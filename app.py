@@ -71,8 +71,6 @@ with gr.Blocks(title="OpenProBono",
 
     #actually generates the text and uses langchain (this is where handoff between frontend and backend is)
     def bot(history, context):
-        print(context)
-        print("context^^")
         PROMPT = ""
         if context != "":
             PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
@@ -118,8 +116,7 @@ with gr.Blocks(title="OpenProBono",
             prompt=PROMPT_TEMPLATE,
         )
 
-        bot_message = openai_conversation.run(history[-1][0]) #llm(history_langchain_format).content
-        # print(openai_memory)
+        bot_message = openai_conversation.run(history[-1][0])
         history[-1][1] = bot_message #.split("AI: ")[1]
         yield history
     
@@ -191,4 +188,4 @@ with gr.Blocks(title="OpenProBono",
 
 demo.queue()
 
-demo.launch(root_path="/",favicon_path="./missing.ico")#auth=("sage", "kiwi"))
+demo.launch(root_path="/",favicon_path="./missing.ico")

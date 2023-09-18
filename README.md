@@ -1,3 +1,3 @@
-## openprobono
+# OpenProBono
 
-# Check out openprobono.com
+### Check out [openprobono.com](https://openprobono.com)

@@ -3,6 +3,7 @@ import random
 import time
 import os
 import json
+import sagemaker
 
 from langchain.vectorstores import Vectara
 from langchain.vectorstores.vectara import VectaraRetriever
@@ -43,7 +44,7 @@ def make_async_endpoint():
 
     chain = LLMChain(
         llm=SagemakerAsyncEndpoint(
-            endpoint_name=my_model.endpoint_name,
+            endpoint_name="hf-text2text-flan-t5-xxl-2023-09-18-22-08-48-231",
             region_name=sagemaker.Session().boto_region_name,
             content_handler=ContentHandler(),
         ),

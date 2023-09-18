@@ -43,8 +43,6 @@ def make_async_endpoint():
 
     chain = LLMChain(
         llm=SagemakerAsyncEndpoint(
-            input_bucket=bucket,
-            input_prefix=prefix,
             endpoint_name=my_model.endpoint_name,
             region_name=sagemaker.Session().boto_region_name,
             content_handler=ContentHandler(),

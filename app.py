@@ -109,7 +109,7 @@ with gr.Blocks(title="OpenProBono",
         history = history + [((file.name,), None)]
         return history
 
-    def async_bot(history_context)
+    def async_bot(history_context):
         PROMPT = ""
         if context != "":
             PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"

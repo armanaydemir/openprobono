@@ -236,8 +236,8 @@ with gr.Blocks(title="OpenProBono",
     txt_msg = txt.submit(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
         bot, [sage_chat, contxt], sage_chat
     )
-    txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt], openai_chat
+    txt_msg = txt.submit(add_text, [async_chat, txt], [async_chat, txt], queue=False).then(
+        async_bot, [async_chat, contxt], async_chat
     )
     # txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
     #     async_bot, [async_chat, contxt], openai_chat
@@ -248,8 +248,8 @@ with gr.Blocks(title="OpenProBono",
     sub_msg = subbtn.click(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
         bot, [sage_chat, contxt], sage_chat
     )
-    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt], openai_chat
+    sub_msg = subbtn.click(add_text, [async_chat, txt], [async_chat, txt], queue=False).then(
+        async_bot, [async_chat, contxt], async_chat
     )
     # sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
     #     async_bot, [async_chat, contxt], openai_chat

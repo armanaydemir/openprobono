@@ -83,7 +83,7 @@ with gr.Blocks(title="OpenProBono",
 
     content_handler = ContentHandler()
 
-    async_sage_lln = make_async_endpoint()
+    async_sage_llm = make_async_endpoint()
 
     sage_llm = SagemakerEndpoint(
             endpoint_name="jumpstart-dft-meta-textgeneration-llama-2-7b-f",

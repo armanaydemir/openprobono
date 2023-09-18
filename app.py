@@ -25,35 +25,33 @@ from sagemaker_async_endpoint import SagemakerAsyncEndpoint
 # - bot calls the llm endpoint with some prompts and context and langchain magic
 # - llm is the actual endpoint / api
 
-def make_async_endpoint():
-    class ContentHandler(LLMContentHandler):
-        content_type:str = "application/json"
-        accepts:str = "application/json"
-        len_prompt:int = 0
+class ContentHandler(LLMContentHandler):
+    content_type:str = "application/json"
+    accepts:str = "application/json"
+    len_prompt:int = 0
 
-        def transform_input(self, prompt: str, model_kwargs: Dict) -> bytes:
-            self.len_prompt = len(prompt)
-            input_str = json.dumps({"inputs": prompt, "parameters": {"max_new_tokens": 100, "do_sample": False, "repetition_penalty": 1.1}})
-            return input_str.encode('utf-8')
+    def transform_input(self, prompt: str, model_kwargs: Dict) -> bytes:
+        self.len_prompt = len(prompt)
+        input_str = json.dumps({"inputs": prompt, "parameters": {"max_new_tokens": 100, "do_sample": False, "repetition_penalty": 1.1}})
+        return input_str.encode('utf-8')
 
-        def transform_output(self, output: bytes) -> str:
-            response_json = output.read()
-            res = json.loads(response_json)
-            ans = res[0]['generated_text']
-            return ans
+    def transform_output(self, output: bytes) -> str:
+        response_json = output.read()
+        res = json.loads(response_json)
+        ans = res[0]['generated_text']
+        return ans
 
-    chain = LLMChain(
-        llm=SagemakerAsyncEndpoint(
-            endpoint_name="hf-text2text-flan-t5-xxl-2023-09-18-22-08-48-231",
-            region_name=sagemaker.Session().boto_region_name,
-            content_handler=ContentHandler(),
-        ),
-        prompt=PromptTemplate(
-            input_variables=["query"],
-            template="{query}",
-        ),
-    )
-    return chain
+async_sage_llm = LLMChain(
+    llm=SagemakerAsyncEndpoint(
+        endpoint_name="hf-text2text-flan-t5-xxl-2023-09-18-22-08-48-231",
+        region_name=sagemaker.Session().boto_region_name,
+        content_handler=ContentHandler(),
+    ),
+    prompt=PromptTemplate(
+        input_variables=["query"],
+        template="{query}",
+    ),
+)
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -82,8 +80,6 @@ with gr.Blocks(title="OpenProBono",
     css="footer {visibility: hidden}") as demo:
 
     content_handler = ContentHandler()
-
-    async_sage_llm = make_async_endpoint()
 
     sage_llm = SagemakerEndpoint(
             endpoint_name="jumpstart-dft-meta-textgeneration-llama-2-7b-f",

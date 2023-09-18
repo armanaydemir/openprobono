@@ -245,13 +245,13 @@ with gr.Blocks(title="OpenProBono",
 
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
-    sub_msg = subbtn.submit(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
+    sub_msg = subbtn.click(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
         bot, [sage_chat, contxt], sage_chat
     )
-    sub_msg = subbtn.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
         openai_bot, [openai_chat, contxt], openai_chat
     )
-    sub_msg = subbtn.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
         async_bot, [async_chat, contxt], openai_chat
     )
 

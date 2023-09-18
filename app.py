@@ -10,8 +10,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage
 from langchain.document_loaders import TextLoader
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chains import ConversationChain
+from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain
 
 from typing import Dict
 

@@ -138,11 +138,11 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
         self.s3_client.put_object(Body=body, Bucket=self.input_bucket, Key=request_key)
         response = self.client.invoke_endpoint_async(
             EndpointName=self.endpoint_name,
+            OffloadFolder="./",
             InputLocation="s3://{}/{}".format(self.input_bucket, request_key),
             ContentType=content_type,
             Accept=accepts,
             InvocationTimeoutSeconds=self.max_request_timeout, # timeout 
-            OffloadFolder="./",
             **_endpoint_kwargs,
         )
         print(response)

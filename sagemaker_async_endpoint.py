@@ -121,7 +121,8 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
             InvocationTimeoutSeconds=self.max_request_timeout, # timeout 
             **_endpoint_kwargs,
         )
-
+        print(response)
+        print("THISIS RESPONSE")
         # Read the bytes of the file from S3 in output_url with Boto3
         output_url = response["OutputLocation"]
         failure_url = response["FailureLocation"]

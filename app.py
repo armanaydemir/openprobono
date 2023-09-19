@@ -142,7 +142,7 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
             ContentType=content_type,
             Accept=accepts,
             InvocationTimeoutSeconds=self.max_request_timeout, # timeout 
-            OffloadFolder="./"
+            OffloadFolder="./",
             **_endpoint_kwargs,
         )
         print(response)

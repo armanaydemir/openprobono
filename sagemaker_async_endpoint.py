@@ -125,6 +125,8 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
         # Read the bytes of the file from S3 in output_url with Boto3
         output_url = response["OutputLocation"]
         failure_url = response["FailureLocation"]
+        print(output_url)
+        print(failure_url)
         response = wait_inference_file(output_url, failure_url, self.s3_client)
         text = self.content_handler.transform_output(response["Body"])
         if stop is not None:

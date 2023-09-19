@@ -164,21 +164,9 @@ class AsyncContentHandler(LLMContentHandler):
     len_prompt:int = 0
 
     def transform_input(self, prompt: str, model_kwargs: Dict) -> bytes:
-        payload = {
-            "inputs": [
-                [
-                 {"role": "user", "content": prompt}],
-                ],
-                "parameters": {"max_new_tokens": 1000, "top_p": 0.6, "temperature": 0.1},
-        }
-
-        input_str = json.dumps(
-            payload,
-        )
-        return input_str.encode("utf-8")
-        # self.len_prompt = len(prompt)
-        # input_str = json.dumps({"inputs": prompt}) #"parameters": {"max_new_tokens": 100, "do_sample": False, "repetition_penalty": 1.1}})
-        # return input_str.encode('utf-8')
+        self.len_prompt = len(prompt)
+        input_str = json.dumps({"inputs": prompt})
+        return input_str.encode('utf-8')
 
     def transform_output(self, output: bytes) -> str:
         response_json = output.read()

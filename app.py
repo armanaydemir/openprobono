@@ -20,10 +20,15 @@ from langchain.llms.sagemaker_endpoint import LLMContentHandler
 
 from sagemaker_async_endpoint import SagemakerAsyncEndpoint
 
-#three parts of a model: chat, bot and llm 
+#tparts of a model: chat, bot
 # - chat is the actualy chat history / output on the screen
 # - bot calls the llm endpoint with some prompts and context and langchain magic
-# - llm is the actual endpoint / api
+
+async_endpoint = SagemakerAsyncEndpoint(
+        endpoint_name="hf-text2text-flan-t5-xxl-2023-09-18-22-08-48-231",
+        region_name=sagemaker.Session().boto_region_name,
+        content_handler=ContentHandler(),
+)
 
 class ContentHandler(LLMContentHandler):
     content_type:str = "application/json"
@@ -40,18 +45,6 @@ class ContentHandler(LLMContentHandler):
         res = json.loads(response_json)
         ans = res[0]['generated_text']
         return ans
-
-async_sage_llm = LLMChain(
-    llm=SagemakerAsyncEndpoint(
-        endpoint_name="hf-text2text-flan-t5-xxl-2023-09-18-22-08-48-231",
-        region_name=sagemaker.Session().boto_region_name,
-        content_handler=ContentHandler(),
-    ),
-    prompt=PromptTemplate(
-        input_variables=["query"],
-        template="{query}",
-    ),
-)
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -118,11 +111,12 @@ with gr.Blocks(title="OpenProBono",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-        conversation = ConversationChain(
-            llm=async_sage_llm,
-            memory=memory,
-            prompt=PROMPT_TEMPLATE,
+        conversation = ConversationBufferMemory(
+            llm = async_endpoint,
+            memory = memory,
+            prompt = PROMPT_TEMPLATE,
         )
+        
 
         bot_message = conversation.run(history[-1][0])
         history[-1][1] = bot_message #.split("AI: ")[1]
@@ -145,9 +139,9 @@ with gr.Blocks(title="OpenProBono",
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
         conversation = ConversationChain(
-            llm=sage_llm,
-            memory=memory,
-            prompt=PROMPT_TEMPLATE,
+            llm = sage_llm,
+            memory = memory,
+            prompt = PROMPT_TEMPLATE,
         )
 
         bot_message = conversation.run(history[-1][0])

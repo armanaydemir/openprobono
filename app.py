@@ -215,7 +215,7 @@ with gr.Blocks(title="OpenProBono",
     async_content_handler = AsyncContentHandler()
 
     async_endpoint = SagemakerAsyncEndpoint(
-        endpoint_name="hf-text2text-flan-t5-xxl-2023-09-19-21-23-58-762",
+        endpoint_name="huggingface-pytorch-tgi-inference-2023-09-19-23-22-18-491",
         region_name=sagemaker.Session().boto_region_name,
         content_handler=async_content_handler,
     )

@@ -171,7 +171,9 @@ class AsyncContentHandler(LLMContentHandler):
     def transform_output(self, output: bytes) -> str:
         response_json = output.read()
         res = json.loads(response_json)
-        ans = res[0]['generated_text']
+        print(res)
+        print("res")
+        ans = res['generated_text']
         return ans
 
 

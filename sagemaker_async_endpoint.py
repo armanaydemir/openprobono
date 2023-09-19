@@ -97,7 +97,7 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
         test_key = os.path.join(self.input_prefix, "test")
         self.s3_client.put_object(Body=test_data, Bucket=self.input_bucket, Key=test_key)
         if not endpoint_is_running:
-            self.client.invoke_endpoint_async(
+            response = self.client.invoke_endpoint_async(
                 EndpointName=self.endpoint_name,
                 InputLocation="s3://{}/{}".format(self.input_bucket, test_key),
                 ContentType=content_type,
@@ -105,6 +105,7 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
                 InvocationTimeoutSeconds=self.max_request_timeout, # timeout of 60 seconds to detect if it's not running yet
                 **_endpoint_kwargs,
             )
+            print(response)
             return "Error: Endpoint is not running - check back in ~10 minutes"
             raise Exception("Endpoint is not running - check back in ~10 minutes.")
         else:

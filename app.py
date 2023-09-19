@@ -24,13 +24,7 @@ from sagemaker_async_endpoint import SagemakerAsyncEndpoint
 # - chat is the actualy chat history / output on the screen
 # - bot calls the llm endpoint with some prompts and context and langchain magic
 
-async_endpoint = SagemakerAsyncEndpoint(
-        endpoint_name="hf-text2text-flan-t5-xxl-2023-09-18-22-08-48-231",
-        region_name=sagemaker.Session().boto_region_name,
-        content_handler=ContentHandler(),
-)
-
-class ContentHandler(LLMContentHandler):
+class AsyncContentHandler(LLMContentHandler):
     content_type:str = "application/json"
     accepts:str = "application/json"
     len_prompt:int = 0
@@ -45,6 +39,7 @@ class ContentHandler(LLMContentHandler):
         res = json.loads(response_json)
         ans = res[0]['generated_text']
         return ans
+
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -68,6 +63,8 @@ class ContentHandler(LLMContentHandler):
         response_json = json.loads(output.read().decode("utf-8"))
         return response_json[0]["generation"]["content"]
 
+
+
 with gr.Blocks(title="OpenProBono",
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}") as demo:
@@ -81,6 +78,14 @@ with gr.Blocks(title="OpenProBono",
             endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
             content_handler=content_handler,
         )
+
+    async_content_handler = AsyncContentHandler()
+
+    async_endpoint = SagemakerAsyncEndpoint(
+        endpoint_name="hf-text2text-flan-t5-xxl-2023-09-18-22-08-48-231",
+        region_name=sagemaker.Session().boto_region_name,
+        content_handler=async_content_handler,
+    )
 
     # gpt3_llm = ChatOpenAI(temperature=1.0, model='gpt-3.5-turbo-0613')
     

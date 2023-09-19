@@ -116,7 +116,7 @@ with gr.Blocks(title="OpenProBono",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-        conversation = ConversationBufferMemory(
+        conversation = ConversationChain(
             llm = async_endpoint,
             memory = memory,
             prompt = PROMPT_TEMPLATE,

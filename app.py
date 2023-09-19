@@ -128,7 +128,6 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
                 InvocationTimeoutSeconds=self.max_request_timeout, # timeout of 60 seconds to detect if it's not running yet
                 **_endpoint_kwargs,
             )
-            print(response)
             return "Error: Endpoint is not running - check back in ~10 minutes"
             raise Exception("Endpoint is not running - check back in ~10 minutes.")
         else:
@@ -143,6 +142,7 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
             ContentType=content_type,
             Accept=accepts,
             InvocationTimeoutSeconds=self.max_request_timeout, # timeout 
+            OffloadFolder="./"
             **_endpoint_kwargs,
         )
         print(response)
@@ -158,8 +158,6 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
             text = enforce_stop_tokens(text, stop)
 
         return text
-
-
 
 class AsyncContentHandler(LLMContentHandler):
     content_type:str = "application/json"

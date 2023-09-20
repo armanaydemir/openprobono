@@ -246,7 +246,7 @@ with gr.Blocks(title="OpenProBono",
             PROMPT += context
             PROMPT += "\nReference the information in the document sources provided within the context above.\n"
         PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nAI: "
-        PROMPT_TEMPLATE = PromptTemplate(input_variables=['history'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
+        PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
 
         history_langchain_format = ChatMessageHistory()
         history_langchain_format.add_user_message("Hi. Could you help me?")
@@ -286,7 +286,7 @@ with gr.Blocks(title="OpenProBono",
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
-            
+
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
         conversation = ConversationChain(
             llm = sage_llm,

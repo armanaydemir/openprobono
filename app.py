@@ -158,6 +158,9 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
 
         return text
 
+system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
+# too much safety, hurts accuracy
+
 class AsyncContentHandler(LLMContentHandler):
     content_type:str = "application/json"
     accepts:str = "application/json"
@@ -165,7 +168,7 @@ class AsyncContentHandler(LLMContentHandler):
 
     def transform_input(self, prompt: str, model_kwargs: Dict) -> bytes:
         self.len_prompt = len(prompt)
-        input_str = json.dumps({"inputs": prompt, "parameters": {"max_new_tokens": 1000, "top_p": 0.9, "temperature": 0.1},})
+        input_str = json.dumps({"inputs": prompt, "parameters": {"max_new_tokens": 1000, "top_p": 0.85, "top_k": 70, "temperature": 0.2},})
         return input_str.encode('utf-8')
 
     def transform_output(self, output: bytes) -> str:

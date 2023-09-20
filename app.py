@@ -221,6 +221,7 @@ with gr.Blocks(title="OpenProBono",
     async_endpoint = SagemakerAsyncEndpoint(
         endpoint_name="huggingface-pytorch-tgi-inference-2023-09-19-23-22-18-491",
         region_name=sagemaker.Session().boto_region_name,
+        model_kwargs={"temperature": 1e-10},
         content_handler=async_content_handler,
     )
 
@@ -244,14 +245,18 @@ with gr.Blocks(title="OpenProBono",
             PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
             PROMPT += context
             PROMPT += "\nReference the information in the document sources provided within the context above.\n"
-        PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI: "
-        PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
+        PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nAI: "
+        PROMPT_TEMPLATE = PromptTemplate(input_variables=['history'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
 
         history_langchain_format = ChatMessageHistory()
+        history_langchain_format.add_user_message("Hi. Could you help me?")
+        history_langchain_format.add_ai_message("Hello! I'm here to help. How can I assist you today?")
+
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
+
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
         conversation = ConversationChain(
             llm = async_endpoint,
@@ -275,10 +280,13 @@ with gr.Blocks(title="OpenProBono",
         PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
 
         history_langchain_format = ChatMessageHistory()
+        history_langchain_format.add_user_message("Hi. Could you help me?")
+        history_langchain_format.add_ai_message("Hello! I'm here to help. How can I assist you today?")
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
+            
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
         conversation = ConversationChain(
             llm = sage_llm,

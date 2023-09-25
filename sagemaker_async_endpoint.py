@@ -106,7 +106,7 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
                 **_endpoint_kwargs,
             )
             print(response)
-            return "Error: Endpoint is not running - check back in ~10 minutes"
+            return "To save money, we turn off our computing resources when no one is using them. Please wait ~10 minutes for the compute units to spin up."
             raise Exception("Endpoint is not running - check back in ~10 minutes.")
         else:
             print("Endpoint is running! Proceeding to inference.")

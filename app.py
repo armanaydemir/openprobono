@@ -18,7 +18,7 @@ from typing import Dict
 from langchain import PromptTemplate, SagemakerEndpoint
 from langchain.llms.sagemaker_endpoint import LLMContentHandler
 
-#tparts of a model: chat, bot
+#parts of a model: chat, bot
 # - chat is the actualy chat history / output on the screen
 # - bot calls the llm endpoint with some prompts and context and langchain magic
 
@@ -174,7 +174,7 @@ class AsyncContentHandler(LLMContentHandler):
     def transform_output(self, output: bytes) -> str:
         response_json = output.read()
         return response_json
-        # res = json.loads(response_json)
+        res = json.loads(response_json)
         # ans = res['generated_texts'][0]
         # return ans
 
@@ -206,26 +206,26 @@ with gr.Blocks(title="OpenProBono",
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}") as demo:
 
-    content_handler = ContentHandler()
+    # content_handler = ContentHandler()
 
-    sage_llm = SagemakerEndpoint(
-            endpoint_name="jumpstart-dft-meta-textgeneration-llama-2-7b-f",
-            region_name="us-east-1",
-            model_kwargs={"temperature": 1e-10},
-            endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
-            content_handler=content_handler,
-        )
+    # sage_llm = SagemakerEndpoint(
+    #         endpoint_name="jumpstart-dft-meta-textgeneration-llama-2-7b-f",
+    #         region_name="us-east-1",
+    #         model_kwargs={"temperature": 1e-10},
+    #         endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
+    #         content_handler=content_handler,
+    #     )
 
     async_content_handler = AsyncContentHandler()
 
     async_endpoint = SagemakerAsyncEndpoint(
-        endpoint_name="huggingface-pytorch-tgi-inference-2023-09-19-23-22-18-491",
+        endpoint_name="huggingface-pytorch-tgi-inference-2023-09-25-05-08-31-975",
         region_name=sagemaker.Session().boto_region_name,
         model_kwargs={"temperature": 1e-10},
         content_handler=async_content_handler,
     )
 
-    # gpt3_llm = ChatOpenAI(temperature=1.0, model='gpt-3.5-turbo-0613')
+    gpt3_llm = ChatOpenAI(temperature=1.0, model='gpt-3.5-turbo-0613')
     
     def add_text(history, text):
         history = history + [(text, None)]
@@ -270,58 +270,58 @@ with gr.Blocks(title="OpenProBono",
         yield history
 
     #actually generates the text and uses langchain (this is where handoff between frontend and backend is)
-    def bot(history, context):
-        PROMPT = ""
-        if context != "":
-            PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
-            PROMPT += context
-            PROMPT += "\nReference the information in the document sources provided within the context above.\n"
-        PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI: "
-        PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
-
-        history_langchain_format = ChatMessageHistory()
-        history_langchain_format.add_user_message("Hi. Could you help me?")
-        history_langchain_format.add_ai_message("Hello! I'm here to help. How can I assist you today?")
-        for i in range(0, len(history)-1):
-            (human, ai) = history[i]
-            history_langchain_format.add_user_message(human)
-            history_langchain_format.add_ai_message(ai)
-
-        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-        conversation = ConversationChain(
-            llm = sage_llm,
-            memory = memory,
-            prompt = PROMPT_TEMPLATE,
-        )
-
-        bot_message = conversation.run(history[-1][0])
-        history[-1][1] = bot_message #.split("AI: ")[1]
-        yield history
-
-    # def openai_bot(history, context):
+    # def bot(history, context):
     #     PROMPT = ""
     #     if context != "":
     #         PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
     #         PROMPT += context
     #         PROMPT += "\nReference the information in the document sources provided within the context above.\n"
-    #     PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:"
+    #     PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI: "
     #     PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
 
     #     history_langchain_format = ChatMessageHistory()
+    #     history_langchain_format.add_user_message("Hi. Could you help me?")
+    #     history_langchain_format.add_ai_message("Hello! I'm here to help. How can I assist you today?")
     #     for i in range(0, len(history)-1):
     #         (human, ai) = history[i]
     #         history_langchain_format.add_user_message(human)
     #         history_langchain_format.add_ai_message(ai)
-    #     openai_memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-    #     openai_conversation = ConversationChain(
-    #         llm=gpt3_llm,
-    #         memory=openai_memory,
-    #         prompt=PROMPT_TEMPLATE,
+
+    #     memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
+    #     conversation = ConversationChain(
+    #         llm = sage_llm,
+    #         memory = memory,
+    #         prompt = PROMPT_TEMPLATE,
     #     )
 
-    #     bot_message = openai_conversation.run(history[-1][0])
+    #     bot_message = conversation.run(history[-1][0])
     #     history[-1][1] = bot_message #.split("AI: ")[1]
     #     yield history
+
+    def openai_bot(history, context):
+        PROMPT = ""
+        if context != "":
+            PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
+            PROMPT += context
+            PROMPT += "\nReference the information in the document sources provided within the context above.\n"
+        PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:"
+        PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
+
+        history_langchain_format = ChatMessageHistory()
+        for i in range(0, len(history)-1):
+            (human, ai) = history[i]
+            history_langchain_format.add_user_message(human)
+            history_langchain_format.add_ai_message(ai)
+        openai_memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
+        openai_conversation = ConversationChain(
+            llm=gpt3_llm,
+            memory=openai_memory,
+            prompt=PROMPT_TEMPLATE,
+        )
+
+        bot_message = openai_conversation.run(history[-1][0])
+        history[-1][1] = bot_message #.split("AI: ")[1]
+        yield history
     
 
 
@@ -334,20 +334,20 @@ with gr.Blocks(title="OpenProBono",
             #bubble_full_width=True,
             #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         )
-        sage_chat = gr.Chatbot(
-            [],
-            elem_id="sagemaker-llama",
-            label="llama2-7b",
-            #bubble_full_width=True,
-            #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
-        )
-        # openai_chat = gr.Chatbot(
+        # sage_chat = gr.Chatbot(
         #     [],
-        #     elem_id="gpt3.5-turbo",
-        #     label="gpt3.5",
+        #     elem_id="sagemaker-llama",
+        #     label="llama2-7b",
         #     #bubble_full_width=True,
         #     #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         # )
+        openai_chat = gr.Chatbot(
+            [],
+            elem_id="gpt3.5-turbo",
+            label="gpt3.5",
+            #bubble_full_width=True,
+            #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
+        )
 
     with gr.Row():
         contxt = gr.Textbox(
@@ -369,31 +369,31 @@ with gr.Blocks(title="OpenProBono",
 
     with gr.Row():
         clearasync = gr.ClearButton([txt, async_chat])
-        clearsage = gr.ClearButton([txt, sage_chat])
-        # clearopenai = gr.ClearButton([txt, openai_chat])
+        # clearsage = gr.ClearButton([txt, sage_chat])
+        clearopenai = gr.ClearButton([txt, openai_chat])
 
 
-    txt_msg = txt.submit(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
-        bot, [sage_chat, contxt], sage_chat
-    )
+    # txt_msg = txt.submit(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
+    #     bot, [sage_chat, contxt], sage_chat
+    # )
     txt_msg = txt.submit(add_text, [async_chat, txt], [async_chat, txt], queue=False).then(
         async_bot, [async_chat, contxt], async_chat
     )
-    # txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-    #     async_bot, [async_chat, contxt], openai_chat
-    # )
+    txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+        openai_bot, [openai_chat, contxt], openai_chat
+    )
 
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
-    sub_msg = subbtn.click(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
-        bot, [sage_chat, contxt], sage_chat
-    )
+    # sub_msg = subbtn.click(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
+    #     bot, [sage_chat, contxt], sage_chat
+    # )
     sub_msg = subbtn.click(add_text, [async_chat, txt], [async_chat, txt], queue=False).then(
         async_bot, [async_chat, contxt], async_chat
     )
-    # sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-    #     async_bot, [async_chat, contxt], openai_chat
-    # )
+    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+        openai_bot, [openai_chat, contxt], openai_chat
+    )
 
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
     

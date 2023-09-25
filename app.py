@@ -251,7 +251,7 @@ with gr.Blocks(title="OpenProBono",
             PROMPT += "[INST] " + human + " [/INST]\n"
             PROMPT += ai
         PROMPT += "[INST] " + history[-1][0] + " [/INST]\n"
-        history[-1][1] = async_endpoint(PROMPT)[0]["".split("\n")[-1]
+        history[-1][1] = async_endpoint(PROMPT).split("\n")[-1]
 
         yield history
 

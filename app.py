@@ -252,30 +252,8 @@ with gr.Blocks(title="OpenProBono",
             PROMPT += "[INST] " + human + " [/INST]\n"
             PROMPT += ai
         PROMPT += "[INST] " + history[-1][0] + " [/INST]\n"
-        history[-1][1] = async_endpoint(PROMPT)
+        history[-1][1] = async_endpoint(PROMPT).split("\n")[-1]
 
-        # PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI: "
-        # PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
-
-        # history_langchain_format = ChatMessageHistory()
-        # history_langchain_format.add_user_message("Hi. Could you help me?")
-        # history_langchain_format.add_ai_message("Hello! I'm here to help. How can I assist you today?")
-
-        # for i in range(0, len(history)-1):
-        #     (human, ai) = history[i]
-        #     history_langchain_format.add_user_message(human)
-        #     history_langchain_format.add_ai_message(ai)
-
-        # memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-        # conversation = ConversationChain(
-        #     llm = async_endpoint,
-        #     memory = memory,
-        #     prompt = PROMPT_TEMPLATE,
-        # )
-        
-
-        # bot_message = conversation.run(history[-1][0])
-        # history[-1][1] = bot_message.split("Human: " + history[-1][0])[1].split("\n")[1]
         yield history
 
     #actually generates the text and uses langchain (this is where handoff between frontend and backend is)
@@ -338,8 +316,8 @@ with gr.Blocks(title="OpenProBono",
     with gr.Row():
         async_chat = gr.Chatbot(
             [],
-            elem_id="flan-t5-xxl",
-            label="flan-t5-xxl",
+            elem_id="llama2-7b-chat",
+            label="llama2-7b-chat",
             #bubble_full_width=True,
             #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         )

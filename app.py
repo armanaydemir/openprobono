@@ -128,7 +128,7 @@ class SagemakerAsyncEndpoint(SagemakerEndpoint):
                 InvocationTimeoutSeconds=self.max_request_timeout, # timeout of 60 seconds to detect if it's not running yet
                 **_endpoint_kwargs,
             )
-            return "Error: Endpoint is not running - check back in ~10 minutes"
+            return "To save money, we turn off our computing resources when no one is using them. Please wait ~10 minutes for the compute units to spin up and try again. Feel free to use other models in the meantime"
             raise Exception("Endpoint is not running - check back in ~10 minutes.")
         else:
             print("Endpoint is running! Proceeding to inference.")

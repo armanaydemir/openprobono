@@ -173,10 +173,9 @@ class AsyncContentHandler(LLMContentHandler):
 
     def transform_output(self, output: bytes) -> str:
         response_json = output.read()
-        return response_json
         res = json.loads(response_json)
-        # ans = res['generated_texts'][0]
-        # return ans
+        ans = res[0]['generated_text']
+        return ans
 
 class ContentHandler(LLMContentHandler):
     content_type = "application/json"
@@ -252,7 +251,7 @@ with gr.Blocks(title="OpenProBono",
             PROMPT += "[INST] " + human + " [/INST]\n"
             PROMPT += ai
         PROMPT += "[INST] " + history[-1][0] + " [/INST]\n"
-        history[-1][1] = async_endpoint(PROMPT).split("\n")[-1]
+        history[-1][1] = async_endpoint(PROMPT)[0]["".split("\n")[-1]
 
         yield history
 

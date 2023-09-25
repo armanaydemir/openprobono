@@ -252,7 +252,7 @@ with gr.Blocks(title="OpenProBono",
             PROMPT += "[INST] " + human + " [/INST]\n"
             PROMPT += ai
         PROMPT += "[INST] " + history[-1][0] + " [/INST]\n"
-        history[-1][1] = async_endpoint.run(PROMPT)
+        history[-1][1] = async_endpoint(PROMPT)
 
         # PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI: "
         # PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)

@@ -249,8 +249,8 @@ with gr.Blocks(title="OpenProBono",
         PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
 
         history_langchain_format = ChatMessageHistory()
-        history_langchain_format.add_user_message("Hi. Could you help me?")
-        history_langchain_format.add_ai_message("Hello! I'm here to help. How can I assist you today?")
+        # history_langchain_format.add_user_message("Hi. Could you help me?")
+        # history_langchain_format.add_ai_message("Hello! I'm here to help. How can I assist you today?")
 
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -266,7 +266,7 @@ with gr.Blocks(title="OpenProBono",
         
 
         bot_message = conversation.run(history[-1][0])
-        history[-1][1] = bot_message #.split("AI: ")[1]
+        history[-1][1] = bot_message #.split("Human: " + history[-1][0])[1].split("\n")[1]
         yield history
 
     #actually generates the text and uses langchain (this is where handoff between frontend and backend is)

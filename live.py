@@ -35,7 +35,7 @@ system_prompt = """You are a helpful, respectful and honest assistant. Always an
 # too much safety, hurts accuracy
 
 
-with gr.Blocks(title="OpenProBono Workspace",
+with gr.Blocks(title="OpenProBono:Workspace",
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}") as demo:
 

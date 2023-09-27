@@ -391,4 +391,4 @@ with gr.Blocks(title="OpenProBono",
 
 demo.queue()
 
-demo.launch(root_path="/",favicon_path="./missing.ico")
+demo.launch(root_path="/wip",favicon_path="./missing.ico")

@@ -127,7 +127,7 @@ with gr.Blocks(title="OpenProBono-Workspace",
     # file_msg = btn.upload(add_file, [openai, btn], [openai], queue=False).then(
     #     bot, openai, openai
     # )
-    with gr.Accordion("Details"):
+    with gr.Accordion("This is my workspace where I am doing live iterations."):
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates.")
 
 demo.queue()

@@ -31,7 +31,7 @@ import boto3, time, os, uuid
 from botocore.exceptions import ClientError
 
 from langchain.utilities import SerpAPIWrapper
-from langchain.agents import Tool
+from langchain.agents import AgentType, initialize_agent, Tool
 
 search = SerpAPIWrapper()
 tools = [
@@ -80,13 +80,18 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         openai_memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-        openai_conversation = ConversationChain(
-            llm=gpt3_llm,
-            memory=openai_memory,
-            prompt=PROMPT_TEMPLATE,
+        agent_kwargs = {
+            "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+        }
+        agent = initialize_agent(
             tools=tools,
+            llm=gpt3_llm,
+            agent=AgentType.OPENAI_FUNCTIONS,
+            verbose=True,
+            agent_kwargs=agent_kwargs,
+            memory=memory,
         )
-        bot_message = openai_conversation.run(history[-1][0])
+        bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message
         yield history
     

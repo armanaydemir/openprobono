@@ -16,6 +16,7 @@ from langchain.chains import ConversationalRetrievalChain, ConversationChain, LL
 from typing import Dict
 
 from langchain import PromptTemplate, SagemakerEndpoint
+from langchain.prompts import MessagesPlaceholder
 from langchain.llms.sagemaker_endpoint import LLMContentHandler
 
 # parts of a model: chat, bot

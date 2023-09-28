@@ -90,7 +90,7 @@ with gr.Blocks(title="Workspace",
             agent=AgentType.OPENAI_FUNCTIONS,
             verbose=True,
             agent_kwargs=agent_kwargs,
-            memory=memory,
+            memory=openai_memory,
         )
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message

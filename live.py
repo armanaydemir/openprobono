@@ -68,14 +68,17 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         openai_memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-        openai_conversation = ConversationChain(
+        # openai_conversation = ConversationChain(
+        #     llm=gpt3_llm,
+        #     memory=openai_memory,
+        #     prompt=PROMPT_TEMPLATE,
+        # )
+        openai_conversation = LLMCheckerChain(
             llm=gpt3_llm,
             memory=openai_memory,
             prompt=PROMPT_TEMPLATE,
         )
-        openai_convo_checked = LLMCheckerChain.from_llm(ConversationChain, verbose=True)
-
-        bot_message = openai_convo_checked.run(history[-1][0])
+        bot_message = openai_conversation.run(history[-1][0])
         history[-1][1] = bot_message
         yield history
     

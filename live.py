@@ -30,6 +30,18 @@ from langchain.llms.sagemaker_endpoint import SagemakerEndpoint
 import boto3, time, os, uuid
 from botocore.exceptions import ClientError
 
+from langchain.utilities import SerpAPIWrapper
+from langchain.agents import Tool
+
+search = SerpAPIWrapper()
+tools = [
+    Tool(
+        name="search",
+        func=search.run,
+        description="useful for when you need to answer questions about current events. You should ask targeted questions",
+    )
+]
+
 
 system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
 # too much safety, hurts accuracy
@@ -68,15 +80,11 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         openai_memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-        # openai_conversation = ConversationChain(
-        #     llm=gpt3_llm,
-        #     memory=openai_memory,
-        #     prompt=PROMPT_TEMPLATE,
-        # )
-        openai_conversation = LLMCheckerChain(
+        openai_conversation = ConversationChain(
             llm=gpt3_llm,
             memory=openai_memory,
             prompt=PROMPT_TEMPLATE,
+            tools=tools,
         )
         bot_message = openai_conversation.run(history[-1][0])
         history[-1][1] = bot_message

@@ -80,7 +80,7 @@ with gr.Blocks(title="Workspace",
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
-        openai_memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
@@ -90,7 +90,7 @@ with gr.Blocks(title="Workspace",
             agent=AgentType.OPENAI_FUNCTIONS,
             verbose=True,
             agent_kwargs=agent_kwargs,
-            memory=openai_memory,
+            memory=memory,
         )
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message

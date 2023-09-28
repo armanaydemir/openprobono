@@ -73,8 +73,9 @@ with gr.Blocks(title="Workspace",
             memory=openai_memory,
             prompt=PROMPT_TEMPLATE,
         )
+        openai_convo_checked = LLMCheckerChain.from_llm(ConversationChain, verbose=True)
 
-        bot_message = openai_conversation.run(history[-1][0])
+        bot_message = openai_convo_checked.run(history[-1][0])
         history[-1][1] = bot_message
         yield history
     

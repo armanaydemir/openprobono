@@ -68,13 +68,13 @@ with gr.Blocks(title="Workspace",
         return history
 
     def openai_bot(history, context):
-        PROMPT = ""
-        if context != "":
-            PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
-            PROMPT += context
-            PROMPT += "\nReference the information in the document sources provided within the context above.\n"
-        PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:"
-        PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
+        # PROMPT = ""
+        # if context != "":
+        #     PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
+        #     PROMPT += context
+        #     PROMPT += "\nReference the information in the document sources provided within the context above.\n"
+        # PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:"
+        # PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
 
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
@@ -82,7 +82,7 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="chat_history")
-        prefix = """Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
+        prefix = """You are a helpful legal assisant. Only answer legal questions. Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
         suffix = """Begin!"
 
         {chat_history}

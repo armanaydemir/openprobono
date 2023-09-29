@@ -95,7 +95,6 @@ with gr.Blocks(title="Workspace",
             suffix=suffix,
             input_variables=["input", "chat_history", "agent_scratchpad"],
         )
-        memory = ConversationBufferMemory(memory_key="chat_history")
 
 
         llm_chain = LLMChain(llm=OpenAI(temperature=0), prompt=prompt)

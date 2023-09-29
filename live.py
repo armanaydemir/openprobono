@@ -35,6 +35,10 @@ from langchain.utilities import SerpAPIWrapper
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
 from langchain.llms import OpenAI
 
+import langchain
+
+langchain.debug = True
+
 search = SerpAPIWrapper()
 tools = [
     Tool(
@@ -81,39 +85,41 @@ with gr.Blocks(title="Workspace",
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
-        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="chat_history")
-        prefix = user_prompt + """Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
-        suffix = """Begin!"
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+        
 
-        {chat_history}
-        Question: {input}
-        {agent_scratchpad}"""
+        # prefix = user_prompt + """Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
+        # suffix = """Begin!"
 
-        prompt = ZeroShotAgent.create_prompt(
-            tools,
-            prefix=prefix,
-            suffix=suffix,
-            input_variables=["input", "chat_history", "agent_scratchpad"],
-        )
+        # {chat_history}
+        # Question: {input}
+        # {agent_scratchpad}"""
 
-
-        llm_chain = LLMChain(llm=OpenAI(temperature=0), prompt=prompt)
-        agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools, verbose=True)
-        agent_chain = AgentExecutor.from_agent_and_tools(
-            agent=agent, tools=tools, verbose=True, memory=memory
-        )
-        # agent_kwargs = {
-        #     "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
-        # }
-        # agent = initialize_agent(
-        #     tools=tools,
-        #     llm=gpt3_llm,
-        #     agent=AgentType.OPENAI_FUNCTIONS,
-        #     verbose=True,
-        #     agent_kwargs=agent_kwargs,
-        #     memory=memory,
+        # prompt = ZeroShotAgent.create_prompt(
+        #     tools,
+        #     prefix=prefix,
+        #     suffix=suffix,
+        #     input_variables=["input", "chat_history", "agent_scratchpad"],
         # )
-        bot_message = agent_chain.run(input=history[-1][0])
+
+        # llm_chain = LLMChain(llm=OpenAI(temperature=0), prompt=prompt)
+        # agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools, verbose=True)
+        # agent_chain = AgentExecutor.from_agent_and_tools(
+        #     agent=agent, tools=tools, verbose=True, memory=memory
+        # )
+        
+        agent_kwargs = {
+            "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+        }
+        agent = initialize_agent(
+            tools=tools,
+            llm=gpt3_llm,
+            agent=AgentType.OPENAI_FUNCTIONS,
+            verbose=True,
+            agent_kwargs=agent_kwargs,
+            memory=memory,
+        )
+        bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message
         yield history
     

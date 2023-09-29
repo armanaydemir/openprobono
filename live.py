@@ -81,7 +81,7 @@ with gr.Blocks(title="Workspace",
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
-        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="chat_history")
         prefix = """Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
         suffix = """Begin!"
 

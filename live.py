@@ -32,7 +32,7 @@ import boto3, time, os, uuid
 from botocore.exceptions import ClientError
 
 from langchain.utilities import SerpAPIWrapper
-from langchain.agents import AgentType, initialize_agent, Tool
+from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
 
 search = SerpAPIWrapper()
 tools = [

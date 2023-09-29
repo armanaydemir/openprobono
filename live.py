@@ -40,7 +40,7 @@ tools = [
     Tool(
         name="search",
         func=search.run,
-        description="useful for when you need to answer questions about current events. You should ask targeted questions",
+        description="useful for when you need to answer questions about current events. You should ask targeted questions. Always include reference to any websites used.",
     )
 ]
 
@@ -82,7 +82,7 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="chat_history")
-        prefix = """You are a helpful legal assisant. Only answer legal questions. Always refer to specific laws and websites. Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
+        prefix = """You are a helpful legal assisant. Always refer to specific laws and websites. Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
         suffix = """Begin!"
 
         {chat_history}

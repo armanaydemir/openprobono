@@ -33,6 +33,7 @@ from botocore.exceptions import ClientError
 
 from langchain.utilities import SerpAPIWrapper
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
+from langchain.llms import OpenAI
 
 search = SerpAPIWrapper()
 tools = [

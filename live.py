@@ -40,7 +40,7 @@ tools = [
     Tool(
         name="search",
         func=search.run,
-        description="useful for when you need to answer questions about current events. You should ask targeted questions. Always include reference to any websites used.",
+        description="useful for when you need to answer questions about current events. You should ask targeted questions.",
     )
 ]
 
@@ -67,7 +67,7 @@ with gr.Blocks(title="Workspace",
         history = history + [((file.name,), None)]
         return history
 
-    def openai_bot(history, context):
+    def openai_bot(history, context, user_prompt):
         # PROMPT = ""
         # if context != "":
         #     PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
@@ -82,7 +82,7 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="chat_history")
-        prefix = """You are a helpful legal assisant. Always refer to specific laws and websites. Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
+        prefix = user_prompt + """Have a conversation with a human, answering the following questions as best you can. You have access to the following tools:"""
         suffix = """Begin!"
 
         {chat_history}
@@ -136,6 +136,12 @@ with gr.Blocks(title="Workspace",
             placeholder="Enter any context you want the AI to reference", #, or upload an image",
             container=False,
         )
+        user_prompt = gr.Textbox(
+            scale=4,
+            show_label=False,
+            placeholder="Enter any additional prompt prefix for the AI", #, or upload an image",
+            container=False,
+        )
 
     with gr.Row():
         txt = gr.Textbox(
@@ -152,13 +158,13 @@ with gr.Blocks(title="Workspace",
 
 
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt], openai_chat
+        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
     )
 
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt], openai_chat
+        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
     )
 
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)

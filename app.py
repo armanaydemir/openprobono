@@ -163,6 +163,7 @@ with gr.Blocks(title="OpenProBono",
             container=False,
         )
         subbtn = gr.Button("Submit")
+        clearopenai = gr.ClearButton([txt, openai_chat])
         #btn = gr.UploadButton("📁", file_types=["text"])
 
 
@@ -170,7 +171,6 @@ with gr.Blocks(title="OpenProBono",
     #     bot, openai, openai
     # )
     with gr.Accordion("Details"):
-        clearopenai = gr.ClearButton([txt, openai_chat])
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice.")
 
 

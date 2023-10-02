@@ -224,7 +224,7 @@ with gr.Blocks(title="OpenProBono",
     #     content_handler=async_content_handler,
     # )
 
-    gpt3_llm = ChatOpenAI(temperature=1.0, model='gpt-3.5-turbo-0613')
+    gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
     
     def add_text(history, text):
         history = history + [(text, None)]
@@ -284,12 +284,12 @@ with gr.Blocks(title="OpenProBono",
     #     history[-1][1] = bot_message #.split("AI: ")[1]
     #     yield history
 
-    def openai_bot(history, context):
+    def openai_bot(history):
         PROMPT = ""
-        if context != "":
-            PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
-            PROMPT += context
-            PROMPT += "\nReference the information in the document sources provided within the context above.\n"
+        # if context != "":
+        #     PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
+        #     PROMPT += context
+        #     PROMPT += "\nReference the information in the document sources provided within the context above.\n"
         PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:"
         PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
 

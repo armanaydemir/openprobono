@@ -107,7 +107,7 @@ with gr.Blocks(title="Workspace",
         # agent_chain = AgentExecutor.from_agent_and_tools(
         #     agent=agent, tools=tools, verbose=True, memory=memory
         # )
-        
+
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
@@ -124,13 +124,11 @@ with gr.Blocks(title="Workspace",
         yield history
     
 
-
-    gr.Markdown("OpenProBono")
     with gr.Row():
         openai_chat = gr.Chatbot(
             [],
-            elem_id="gpt3.5-turbo",
-            label="gpt3.5",
+            elem_id="OpenProBono",
+            label="OpenProBono",
             #bubble_full_width=True,
             #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         )

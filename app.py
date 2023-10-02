@@ -311,7 +311,7 @@ with gr.Blocks(title="OpenProBono",
     
 
 
-    gr.Markdown("OpenProBono")
+    #gr.Markdown("OpenProBono")
     with gr.Row():
         # async_chat = gr.Chatbot(
         #     [],
@@ -329,19 +329,19 @@ with gr.Blocks(title="OpenProBono",
         # )
         openai_chat = gr.Chatbot(
             [],
-            elem_id="gpt3.5-turbo",
-            label="OpenProBono - gpt3.5",
+            elem_id="OpenProBono",
+            label="OpenProBono",
             #bubble_full_width=True,
             #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         )
 
-    with gr.Row():
-        contxt = gr.Textbox(
-            scale=4,
-            show_label=False,
-            placeholder="Enter any context you want the AI to reference", #, or upload an image",
-            container=False,
-        )
+    # with gr.Row():
+    #     contxt = gr.Textbox(
+    #         scale=4,
+    #         show_label=False,
+    #         placeholder="Enter any context you want the AI to reference", #, or upload an image",
+    #         container=False,
+    #     )
 
     with gr.Row():
         txt = gr.Textbox(
@@ -366,7 +366,7 @@ with gr.Blocks(title="OpenProBono",
     #     async_bot, [async_chat, contxt], async_chat
     # )
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt], openai_chat
+        openai_bot, [openai_chat], openai_chat
     )
 
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
@@ -378,7 +378,7 @@ with gr.Blocks(title="OpenProBono",
     #     async_bot, [async_chat, contxt], async_chat
     # )
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt], openai_chat
+        openai_bot, [openai_chat], openai_chat
     )
 
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)

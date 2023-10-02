@@ -353,10 +353,14 @@ with gr.Blocks(title="OpenProBono",
         subbtn = gr.Button("Submit")
         #btn = gr.UploadButton("📁", file_types=["text"])
 
-    with gr.Row():
-        # clearasync = gr.ClearButton([txt, async_chat])
-        # clearsage = gr.ClearButton([txt, sage_chat])
+
+    # file_msg = btn.upload(add_file, [openai, btn], [openai], queue=False).then(
+    #     bot, openai, openai
+    # )
+    with gr.Accordion("Details"):
         clearopenai = gr.ClearButton([txt, openai_chat])
+        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates.")
+
 
 
     # txt_msg = txt.submit(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
@@ -383,12 +387,6 @@ with gr.Blocks(title="OpenProBono",
 
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
     
-    # file_msg = btn.upload(add_file, [openai, btn], [openai], queue=False).then(
-    #     bot, openai, openai
-    # )
-    with gr.Accordion("Details"):
-        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates.")
-
 demo.queue()
 
 demo.launch(root_path="/",favicon_path="./missing.ico")

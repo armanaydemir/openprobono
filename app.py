@@ -72,7 +72,7 @@ with gr.Blocks(title="OpenProBono",
         return history
 
 
-    def openai_bot(history, context, user_prompt):
+    def openai_bot(history):
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -96,7 +96,7 @@ with gr.Blocks(title="OpenProBono",
         history[-1][1] = bot_message
         yield history
 
-    # def openai_bot(history):
+    # def openai_bot_no_search(history):
     #     PROMPT = ""
     #     # if context != "":
     #     #     PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"

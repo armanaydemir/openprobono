@@ -30,199 +30,28 @@ from langchain.llms.sagemaker_endpoint import SagemakerEndpoint
 import boto3, time, os, uuid
 from botocore.exceptions import ClientError
 
-def wait_inference_file(output_url, failure_url, s3_client=None):
-    s3_client = boto3.client("s3") if s3_client == None else s3_client
-    bucket = output_url.split("/")[2]
-    output_prefix = "/".join(output_url.split("/")[3:])
-    failure_prefix = "/".join(failure_url.split("/")[3:])
-    while True:
-        try:
-            response = s3_client.get_object(Bucket=bucket, Key=output_prefix)
-            print(response)
-            return response
-        except ClientError as ex:
-            if ex.response['Error']['Code'] == 'NoSuchKey':
-                try:
-                    response = s3_client.get_object(Bucket=bucket, Key=failure_prefix)
-                    raise Exception(response['Body'].read().decode('utf-8'))
-                except ClientError as ex:
-                    if ex.response['Error']['Code'] == 'NoSuchKey':
-                        # Wait for file to be generated
-                        print("Waiting for file to be generated...")
-                        time.sleep(5)
-                        continue
-                    else:
-                        raise
-            else:
-                raise
+import langchain
 
-        except Exception as e:
-            print(e.__dict__)
-            raise
+langchain.debug = True
 
-class SagemakerAsyncEndpoint(SagemakerEndpoint):
-    input_bucket: str = ""
-    input_prefix: str = ""
-    max_request_timeout: int = 90
-    s3_client: Any
-    sm_client: Any
-    
-    def __init__(self, input_bucket:str="", input_prefix:str="", max_request_timeout:int=90, **kwargs):
-        """
-        Initialize a Sagemaker asynchronous endpoint connector in Langchain
-        Args:
-            input_bucket: S3 bucket name where input files are stored.
-            input_prefix: S3 prefix where input files are stored.
-            max_request_timeout: Maximum timeout for the request in seconds - also used to validate if endpoint is in cold start
-            kwargs: Keyword arguments to pass to the SagemakerEndpoint class.
-        """
-        super().__init__(**kwargs)
-        region = self.region_name
-        account = boto3.client("sts").get_caller_identity()["Account"]
-        self.input_bucket = f'sagemaker-{region}-{account}' if input_bucket == "" else input_bucket
-        self.input_prefix = f'async-endpoint-outputs/{self.endpoint_name}' if input_prefix == "" else input_prefix
-        self.max_request_timeout = max_request_timeout
-        self.s3_client = boto3.client("s3")
-        self.sm_client = boto3.client("sagemaker")
-        
-    def _call(
-        self,
-        prompt: str,
-        stop: Optional[List[str]] = None,
-        run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
-    ) -> str:
-        """Call out to Sagemaker asynchronous inference endpoint.
-        Args:
-            prompt: The prompt to use for the inference.
-            stop: The stop tokens to use for the inference.
-            run_manager: The run manager to use for the inference.
-            kwargs: Keyword arguments to pass to the SagemakerEndpoint class.
-        Returns:
-            The output from the Sagemaker asynchronous inference endpoint.
-        """
-        # Parse the SagemakerEndpoint class arguments
-        _model_kwargs = self.model_kwargs or {}
-        _model_kwargs = {**_model_kwargs, **kwargs}
-        _endpoint_kwargs = self.endpoint_kwargs or {}
-        
-        # Transform the input to match SageMaker expectations
-        body = self.content_handler.transform_input(prompt, _model_kwargs)
-        content_type = self.content_handler.content_type
-        accepts = self.content_handler.accepts
+search = SerpAPIWrapper()
+tools = [
+    Tool(
+        name="search",
+        func=search.run,
+        description="useful for when you need to answer questions about current events. You should ask targeted questions.",
+    )
+]
 
-        # Verify if the endpoint is running
-        response = self.sm_client.describe_endpoint(EndpointName=self.endpoint_name)
-        endpoint_is_running = response["ProductionVariants"][0]["CurrentInstanceCount"] > 0
-
-        # If the endpoint is not running, send an empty request to "wake up" the endpoint
-        test_data = b""
-        test_key = os.path.join(self.input_prefix, "test")
-        self.s3_client.put_object(Body=test_data, Bucket=self.input_bucket, Key=test_key)
-        if not endpoint_is_running:
-            response = self.client.invoke_endpoint_async(
-                EndpointName=self.endpoint_name,
-                InputLocation="s3://{}/{}".format(self.input_bucket, test_key),
-                ContentType=content_type,
-                Accept=accepts,
-                InvocationTimeoutSeconds=self.max_request_timeout, # timeout of 60 seconds to detect if it's not running yet
-                **_endpoint_kwargs,
-            )
-            return "To save money, we turn off our computing resources when no one is using them. Please wait ~10 minutes for the compute units to spin up and try again. Feel free to use other models in the meantime."
-            raise Exception("Endpoint is not running - check back in ~10 minutes.")
-        else:
-            print("Endpoint is running! Proceeding to inference.")
-        
-        # Send request to the async endpoint
-        request_key = os.path.join(self.input_prefix, f"request-{str(uuid.uuid4())}")
-        self.s3_client.put_object(Body=body, Bucket=self.input_bucket, Key=request_key)
-        response = self.client.invoke_endpoint_async(
-            EndpointName=self.endpoint_name,
-            InputLocation="s3://{}/{}".format(self.input_bucket, request_key),
-            ContentType=content_type,
-            Accept=accepts,
-            InvocationTimeoutSeconds=self.max_request_timeout, # timeout 
-            **_endpoint_kwargs,
-        )
-        print(response)
-        print("THISIS RESPONSE")
-        # Read the bytes of the file from S3 in output_url with Boto3
-        output_url = response["OutputLocation"]
-        failure_url = response["FailureLocation"]
-        print(output_url)
-        print(failure_url)
-        response = wait_inference_file(output_url, failure_url, self.s3_client)
-        text = self.content_handler.transform_output(response["Body"])
-        if stop is not None:
-            text = enforce_stop_tokens(text, stop)
-
-        return text
 
 system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
 # too much safety, hurts accuracy
-
-# class AsyncContentHandler(LLMContentHandler):
-#     content_type:str = "application/json"
-#     accepts:str = "application/json"
-#     len_prompt:int = 0
-
-#     def transform_input(self, prompt: str, model_kwargs: Dict) -> bytes:
-#         self.len_prompt = len(prompt)
-#         input_str = json.dumps({"inputs": prompt, "parameters": {"max_new_tokens": 1000, "top_p": 0.6, "temperature": 0.1},})
-#         return input_str.encode('utf-8')
-
-#     def transform_output(self, output: bytes) -> str:
-#         response_json = output.read()
-#         res = json.loads(response_json)
-#         ans = res[0]['generated_text']
-#         return ans
-
-# class ContentHandler(LLMContentHandler):
-#     content_type = "application/json"
-#     accepts = "application/json"
-
-#     def transform_input(self, prompt: str, model_kwargs: Dict) -> bytes:
-#         payload = {
-#             "inputs": [
-#                 [
-#                  {"role": "user", "content": prompt}],
-#                 ],
-#                 "parameters": {"max_new_tokens": 1000, "top_p": 0.6, "temperature": 0.1},
-#         }
-
-#         input_str = json.dumps(
-#             payload,
-#         )
-#         return input_str.encode("utf-8")
-
-#     def transform_output(self, output: bytes) -> str:
-#         response_json = json.loads(output.read().decode("utf-8"))
-#         return response_json[0]["generation"]["content"]
 
 
 
 with gr.Blocks(title="OpenProBono",
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}") as demo:
-
-    # content_handler = ContentHandler()
-
-    # sage_llm = SagemakerEndpoint(
-    #         endpoint_name="jumpstart-dft-meta-textgeneration-llama-2-7b-f",
-    #         region_name="us-east-1",
-    #         model_kwargs={"temperature": 1e-10},
-    #         endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
-    #         content_handler=content_handler,
-    #     )
-
-    # async_content_handler = AsyncContentHandler()
-
-    # async_endpoint = SagemakerAsyncEndpoint(
-    #     endpoint_name="huggingface-pytorch-tgi-inference-2023-09-25-05-08-31-975",
-    #     region_name=sagemaker.Session().boto_region_name,
-    #     model_kwargs={"temperature": 1e-10},
-    #     content_handler=async_content_handler,
-    # )
 
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
     
@@ -238,76 +67,55 @@ with gr.Blocks(title="OpenProBono",
         history = history + [((file.name,), None)]
         return history
 
-    # def async_bot(history, context):
-    #     PROMPT = ""
-    #     if context != "":
-    #         PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
-    #         PROMPT += context
-    #         PROMPT += "\nReference the information in the document sources provided within the context above.\n"
-    #     PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\n"
-    #     PROMPT += "Current conversation:\n"
-    #     for i in range(0, len(history)-1):
-    #         (human, ai) = history[i]
-    #         PROMPT += "[INST] " + human + " [/INST]\n"
-    #         PROMPT += ai
-    #     PROMPT += "[INST] " + history[-1][0] + " [/INST]\n"
-    #     history[-1][1] = async_endpoint(PROMPT).split("\n")[-1]
 
-    #     yield history
-
-    #actually generates the text and uses langchain (this is where handoff between frontend and backend is)
-    # def bot(history, context):
-    #     PROMPT = ""
-    #     if context != "":
-    #         PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
-    #         PROMPT += context
-    #         PROMPT += "\nReference the information in the document sources provided within the context above.\n"
-    #     PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI: "
-    #     PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
-
-    #     history_langchain_format = ChatMessageHistory()
-    #     history_langchain_format.add_user_message("Hi. Could you help me?")
-    #     history_langchain_format.add_ai_message("Hello! I'm here to help. How can I assist you today?")
-    #     for i in range(0, len(history)-1):
-    #         (human, ai) = history[i]
-    #         history_langchain_format.add_user_message(human)
-    #         history_langchain_format.add_ai_message(ai)
-
-    #     memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-    #     conversation = ConversationChain(
-    #         llm = sage_llm,
-    #         memory = memory,
-    #         prompt = PROMPT_TEMPLATE,
-    #     )
-
-    #     bot_message = conversation.run(history[-1][0])
-    #     history[-1][1] = bot_message #.split("AI: ")[1]
-    #     yield history
-
-    def openai_bot(history):
-        PROMPT = ""
-        # if context != "":
-        #     PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
-        #     PROMPT += context
-        #     PROMPT += "\nReference the information in the document sources provided within the context above.\n"
-        PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:"
-        PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
-
+    def openai_bot(history, context, user_prompt):
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
-        openai_memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
-        openai_conversation = ConversationChain(
-            llm=gpt3_llm,
-            memory=openai_memory,
-            prompt=PROMPT_TEMPLATE,
-        )
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+        
 
-        bot_message = openai_conversation.run(history[-1][0])
-        history[-1][1] = bot_message #.split("AI: ")[1]
+        agent_kwargs = {
+            "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+        }
+        agent = initialize_agent(
+            tools=tools,
+            llm=gpt3_llm,
+            agent=AgentType.OPENAI_FUNCTIONS,
+            verbose=True,
+            agent_kwargs=agent_kwargs,
+            memory=memory,
+        )
+        bot_message = agent.run(history[-1][0])
+        history[-1][1] = bot_message
         yield history
+
+    # def openai_bot(history):
+    #     PROMPT = ""
+    #     # if context != "":
+    #     #     PROMPT += "Pay attention and remember information below, which will help to answer the question or imperative after the context ends.\n"
+    #     #     PROMPT += context
+    #     #     PROMPT += "\nReference the information in the document sources provided within the context above.\n"
+    #     PROMPT += "The following is a conversation between a human and an AI. The AI is a helpful assistant. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:"
+    #     PROMPT_TEMPLATE = PromptTemplate(input_variables=['history', 'input'], output_parser=None, partial_variables={}, template=PROMPT, template_format='f-string', validate_template=True)
+
+    #     history_langchain_format = ChatMessageHistory()
+    #     for i in range(0, len(history)-1):
+    #         (human, ai) = history[i]
+    #         history_langchain_format.add_user_message(human)
+    #         history_langchain_format.add_ai_message(ai)
+    #     openai_memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format)
+    #     openai_conversation = ConversationChain(
+    #         llm=gpt3_llm,
+    #         memory=openai_memory,
+    #         prompt=PROMPT_TEMPLATE,
+    #     )
+
+    #     bot_message = openai_conversation.run(history[-1][0])
+    #     history[-1][1] = bot_message #.split("AI: ")[1]
+    #     yield history
     
 
 
@@ -359,7 +167,7 @@ with gr.Blocks(title="OpenProBono",
     # )
     with gr.Accordion("Details"):
         clearopenai = gr.ClearButton([txt, openai_chat])
-        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates.")
+        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice.")
 
 
 

@@ -15,7 +15,7 @@ from langchain.chains import ConversationalRetrievalChain, ConversationChain, LL
 
 from typing import Dict
 
-from langchain import PromptTemplate, SagemakerEndpoint
+from langchain import PromptTemplate
 from langchain.llms.sagemaker_endpoint import LLMContentHandler
 
 # parts of a model: chat, bot
@@ -26,9 +26,12 @@ from abc import abstractmethod
 from typing import Any, List, Optional
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.utils import enforce_stop_tokens
-from langchain.llms.sagemaker_endpoint import SagemakerEndpoint
 import boto3, time, os, uuid
 from botocore.exceptions import ClientError
+
+from langchain.utilities import SerpAPIWrapper
+from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
+from langchain.llms import OpenAI
 
 import langchain
 

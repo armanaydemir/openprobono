@@ -64,7 +64,7 @@ with gr.Blocks(title="OpenProBono",
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
-          gtag('config', 'YOUR_TRACKING_ID');
+          gtag('config', 'G-MKDNM9G2PQ');
         </script>
         """)
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')

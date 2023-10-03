@@ -57,6 +57,16 @@ with gr.Blocks(title="OpenProBono",
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}") as demo:
 
+    gr.HTML("""
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'YOUR_TRACKING_ID');
+        </script>
+        """)
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
     
     def add_text(history, text):

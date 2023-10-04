@@ -53,7 +53,7 @@ system_prompt = """You are a helpful, respectful and honest assistant. Always an
 
 with gr.Blocks(title="OpenProBono",
     #font=gr.themes.GoogleFont("Open Sans"),
-    #css="footer {visibility: hidden}"
+    css="footer {visibility: hidden}"
     )  as demo:
 
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
@@ -142,7 +142,7 @@ with gr.Blocks(title="OpenProBono",
             [],
             elem_id="chat",
             label="OpenProBono",
-            show_label=False,
+            show_label=True,
             #bubble_full_width=True,
             #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         )

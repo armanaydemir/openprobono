@@ -56,6 +56,16 @@ with gr.Blocks(title="OpenProBono",
     css="footer {visibility: hidden}"
     )  as demo:
 
+    demo.load(_js="""
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-MKDNM9G2PQ');
+        </script>
+        """)
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
     
     def add_text(history, text):
@@ -201,13 +211,3 @@ with gr.Blocks(title="OpenProBono",
 demo.queue()
 
 demo.launch(root_path="/",favicon_path="./missing.ico")
-# , _js="""
-#         <script async src="https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ"></script>
-#         <script>
-#           window.dataLayer = window.dataLayer || [];
-#           function gtag(){dataLayer.push(arguments);}
-#           gtag('js', new Date());
-
-#           gtag('config', 'G-MKDNM9G2PQ');
-#         </script>
-#         """)

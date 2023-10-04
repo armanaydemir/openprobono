@@ -140,8 +140,9 @@ with gr.Blocks(title="OpenProBono",
         # )
         openai_chat = gr.Chatbot(
             [],
-            elem_id="OpenProBono",
+            elem_id="chat",
             label="OpenProBono",
+            show_label=False,
             #bubble_full_width=True,
             #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         )
@@ -157,6 +158,7 @@ with gr.Blocks(title="OpenProBono",
     with gr.Row():
         txt = gr.Textbox(
             scale=4,
+            label="input",
             show_label=False,
             placeholder="Enter query", #, or upload an image",
             container=False,

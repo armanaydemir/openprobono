@@ -197,13 +197,14 @@ with gr.Blocks(title="OpenProBono",
     
 demo.queue()
 
-demo.launch(root_path="/",favicon_path="./missing.ico", _js="""
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+demo.launch(root_path="/",favicon_path="./missing.ico")
+# , _js="""
+#         <script async src="https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ"></script>
+#         <script>
+#           window.dataLayer = window.dataLayer || [];
+#           function gtag(){dataLayer.push(arguments);}
+#           gtag('js', new Date());
 
-          gtag('config', 'G-MKDNM9G2PQ');
-        </script>
-        """)
+#           gtag('config', 'G-MKDNM9G2PQ');
+#         </script>
+#         """)

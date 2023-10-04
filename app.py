@@ -189,7 +189,7 @@ with gr.Blocks(title="OpenProBono",
     # sub_msg = subbtn.click(add_text, [async_chat, txt], [async_chat, txt], queue=False).then(
     #     async_bot, [async_chat, contxt], async_chat
     # )
-    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
         openai_bot, [openai_chat], openai_chat
     )
 

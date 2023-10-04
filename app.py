@@ -51,22 +51,10 @@ tools = [
 system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
 # too much safety, hurts accuracy
 
-
-
 with gr.Blocks(title="OpenProBono",
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}") as demo:
 
-    gr.HTML("""
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', 'G-MKDNM9G2PQ');
-        </script>
-        """)
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
     
     def add_text(history, text):
@@ -183,8 +171,6 @@ with gr.Blocks(title="OpenProBono",
     with gr.Accordion("Details"):
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice.")
 
-
-
     # txt_msg = txt.submit(add_text, [sage_chat, txt], [sage_chat, txt], queue=False).then(
     #     bot, [sage_chat, contxt], sage_chat
     # )
@@ -211,4 +197,13 @@ with gr.Blocks(title="OpenProBono",
     
 demo.queue()
 
-demo.launch(root_path="/",favicon_path="./missing.ico")
+demo.launch(root_path="/",favicon_path="./missing.ico", _js="""
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-MKDNM9G2PQ');
+        </script>
+        """)

@@ -53,7 +53,7 @@ tools = [
         name="search",
         func=search.run,
         description="useful for when you need to answer questions about current events. You should ask targeted questions.",
-    )
+    ),
     Tool(
         name="government-search",
         func=gov_search,

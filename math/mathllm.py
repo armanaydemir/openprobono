@@ -34,7 +34,7 @@ from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, Z
 from langchain.llms import OpenAI
 from langchain.prompts import MessagesPlaceholder
 
-from langchain.chains import LLMMathChain
+from langchain.chains.llm_symbolic_math.base import LLMSymbolicMathChain
 
 import langchain
 
@@ -83,7 +83,7 @@ with gr.Blocks(title="MathLLM",
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
         
 
-        llm_math = LLMMathChain.from_llm(
+        llm_math = LLMSymbolicMathChain.from_llm(
             llm=gpt3_llm, 
             memory=memory,
             verbose=True)

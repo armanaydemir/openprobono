@@ -38,6 +38,7 @@ from langchain.llms import OpenAI
 #web retriever
 from langchain.retrievers.web_research import WebResearchRetriever
 from langchain.embeddings import OpenAIEmbeddings
+from langchain.utilities import GoogleSearchAPIWrapper
 
 import langchain
 

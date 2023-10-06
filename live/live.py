@@ -45,13 +45,22 @@ import langchain
 langchain.debug = True
 
 search = SerpAPIWrapper()
+def gov_search(q):
+    return search.run("site:*.gov " + q)
+    
 tools = [
     Tool(
         name="search",
         func=search.run,
         description="useful for when you need to answer questions about current events. You should ask targeted questions.",
     )
+    Tool(
+        name="government-search",
+        func=gov_search,
+        description="useful for when you need to answer questions or find resources about government and laws.",
+    )
 ]
+
 
 
 system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
@@ -174,13 +183,13 @@ with gr.Blocks(title="Workspace",
 
 
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        web_research_bot, [openai_chat, contxt, user_prompt], openai_chat
+        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
     )
 
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        web_research_bot, [openai_chat, contxt, user_prompt], openai_chat
+        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
     )
 
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)

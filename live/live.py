@@ -68,7 +68,7 @@ with gr.Blocks(title="Workspace",
     # Search 
     search = GoogleSearchAPIWrapper()
 
-    gpt3_llm = ChatOpenAI(temperature=1.0, model='gpt-3.5-turbo-0613')
+    gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
 
     # Initialize
     web_research_retriever = WebResearchRetriever.from_llm(
@@ -104,7 +104,7 @@ with gr.Blocks(title="Workspace",
         from langchain.chains import RetrievalQAWithSourcesChain
         user_input = history[-1][0]
         qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
-            llm,
+            llm=gpt3_llm,
             retriever=web_research_retriever,
             memory=memory,)
         result = qa_chain({"question": user_input})
@@ -174,13 +174,13 @@ with gr.Blocks(title="Workspace",
 
 
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
+        web_research_bot, [openai_chat, contxt, user_prompt], openai_chat
     )
 
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
+        web_research_bot, [openai_chat, contxt, user_prompt], openai_chat
     )
 
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)

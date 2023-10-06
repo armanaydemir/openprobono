@@ -95,7 +95,7 @@ with gr.Blocks(title="Workspace",
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
-        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory", input_key='question', output_key='answer')
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
 
 
         import logging
@@ -108,7 +108,7 @@ with gr.Blocks(title="Workspace",
             retriever=web_research_retriever,
             memory=memory,)
         result = qa_chain({"question": user_input})
-        history[-1][1] = result
+        history[-1][1] = result['answer'] + '\n' + result['sources']
         yield history
 
     def openai_bot(history, context, user_prompt):

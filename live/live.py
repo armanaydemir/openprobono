@@ -73,7 +73,7 @@ with gr.Blocks(title="Workspace",
     # Initialize
     web_research_retriever = WebResearchRetriever.from_llm(
         vectorstore=vectorstore,
-        llm=llm, 
+        llm=gpt3_llm, 
         search=search
     )
     

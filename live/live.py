@@ -5,7 +5,7 @@ import os
 import json
 import sagemaker
 
-from langchain.vectorstores import Vectara
+from langchain.vectorstores import Vectara, Chroma
 from langchain.vectorstores.vectara import VectaraRetriever
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage
@@ -35,6 +35,10 @@ from langchain.utilities import SerpAPIWrapper
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
 from langchain.llms import OpenAI
 
+#web retriever
+from langchain.retrievers.web_research import WebResearchRetriever
+from langchain.embeddings import OpenAIEmbeddings
+
 import langchain
 
 langchain.debug = True
@@ -57,7 +61,20 @@ with gr.Blocks(title="Workspace",
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}") as demo:
 
+    # Vectorstore
+    vectorstore = Chroma(embedding_function=OpenAIEmbeddings(),persist_directory="./chroma_db_oai")
+
+    # Search 
+    search = GoogleSearchAPIWrapper()
+
     gpt3_llm = ChatOpenAI(temperature=1.0, model='gpt-3.5-turbo-0613')
+
+    # Initialize
+    web_research_retriever = WebResearchRetriever.from_llm(
+        vectorstore=vectorstore,
+        llm=llm, 
+        search=search
+    )
     
     def add_text(history, text):
         history = history + [(text, None)]
@@ -70,6 +87,28 @@ with gr.Blocks(title="Workspace",
 
         history = history + [((file.name,), None)]
         return history
+
+    def web_research_bot(history, context, user_prompt):
+        history_langchain_format = ChatMessageHistory()
+        for i in range(0, len(history)-1):
+            (human, ai) = history[i]
+            history_langchain_format.add_user_message(human)
+            history_langchain_format.add_ai_message(ai)
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+
+
+        import logging
+        logging.basicConfig()
+        logging.getLogger("langchain.retrievers.web_research").setLevel(logging.INFO)
+        from langchain.chains import RetrievalQAWithSourcesChain
+        user_input = history[-1][0]
+        qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+            llm,
+            retriever=web_research_retriever,
+            memory=memory,)
+        result = qa_chain({"question": user_input})
+        history[-1][1] = result
+        yield history
 
     def openai_bot(history, context, user_prompt):
         history_langchain_format = ChatMessageHistory()

@@ -98,7 +98,6 @@ with gr.Blocks(title="Workspace",
         logging.basicConfig()
         logging.getLogger("langchain.retrievers.web_research").setLevel(logging.INFO)
         from langchain.chains import RetrievalQAWithSourcesChain
-        user_input = history[-1][0]
         qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
             llm=gpt3_llm,
             retriever=web_research_retriever,

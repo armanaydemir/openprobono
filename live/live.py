@@ -143,7 +143,7 @@ with gr.Blocks(title="Workspace",
             agent_kwargs=agent_kwargs,
             memory=memory,
         )
-        print(agent.agent)
+        print(agent.agent.prompt.messages[0])
         print("^^ this agent here^^")
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message

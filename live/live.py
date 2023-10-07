@@ -52,12 +52,12 @@ tools = [
     Tool(
         name="search",
         func=search.run,
-        description="useful for when you need to answer questions about current events. You should ask targeted questions.",
+        description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
     ),
     Tool(
         name="government-search",
         func=gov_search,
-        description="useful for when you need to answer questions or find resources about government and laws.",
+        description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
     )
 ]
 

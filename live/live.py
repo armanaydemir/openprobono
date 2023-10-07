@@ -47,19 +47,6 @@ langchain.debug = True
 search = SerpAPIWrapper()
 def gov_search(q):
     return search.run("site:*.gov " + q)
-    
-tools = [
-    Tool(
-        name="search",
-        func=search.run,
-        description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-    ),
-    Tool(
-        name="government-search",
-        func=gov_search,
-        description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-    )
-]
 
 
 
@@ -98,13 +85,13 @@ with gr.Blocks(title="Workspace",
         history = history + [((file.name,), None)]
         return history
 
-    def web_research_bot(history, context, user_prompt):
-        history_langchain_format = ChatMessageHistory()
-        for i in range(0, len(history)-1):
-            (human, ai) = history[i]
-            history_langchain_format.add_user_message(human)
-            history_langchain_format.add_ai_message(ai)
-        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory", input_key='question', output_key='answer')
+    def web_research_bot(user_input):
+        # history_langchain_format = ChatMessageHistory()
+        # for i in range(0, len(history)-1):
+        #     (human, ai) = history[i]
+        #     history_langchain_format.add_user_message(human)
+        #     history_langchain_format.add_ai_message(ai)
+        # memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory", input_key='question', output_key='answer')
 
 
         import logging
@@ -115,12 +102,28 @@ with gr.Blocks(title="Workspace",
         qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
             llm=gpt3_llm,
             retriever=web_research_retriever,
-            memory=memory,)
+        )
         result = qa_chain({"question": user_input})
-        history[-1][1] = result['answer'] + '\n' + result['sources']
-        yield history
+        return result['answer'] + '\n' + result['sources']
 
     def openai_bot(history, context, user_prompt):
+        tools = [
+            # Tool(
+            #     name="search",
+            #     func=search.run,
+            #     description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
+            # ),
+            # Tool(
+            #     name="government-search",
+            #     func=gov_search,
+            #     description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+            # ),
+            Tool(
+                name="search",
+                func=web_research_bot,
+                description="useful for when you need to answer questions you about recent events",
+            ),
+        ]
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -128,10 +131,10 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
         
-        system_message = 'You are a helpful AI assistant. Always cite your sources. If you do not have enough information to answer a question, ask the user to provide what you need, such as where the user is located.'
+        #system_message = 'You are a helpful AI assistant. Always cite your sources. If you do not have enough information to answer a question, ask the user to provide what you need, such as where the user is located.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
-            "system_message": system_message,
+            #"system_message": system_message,
         }
         agent = initialize_agent(
             tools=tools,

@@ -143,6 +143,7 @@ with gr.Blocks(title="Workspace",
             agent_kwargs=agent_kwargs,
             memory=memory,
         )
+        print(agent)
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message
         yield history

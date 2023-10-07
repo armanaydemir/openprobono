@@ -119,8 +119,8 @@ with gr.Blocks(title="Workspace",
             # ),
             Tool(
                 name="search",
-                func=web_research_bot,
-                description="useful for when you need to answer questions you about recent events",
+                func=web_research_retriever,
+                description="useful for when you need to answer questions you about recent events. You should ask targeted questions. Always cite your sources.",
             ),
         ]
         history_langchain_format = ChatMessageHistory()

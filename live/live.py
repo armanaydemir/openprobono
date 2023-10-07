@@ -119,7 +119,7 @@ with gr.Blocks(title="Workspace",
             # ),
             Tool(
                 name="search",
-                func=web_research_retriever,
+                func=web_research_retriever.get_relevant_documents,
                 description="useful for when you need to answer questions you about recent events. You should ask targeted questions. Always cite your sources.",
             ),
         ]

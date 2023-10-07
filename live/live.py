@@ -107,21 +107,21 @@ with gr.Blocks(title="Workspace",
 
     def openai_bot(history, context, user_prompt):
         tools = [
-            # Tool(
-            #     name="search",
-            #     func=search.run,
-            #     description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-            # ),
-            # Tool(
-            #     name="government-search",
-            #     func=gov_search,
-            #     description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-            # ),
             Tool(
                 name="search",
-                func=web_research_retriever.get_relevant_documents,
-                description="useful for when you need to answer questions you about recent events. You should ask targeted questions. Always cite your sources.",
+                func=search.run,
+                description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
             ),
+            Tool(
+                name="government-search",
+                func=gov_search,
+                description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+            ),
+            # Tool(
+            #     name="search",
+            #     func=web_research_retriever.get_relevant_documents,
+            #     description="useful for when you need to answer questions you about recent events. You should ask targeted questions. Always cite your sources.",
+            # ),
         ]
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
@@ -144,7 +144,8 @@ with gr.Blocks(title="Workspace",
             memory=memory,
         )
         agent.agent.prompt.messages[0].content = system_message
-        #print("^^ this agent here^^")
+        print(agent.agent.prompt)
+        print("^^ this agent here^^")
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message
         yield history

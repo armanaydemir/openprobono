@@ -130,7 +130,7 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
         
-        #system_message = 'You are a helpful AI assistant. Always cite your sources. If you do not have enough information to answer a question, ask the user to provide what you need, such as where the user is located.'
+        system_message = 'You are a helpful AI assistant. Always cite your sources. If you do not have enough information to answer a question, ask the user to provide what you need, such as where the user is located.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
             #"system_message": system_message,
@@ -143,8 +143,8 @@ with gr.Blocks(title="Workspace",
             agent_kwargs=agent_kwargs,
             memory=memory,
         )
-        print(agent.agent.prompt.messages[0])
-        print("^^ this agent here^^")
+        agent.agent.prompt.messages[0].content = system_message
+        #print("^^ this agent here^^")
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message
         yield history

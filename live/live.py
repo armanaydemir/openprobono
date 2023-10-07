@@ -128,9 +128,10 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
         
-
+        system_message = 'You are a helpful assistant. Always cite your sources.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+            "system_message": system_message,
         }
         agent = initialize_agent(
             tools=tools,

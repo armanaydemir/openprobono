@@ -130,7 +130,9 @@ with gr.Blocks(title="Workspace",
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
         
-        system_message = 'You are a helpful AI assistant.ALWAYS return a "SOURCES" part in your answer.'
+        system_message = 'You are a helpful AI assistant. '
+        system_message += user_prompt
+        system_message += '. ALWAYS return a "SOURCES" part in your answer.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
             #"system_message": system_message,
@@ -166,6 +168,7 @@ with gr.Blocks(title="Workspace",
             show_label=False,
             placeholder="Enter any context you want the AI to reference", #, or upload an image",
             container=False,
+            visible=False,
         )
         user_prompt = gr.Textbox(
             scale=4,

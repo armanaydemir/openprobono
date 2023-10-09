@@ -183,19 +183,6 @@ with gr.Blocks(title="Workspace",
 
     with gr.Row():
         clearopenai = gr.ClearButton([txt, openai_chat])
-
-
-    txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
-    )
-
-    txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
-
-    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
-    )
-
-    sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
     
     # file_msg = btn.upload(add_file, [openai, btn], [openai], queue=False).then(
     #     bot, openai, openai
@@ -209,6 +196,21 @@ with gr.Blocks(title="Workspace",
         )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates.")
 
+
+    txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
+    )
+
+    txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
+
+    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
+    )
+
+    sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
+
+
+    
 demo.queue()
 
 demo.launch(root_path="/wip",server_port=7861,favicon_path="./missing.ico")

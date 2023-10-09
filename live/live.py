@@ -170,12 +170,6 @@ with gr.Blocks(title="Workspace",
             container=False,
             visible=False,
         )
-        user_prompt = gr.Textbox(
-            scale=4,
-            show_label=False,
-            placeholder="Enter any additional prompt prefix for the AI", #, or upload an image",
-            container=False,
-        )
 
     with gr.Row():
         txt = gr.Textbox(
@@ -207,6 +201,12 @@ with gr.Blocks(title="Workspace",
     #     bot, openai, openai
     # )
     with gr.Accordion("This is my workspace where I am doing live iterations."):
+        user_prompt = gr.Textbox(
+            scale=4,
+            show_label=False,
+            placeholder="Enter any additional prompt prefix for the AI", #, or upload an image",
+            container=False,
+        )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates.")
 
 demo.queue()

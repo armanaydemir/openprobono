@@ -46,6 +46,8 @@ langchain.debug = True
 
 search = SerpAPIWrapper()
 def gov_search(q):
+    print(search.run("site:*.gov " + q))
+    print("this is results of search^^^^")
     return search.run("site:*.gov " + q)
 
 

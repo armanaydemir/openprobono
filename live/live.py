@@ -45,10 +45,12 @@ import langchain
 langchain.debug = True
 
 search = SerpAPIWrapper()
+
 def gov_search(q):
-    print(search.results("site:*.gov " + q, 5))
-    print("this is results of search^^^^")
-    return search.results("site:*.gov " + q, 5)
+    return search.results("site:*.gov " + q, 10)
+
+def general_search(q):
+    return search.results(q, 10)
 
 
 
@@ -111,7 +113,7 @@ with gr.Blocks(title="Workspace",
         tools = [
             Tool(
                 name="search",
-                func=search.run,
+                func=general_search,
                 description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
             ),
             Tool(

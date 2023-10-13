@@ -56,7 +56,7 @@ langchain.debug = True
 def gov_search(q):
     return filtered_search(GoogleSearch({
         'q': "site:*.gov " + q,
-        'num': 2
+        'num': 5
         }).get_dict())
 
 def filtered_search(results):
@@ -72,7 +72,7 @@ def filtered_search(results):
 def general_search(q):
     return filtered_search(GoogleSearch({
         'q': q,
-        'num': 2
+        'num': 5
         }).get_json())
 
 

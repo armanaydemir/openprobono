@@ -50,13 +50,13 @@ langchain.debug = True
 # search = SerpAPIWrapper()
 
 def gov_search(q):
-    return search.results({
+    return GoogleSearch({
         'q': "site:*.gov " + q,
         'num': 10
         }).get_json()
 
 def general_search(q):
-    return search.results({
+    return GoogleSearch({
         'q': q,
         'num': 10
         }).get_json()

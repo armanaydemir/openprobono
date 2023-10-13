@@ -40,17 +40,26 @@ from langchain.retrievers.web_research import WebResearchRetriever
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.utilities import GoogleSearchAPIWrapper
 
+from serpapi import GoogleSearch
+search = GoogleSearch({})
+
 import langchain
 
 langchain.debug = True
 
-search = SerpAPIWrapper()
+# search = SerpAPIWrapper()
 
 def gov_search(q):
-    return search.results("site:*.gov " + q, 10)
+    return search.results({
+        'q': "site:*.gov " + q,
+        'num': 10
+        }).get_json()
 
 def general_search(q):
-    return search.results(q, 10)
+    return search.results({
+        'q': q,
+        'num': 10
+        }).get_json()
 
 
 

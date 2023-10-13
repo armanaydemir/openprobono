@@ -50,17 +50,30 @@ langchain.debug = True
 
 # search = SerpAPIWrapper()
 
+#'sports_results'
+#'organic_results'
+
 def gov_search(q):
-    return GoogleSearch({
+    return filtered_search(GoogleSearch({
         'q': "site:*.gov " + q,
         'num': 2
-        }).get_json()
+        }).get_dict())
+
+def filtered_search(results):
+    new_dict = {}
+    if('sports_results' in results):
+        new_dict['sports_results'] = results['sports_results']
+    if('organic_results' in results):
+        new_dict['organic_results'] = results['organic_results']
+    return new_dict
+            
+
 
 def general_search(q):
-    return GoogleSearch({
+    return filtered_search(GoogleSearch({
         'q': q,
         'num': 2
-        }).get_json()
+        }).get_json())
 
 
 

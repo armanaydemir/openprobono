@@ -53,13 +53,13 @@ langchain.debug = True
 def gov_search(q):
     return GoogleSearch({
         'q': "site:*.gov " + q,
-        'num': 10
+        'num': 5
         }).get_json()
 
 def general_search(q):
     return GoogleSearch({
         'q': q,
-        'num': 10
+        'num': 5
         }).get_json()
 
 

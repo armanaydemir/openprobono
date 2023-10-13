@@ -107,7 +107,7 @@ with gr.Blocks(title="OpenProBono",
 
         system_message = 'You are a helpful AI assistant. '
         #system_message += user_prompt
-        system_message += 'ALWAYS return a "SOURCES" part in your answer.'
+        system_message += '. ALWAYS return a "SOURCES" part in your answer.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }

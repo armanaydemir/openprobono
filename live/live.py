@@ -41,7 +41,8 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.utilities import GoogleSearchAPIWrapper
 
 from serpapi import GoogleSearch
-search = GoogleSearch({})
+
+GoogleSearch.SERP_API_KEY = "5567e356a3e19133465bc68755a124268543a7dd0b2809d75b038797b43626ab"
 
 import langchain
 

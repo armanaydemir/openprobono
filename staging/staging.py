@@ -149,6 +149,7 @@ with gr.Blocks(title="OpenProBono",
             container=False,
         )
         subbtn = gr.Button("Submit")
+        subbtn.config(bg='#2EFF2E')
         clearopenai = gr.ClearButton([txt, openai_chat])
         #btn = gr.UploadButton("📁", file_types=["text"])
 

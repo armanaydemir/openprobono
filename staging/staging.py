@@ -67,7 +67,7 @@ def general_search(q):
 
 with gr.Blocks(title="OpenProBono",
     theme=gr.themes.Default(
-        primary_hue=gr.themes.colors.lime, 
+        primary_hue=gr.themes.colors.indigo, 
         secondary_hue=gr.themes.colors.blue,
         radius_size=gr.themes.sizes.radius_lg),
         # .set(
@@ -156,7 +156,6 @@ with gr.Blocks(title="OpenProBono",
             container=False,
         )
         subbtn = gr.Button("Submit", variant="primary")
-        testbtn = gr.Button("Test", variant="secondary")
         clearopenai = gr.ClearButton([txt, openai_chat])
         #btn = gr.UploadButton("📁", file_types=["text"])
 

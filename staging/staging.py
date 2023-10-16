@@ -143,7 +143,7 @@ with gr.Blocks(title="OpenProBono",
             #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         )
 
-    with gr.Row(theme=gr.themes.Default(primary_hue=gr.themes.colors.green, secondary_hue=gr.themes.colors.lime)):
+    with gr.Row():
         txt = gr.Textbox(
             scale=4,
             label="input",

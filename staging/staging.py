@@ -69,11 +69,11 @@ with gr.Blocks(title="OpenProBono",
     theme=gr.themes.Default(
         primary_hue=gr.themes.colors.green, 
         secondary_hue=gr.themes.colors.lime,
-        radius_size=gr.themes.sizes.radius_lg)
-        .set(
-            button_primary_background_fill="*primary_200",
-            button_primary_background_fill_hover="*primary_300",
-        ),
+        radius_size=gr.themes.sizes.radius_lg),
+        # .set(
+        #     button_primary_background_fill="*primary_200",
+        #     button_primary_background_fill_hover="*primary_300",
+        # ),
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}"
     ) as demo:
@@ -155,7 +155,7 @@ with gr.Blocks(title="OpenProBono",
             placeholder="Enter query", #, or upload an image",
             container=False,
         )
-        subbtn = gr.Button("Submit")
+        subbtn = gr.Button("Submit", variant="primary")
         clearopenai = gr.ClearButton([txt, openai_chat])
         #btn = gr.UploadButton("📁", file_types=["text"])
 

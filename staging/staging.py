@@ -66,7 +66,10 @@ def general_search(q):
 # too much safety, hurts accuracy
 
 with gr.Blocks(title="OpenProBono",
-    theme=gr.themes.Default(primary_hue=gr.themes.colors.green, secondary_hue=gr.themes.colors.lime),
+    theme=gr.themes.Default(
+        primary_hue=gr.themes.colors.green, 
+        secondary_hue=gr.themes.colors.lime,
+        radius_size=gr.themes.sizes.radius_lg),
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}"
     )  as demo:

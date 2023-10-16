@@ -69,12 +69,12 @@ with gr.Blocks(title="OpenProBono",
     theme=gr.themes.Default(
         primary_hue=gr.themes.colors.indigo, 
         secondary_hue=gr.themes.colors.blue,
+        font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg),
         # .set(
         #     button_primary_background_fill="*primary_200",
         #     button_primary_background_fill_hover="*primary_300",
         # ),
-    font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}"
     ) as demo:
 

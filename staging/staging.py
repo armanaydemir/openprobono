@@ -142,7 +142,7 @@ with gr.Blocks(title="OpenProBono",
     
 
 
-    gr.Markdown("OpenProBono")
+    gr.Markdown("[OpenProBono](www.openprobono.com)")
     with gr.Row():
         openai_chat = gr.Chatbot(
             [],

@@ -79,6 +79,11 @@ with gr.Blocks(title="OpenProBono",
     ) as demo:
 
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
+
+    def print_email(email):
+        print(email)
+        print("^^ this is the email ^^")
+        return email
     
     def add_text(history, text):
         history = history + [(text, None)]
@@ -164,19 +169,28 @@ with gr.Blocks(title="OpenProBono",
     #     bot, openai, openai
     # )
     with gr.Accordion("Details"):
+        emailtxt = gr.Textbox(
+            scale=4,
+            label="input",
+            show_label=False,
+            placeholder="Enter your email to sign up for updates", #, or upload an image",
+            container=False,
+        )
+        emailbtn = gr.Button("Submit")
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice.")
 
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
         openai_bot, [openai_chat], openai_chat
     )
-
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
         openai_bot, [openai_chat], openai_chat
     )
-
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
+
+    email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False)
+    email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
     
 demo.queue()
 

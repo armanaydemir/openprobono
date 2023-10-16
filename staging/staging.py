@@ -72,6 +72,8 @@ with gr.Blocks(title="OpenProBono",
         radius_size=gr.themes.sizes.radius_lg),
     #font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}"
+    ).set(
+        button_color="#FF0000",
     )  as demo:
 
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')

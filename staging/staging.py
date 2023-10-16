@@ -82,7 +82,8 @@ with gr.Blocks(title="OpenProBono",
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
 
     def print_email(email):
-        logging.info(email + " is the email")
+        print(email)
+        print("^^ this is the email ^^")
         return email
     
     def add_text(history, text):
@@ -133,8 +134,8 @@ with gr.Blocks(title="OpenProBono",
             memory=memory,
         )
         agent.agent.prompt.messages[0].content = system_message
-        logging.info(agent.agent.prompt)
-        logging.info("^^ this agent here^^")
+        print(agent.agent.prompt)
+        print("^^ this agent here^^")
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message
         yield history

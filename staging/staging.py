@@ -74,7 +74,7 @@ with gr.Blocks(title="OpenProBono",
         #     button_primary_background_fill="*primary_200",
         #     button_primary_background_fill_hover="*primary_300",
         # ),
-    #font=gr.themes.GoogleFont("Open Sans"),
+    font=gr.themes.GoogleFont("Open Sans"),
     css="footer {visibility: hidden}"
     ) as demo:
 
@@ -141,7 +141,7 @@ with gr.Blocks(title="OpenProBono",
     
 
 
-    #gr.Markdown("OpenProBono")
+    gr.Markdown("OpenProBono")
     with gr.Row():
         openai_chat = gr.Chatbot(
             [],

@@ -50,6 +50,11 @@ def filtered_search(results):
     #     new_dict['sports_results'] = results['sports_results']
     if('organic_results' in results):
         new_dict['organic_results'] = results['organic_results']
+    for result in new_dict["organic_results"]:
+        result.pop("displayed_link", None)
+        result.pop("favicon", None)
+        result.pop("about_page_link", None)
+        result.pop("about_page_serpapi_link", None)
     return new_dict
 
 #this is the function that actually calls the serpapi library, with our whitelisted legal sites

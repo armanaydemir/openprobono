@@ -142,7 +142,7 @@ with gr.Blocks(title="OpenProBono",
     
 
 
-    gr.Markdown("[OpenProBono](www.openprobono.com)")
+    gr.Markdown("OpenProBono")
     with gr.Row():
         openai_chat = gr.Chatbot(
             [],
@@ -178,7 +178,7 @@ with gr.Blocks(title="OpenProBono",
             container=False,
         )
         emailbtn = gr.Button("Submit")
-        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice.")
+        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
 
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
         openai_bot, [openai_chat], openai_chat

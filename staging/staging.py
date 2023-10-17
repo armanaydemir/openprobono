@@ -15,7 +15,7 @@ from langchain.document_loaders import TextLoader
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain, LLMCheckerChain
 
-from typing import Dict
+from typing import Dict, List, Union
 
 from langchain import PromptTemplate
 from langchain.llms.sagemaker_endpoint import LLMContentHandler

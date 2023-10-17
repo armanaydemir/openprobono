@@ -44,23 +44,23 @@ GoogleSearch.SERP_API_KEY = "5567e356a3e19133465bc68755a124268543a7dd0b2809d75b0
 
 def filtered_search(results):
     new_dict = {}
-    if('sports_results' in results):
-        new_dict['sports_results'] = results['sports_results']
+    # if('sports_results' in results):
+    #     new_dict['sports_results'] = results['sports_results']
     if('organic_results' in results):
         new_dict['organic_results'] = results['organic_results']
     return new_dict
 
 def gov_search(q):
     return filtered_search(GoogleSearch({
-        'q': "site:*.gov " + q,
-        'num': 5
+        'q': "site:*.gov | site:*scholar.google.com | site:*case.law | site:*findlaw.com " + q,
+        'num': 8
         }).get_dict())
 
-def general_search(q):
-    return filtered_search(GoogleSearch({
-        'q': q,
-        'num': 5
-        }).get_dict())
+# def general_search(q):
+#     return filtered_search(GoogleSearch({
+#         'q': q,
+#         'num': 5
+#         }).get_dict())
 
 
 # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
@@ -101,11 +101,11 @@ with gr.Blocks(title="OpenProBono",
 
     def openai_bot(history):
         tools = [
-            Tool(
-                name="search",
-                func=general_search,
-                description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-            ),
+            # Tool(
+            #     name="search",
+            #     func=general_search,
+            #     description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
+            # ),
             Tool(
                 name="government-search",
                 func=gov_search,

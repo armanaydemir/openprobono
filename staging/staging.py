@@ -31,7 +31,7 @@ from langchain.llms.utils import enforce_stop_tokens
 import boto3, time, os, uuid
 from botocore.exceptions import ClientError
 
-from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
+from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent, AgentOutputParser
 from langchain.llms import OpenAI
 from langchain.prompts import MessagesPlaceholder
 

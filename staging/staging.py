@@ -250,7 +250,7 @@ with gr.Blocks(title="OpenProBono",
         # print("^^ this agent here^^")
         
         #running the agent and update the history with the response
-        agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
+        agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
         bot_message = agent_executor.run(history[-1][0])
         history[-1][1] = bot_message
         yield history

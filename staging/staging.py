@@ -31,7 +31,7 @@ from langchain.llms.utils import enforce_stop_tokens
 import boto3, time, os, uuid
 from botocore.exceptions import ClientError
 
-from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent, AgentOutputParser
+from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent, AgentOutputParser, LLMSingleActionAgent
 from langchain.llms import OpenAI
 from langchain.prompts import MessagesPlaceholder
 
@@ -106,6 +106,7 @@ Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question
+Sources: the sources you used to find the answer
 
 These were previous tasks you completed:
 
@@ -226,24 +227,31 @@ with gr.Blocks(title="OpenProBono",
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
         llm_chain = LLMChain(llm=gpt3_llm, prompt=prompt)
-        agent = initialize_agent(
-            tools=tools,
-            llm=llm_chain,
-            agent=AgentType.OPENAI_FUNCTIONS,
-            verbose=True,
-            agent_kwargs=agent_kwargs,
-            memory=memory,
-            max_tokens_limit=4000,
+        agent = LLMSingleActionAgent(
+            llm_chain=llm_chain,
+            output_parser=output_parser,
+            stop=["\nObservation:"],
+            allowed_tools=tool_names
         )
+        # agent = initialize_agent(
+        #     tools=tools,
+        #     llm=llm_chain,
+        #     agent=AgentType.OPENAI_FUNCTIONS,
+        #     verbose=True,
+        #     agent_kwargs=agent_kwargs,
+        #     memory=memory,
+        #     max_tokens_limit=4000,
+        # )
         #updating the system prompt
-        agent.agent.prompt.messages[0].content = system_message
+        # agent.agent.prompt.messages[0].content = system_message
 
         #debug
-        print(agent.agent.prompt)
-        print("^^ this agent here^^")
+        # print(agent.agent.prompt)
+        # print("^^ this agent here^^")
         
         #running the agent and update the history with the response
-        bot_message = agent.run(history[-1][0])
+        agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
+        bot_message = agent_executor.run(history[-1][0])
         history[-1][1] = bot_message
         yield history
     

@@ -170,14 +170,15 @@ with gr.Blocks(title="OpenProBono",
     #     bot, openai, openai
     # )
     with gr.Accordion("Details"):
-        emailtxt = gr.Textbox(
-            scale=4,
-            label="input",
-            show_label=False,
-            placeholder="Enter your email to sign up for updates", #, or upload an image",
-            container=False,
-        )
-        emailbtn = gr.Button("Submit")
+        with gr.Row():
+            emailtxt = gr.Textbox(
+                scale=4,
+                label="input",
+                show_label=False,
+                placeholder="Enter your email to sign up for updates", #, or upload an image",
+                container=False,
+            )
+            emailbtn = gr.Button("Submit")
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
 
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(

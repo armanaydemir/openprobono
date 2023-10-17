@@ -6,6 +6,7 @@ import json
 import sagemaker
 import logging
 
+from langchain.prompts import BaseChatPromptTemplate
 from langchain.vectorstores import Vectara
 from langchain.vectorstores.vectara import VectaraRetriever
 from langchain.chat_models import ChatOpenAI

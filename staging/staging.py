@@ -36,6 +36,7 @@ from langchain.prompts import MessagesPlaceholder
 
 import langchain
 
+#makes it so it outputs the whole convo and thought process of bot
 langchain.debug = True
 
 from serpapi import GoogleSearch
@@ -57,6 +58,7 @@ def gov_search(q):
         'q': "site:*.gov | site:*scholar.google.com | site:*case.law | site:*findlaw.com " + q,
         'num': 5
         }).get_dict())
+
 #this is the function that actually calls the serpapi library, just with a general search
 def general_search(q):
     return filtered_search(GoogleSearch({
@@ -138,10 +140,12 @@ with gr.Blocks(title="OpenProBono",
             verbose=True,
             agent_kwargs=agent_kwargs,
             memory=memory,
+            max_tokens_limit=4000,
         )
         #updating the system prompt
         agent.agent.prompt.messages[0].content = system_message
 
+        #debug
         print(agent.agent.prompt)
         print("^^ this agent here^^")
         

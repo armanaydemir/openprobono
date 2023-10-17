@@ -5,6 +5,7 @@ import os
 import json
 import sagemaker
 import logging
+import re
 
 from langchain.prompts import BaseChatPromptTemplate
 from langchain.vectorstores import Vectara

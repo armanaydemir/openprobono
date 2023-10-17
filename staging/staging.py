@@ -10,7 +10,7 @@ from langchain.prompts import BaseChatPromptTemplate
 from langchain.vectorstores import Vectara
 from langchain.vectorstores.vectara import VectaraRetriever
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import AIMessage, HumanMessage
+from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from langchain.document_loaders import TextLoader
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain, LLMCheckerChain

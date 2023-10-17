@@ -53,14 +53,14 @@ def filtered_search(results):
 def gov_search(q):
     return filtered_search(GoogleSearch({
         'q': "site:*.gov | site:*scholar.google.com | site:*case.law | site:*findlaw.com " + q,
-        'num': 8
+        'num': 5
         }).get_dict())
 
-# def general_search(q):
-#     return filtered_search(GoogleSearch({
-#         'q': q,
-#         'num': 5
-#         }).get_dict())
+def general_search(q):
+    return filtered_search(GoogleSearch({
+        'q': q,
+        'num': 5
+        }).get_dict())
 
 
 # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
@@ -101,11 +101,11 @@ with gr.Blocks(title="OpenProBono",
 
     def openai_bot(history):
         tools = [
-            # Tool(
-            #     name="search",
-            #     func=general_search,
-            #     description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-            # ),
+            Tool(
+                name="search",
+                func=general_search,
+                description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
+            ),
             Tool(
                 name="government-search",
                 func=gov_search,
@@ -119,7 +119,7 @@ with gr.Blocks(title="OpenProBono",
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
 
-        system_message = 'You are a helpful AI assistant. '
+        system_message = 'You are a helpful AI assistant. Make a plan to help the user, then execute it. If you cannot answer a question in one step, try to break it down into parts. '
         #system_message += user_prompt
         system_message += '. ALWAYS return a "SOURCES" part in your answer.'
         agent_kwargs = {

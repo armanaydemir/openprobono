@@ -42,6 +42,7 @@ from serpapi import GoogleSearch
 
 GoogleSearch.SERP_API_KEY = "5567e356a3e19133465bc68755a124268543a7dd0b2809d75b038797b43626ab"
 
+#this function filters the huge dict that serpapi returns to only include the results we want (not ads, etc)
 def filtered_search(results):
     new_dict = {}
     # if('sports_results' in results):
@@ -50,12 +51,13 @@ def filtered_search(results):
         new_dict['organic_results'] = results['organic_results']
     return new_dict
 
+#this is the function that actually calls the serpapi library, with our whitelisted legal sites
 def gov_search(q):
     return filtered_search(GoogleSearch({
         'q': "site:*.gov | site:*scholar.google.com | site:*case.law | site:*findlaw.com " + q,
         'num': 5
         }).get_dict())
-
+#this is the function that actually calls the serpapi library, just with a general search
 def general_search(q):
     return filtered_search(GoogleSearch({
         'q': q,
@@ -72,34 +74,33 @@ with gr.Blocks(title="OpenProBono",
         secondary_hue=gr.themes.colors.blue,
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg),
-        # .set(
-        #     button_primary_background_fill="*primary_200",
-        #     button_primary_background_fill_hover="*primary_300",
-        # ),
     css="footer {visibility: hidden}"
     ) as demo:
 
+    #here is where we actually define our llm
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
 
+    #need a better way to store emails
     def print_email(email):
         print(email)
         print("^^ this is the email ^^")
         return email
     
+    #updates the chat history
     def add_text(history, text):
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
 
-
+    #not being used currently, was part of file upload
     def add_file(history, file):
         loader = TextLoader(file.name)
         file_text = loader.load()
-
         history = history + [((file.name,), None)]
         return history
 
-
+    #this is the meat, where the chat history is passed and the bot responds
     def openai_bot(history):
+        #defining the tools available to the agent
         tools = [
             Tool(
                 name="search",
@@ -112,6 +113,8 @@ with gr.Blocks(title="OpenProBono",
                 description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
             )
         ]
+        
+        #defining the memory of the agent
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -119,9 +122,12 @@ with gr.Blocks(title="OpenProBono",
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
 
+        #system prompt
         system_message = 'You are a helpful AI assistant. Make a plan to help the user, then execute it. If you cannot answer a question in one step, try to break it down into parts. '
         #system_message += user_prompt
         system_message += '. ALWAYS return a "SOURCES" part in your answer.'
+
+        #initializing the agent
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
@@ -133,15 +139,19 @@ with gr.Blocks(title="OpenProBono",
             agent_kwargs=agent_kwargs,
             memory=memory,
         )
+        #updating the system prompt
         agent.agent.prompt.messages[0].content = system_message
+
         print(agent.agent.prompt)
         print("^^ this agent here^^")
+        
+        #running the agent and update the history with the response
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message
         yield history
     
 
-
+    #From here on is the gradio stuff, defining the layout of the page
     gr.Markdown("OpenProBono")
     with gr.Row():
         openai_chat = gr.Chatbot(
@@ -181,16 +191,19 @@ with gr.Blocks(title="OpenProBono",
             emailbtn = gr.Button("Submit")
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
 
+    #corresponds to enter in the text box
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
         openai_bot, [openai_chat], openai_chat
     )
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
-
+    
+    #corresponds to clicking the submit button
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
         openai_bot, [openai_chat], openai_chat
     )
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
+    #hitting enter and clicking submit for email
     email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False)
     email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
     

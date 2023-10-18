@@ -65,7 +65,7 @@ def filtered_search(results):
 
             Web Page:
             """
-            llm_input += UnstructuredURLLoader(urls=[result["link"]]).load()
+            llm_input += str(UnstructuredURLLoader(urls=[result["link"]]).load())
             # summary_chain = LLMChain(llm=summary_llm, prompt=summary_prompt)
             result["full_text"] = summary_llm.run(llm_input)
     return new_dict

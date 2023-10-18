@@ -60,14 +60,14 @@ def filtered_search(results):
             result.pop("about_page_link", None)
             result.pop("about_page_serpapi_link", None)
 
-            summary_llm = OpenAI(temperature=0.0, model='text-davinci-003')
+            summary_llm = OpenAI(temperature=0.0, model='gpt-3.5-turbo-16k-0613')
             llm_input = """Summarize this web page in less than 100 words.
 
             Web Page:
             """
             llm_input += str(UnstructuredURLLoader(urls=[result["link"]]).load())
             # summary_chain = LLMChain(llm=summary_llm, prompt=summary_prompt)
-            result["full_text"] = summary_llm.invoke(llm_input)
+            result["full_text"] = summary_llm(prompt=llm_input)
     return new_dict
 
 #this is the function that actually calls the serpapi library, with our whitelisted legal sites

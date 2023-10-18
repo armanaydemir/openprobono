@@ -43,21 +43,23 @@ langchain.debug = True
 
 from serpapi import GoogleSearch
 
-GoogleSearch.SERP_API_KEY = "5567e356a3e19133465bc68755a124268543a7dd0b2809d75b038797b43626ab"
+GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
 
 #this function filters the huge dict that serpapi returns to only include the results we want (not ads, etc)
 def filtered_search(results):
+    print(results)
+    print('^^ search results ^^')
     new_dict = {}
     # if('sports_results' in results):
     #     new_dict['sports_results'] = results['sports_results']
     if('organic_results' in results):
         new_dict['organic_results'] = results['organic_results']
-    for result in new_dict["organic_results"]:
-        result.pop("displayed_link", None)
-        result.pop("favicon", None)
-        result.pop("about_page_link", None)
-        result.pop("about_page_serpapi_link", None)
-        result["full_text"] = UnstructuredURLLoader(urls=[result["link"]]).load()
+        for result in new_dict["organic_results"]:
+            result.pop("displayed_link", None)
+            result.pop("favicon", None)
+            result.pop("about_page_link", None)
+            result.pop("about_page_serpapi_link", None)
+            result["full_text"] = UnstructuredURLLoader(urls=[result["link"]]).load()
     return new_dict
 
 #this is the function that actually calls the serpapi library, with our whitelisted legal sites

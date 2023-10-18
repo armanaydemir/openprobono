@@ -66,7 +66,7 @@ def filtered_search(results):
             Web Page:
             {input}"""
             summary_chain = LLMChain(llm=summary_llm, prompt=summary_prompt)
-            result["full_text"] = summary_chain.run(UnstructuredURLLoader(urls=[result["link"]]).load())
+            result["full_text"] = summary_chain.run(input=UnstructuredURLLoader(urls=[result["link"]]).load())
     return new_dict
 
 #this is the function that actually calls the serpapi library, with our whitelisted legal sites

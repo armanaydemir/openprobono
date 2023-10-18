@@ -12,7 +12,7 @@ from langchain.vectorstores import Vectara
 from langchain.vectorstores.vectara import VectaraRetriever
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
-from langchain.document_loaders import TextLoader
+from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain, LLMCheckerChain
 
@@ -57,6 +57,7 @@ def filtered_search(results):
         result.pop("favicon", None)
         result.pop("about_page_link", None)
         result.pop("about_page_serpapi_link", None)
+        result["full_text"] = UnstructuredURLLoader(urls=[result["link"]]).load()
     return new_dict
 
 #this is the function that actually calls the serpapi library, with our whitelisted legal sites

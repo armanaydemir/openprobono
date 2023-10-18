@@ -75,11 +75,11 @@ def general_search(q):
 
 #defining the tools available to the agent
 tools = [
-    Tool(
-        name="search",
-        func=general_search,
-        description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-    ),
+    # Tool(
+    #     name="search",
+    #     func=general_search,
+    #     description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
+    # ),
     Tool(
         name="government-search",
         func=gov_search,

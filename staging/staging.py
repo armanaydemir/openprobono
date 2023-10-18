@@ -61,7 +61,7 @@ def filtered_search(results):
             result.pop("about_page_serpapi_link", None)
 
             summary_llm = OpenAI(temperature=0.0, model='text-davinci-003')
-            llm_input = """Summarize this web page in less than 300 words.
+            llm_input = """Summarize this web page in less than 100 words.
 
             Web Page:
             """

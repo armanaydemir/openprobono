@@ -3,7 +3,6 @@ import random
 import time
 import os
 import json
-import sagemaker
 import logging
 import re
 
@@ -29,8 +28,7 @@ from abc import abstractmethod
 from typing import Any, List, Optional
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.utils import enforce_stop_tokens
-import boto3, time, os, uuid
-from botocore.exceptions import ClientError
+import time, os, uuid
 
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent, AgentOutputParser, LLMSingleActionAgent
 from langchain.llms import OpenAI
@@ -42,8 +40,9 @@ import langchain
 langchain.debug = True
 
 from serpapi import GoogleSearch
+from constants import serp_api_key
 
-GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
+GoogleSearch.SERP_API_KEY = serp_api_key
 
 #this function filters the huge dict that serpapi returns to only include the results we want (not ads, etc)
 def filtered_search(results):
@@ -331,4 +330,4 @@ with gr.Blocks(title="OpenProBono",
     
 demo.queue()
 
-demo.launch(root_path="/staging",server_port=7863,favicon_path="./missing.ico")
+demo.launch(share=True,favicon_path="./missing.ico")

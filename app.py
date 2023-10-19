@@ -11,6 +11,7 @@ from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from multiprocessing import Pool
 import os
+import re
 from serpapi import GoogleSearch
 import sys
 from typing import List, Union

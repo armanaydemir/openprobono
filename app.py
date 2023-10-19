@@ -7,7 +7,7 @@ from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import AIMessage, HumanMessage
+from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from multiprocessing import Pool
 import os
 from serpapi import GoogleSearch

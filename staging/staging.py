@@ -193,6 +193,19 @@ output_parser = CustomOutputParser()
 # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
 # too much safety, hurts accuracy
 
+ga_script = """
+async () => {
+    const script = document.createElement("script");
+    script.onload = () =>  console.log("tag manager loaded") ;
+    script.src = "https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ";
+    document.head.appendChild(script);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-MKDNM9G2PQ');
+}
+"""
+
 with gr.Blocks(title="OpenProBono",
     theme=gr.themes.Default(
         primary_hue=gr.themes.colors.indigo, 
@@ -327,6 +340,7 @@ with gr.Blocks(title="OpenProBono",
     #hitting enter and clicking submit for email
     email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False)
     email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
+    demo.load(None, None, None, _js=ga_script)
     
 demo.queue()
 

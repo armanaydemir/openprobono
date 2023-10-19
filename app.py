@@ -82,6 +82,8 @@ tools = [
         description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
     )
 ]
+tool_names = [tool.name for tool in tools]
+
 ##----------------------- end of tools -----------------------##
 
 ##----------------------- backend   (llm stuff)-----------------------##

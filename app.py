@@ -102,15 +102,36 @@ def openai_bot(history):
 ##----------------------- end of backend  (llm stuff)-----------------------##
 
 ##----------------------- frontend -----------------------##
+
+#script for google analytics
+ga_script = """
+async () => {
+    const script = document.createElement("script");
+    script.onload = () =>  console.log("tag manager loaded") ;
+    script.src = "https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ";
+    document.head.appendChild(script);
+
+    const script2 = document.createElement("script");
+    script2.onload = () => {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-MKDNM9G2PQ');
+    }
+    document.head.appendChild(script2);
+}
+"""
+
 with gr.Blocks(
-    title = "OpenProBono",
-    theme = gr.themes.Default(
-        primary_hue = gr.themes.colors.indigo, 
-        secondary_hue = gr.themes.colors.blue,
-        font = gr.themes.GoogleFont("Open Sans"),
-        radius_size = gr.themes.sizes.radius_lg,
+    title="OpenProBono",
+    theme=gr.themes.Default(
+        primary_hue=gr.themes.colors.indigo, 
+        secondary_hue=gr.themes.colors.blue,
+        font=gr.themes.GoogleFont("Open Sans"),
+        radius_size=gr.themes.sizes.radius_lg,
     ),
-    css = "footer {visibility: hidden}"
+    css="footer {visibility: hidden}",
+    analytics_enabled=False
     ) as app:
     
     def add_text(history, text):
@@ -166,6 +187,9 @@ with gr.Blocks(
     #hitting enter and clicking submit for email
     email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False)
     email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
+
+    #loading google analytics script
+    demo.load(None, None, None, _js=ga_script)
 ##----------------------- frontend -----------------------##
     
 app.queue()

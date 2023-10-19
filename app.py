@@ -88,9 +88,99 @@ bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
 
 #need a better way to store emails
 def print_email(email):
-        print(email)
-        print("^^ this is the email ^^")
-        return email
+    print(email)
+    print("^^ this is the email ^^")
+    return email
+
+#------- agent definition -------#
+# Set up the base template
+template = """Complete the user's request as best you can. You have access to the following tools:
+
+{tools}
+
+The following is the chat history so far:
+{memory}
+
+Use the following format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question, including your sources
+
+These were previous tasks you completed:
+
+
+
+Begin!
+
+{input}
+{agent_scratchpad}"""
+
+# Set up a prompt template
+class CustomPromptTemplate(BaseChatPromptTemplate):
+    # The template to use
+    template: str
+    # The list of tools available
+    tools: List[Tool]
+
+    def format_messages(self, **kwargs) -> str:
+        # Get the intermediate steps (AgentAction, Observation tuples)
+        # Format them in a particular way
+        intermediate_steps = kwargs.pop("intermediate_steps")
+        thoughts = ""
+        for action, observation in intermediate_steps:
+            thoughts += action.log
+            thoughts += f"\nObservation: {observation}\nThought: "
+        # Set the agent_scratchpad variable to that value
+        kwargs["agent_scratchpad"] = thoughts
+        # Create a tools variable from the list of tools provided
+        kwargs["tools"] = "\n".join([f"{tool.name}: {tool.description}" for tool in self.tools])
+        # Create a list of tool names for the tools provided
+        kwargs["tool_names"] = ", ".join([tool.name for tool in self.tools])
+        formatted = self.template.format(**kwargs)
+        return [HumanMessage(content=formatted)]
+    
+class CustomOutputParser(AgentOutputParser):
+    def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
+        # Check if agent should finish
+        if "Final Answer:" in llm_output:
+            return AgentFinish(
+                # Return values is generally always a dictionary with a single `output` key
+                # It is not recommended to try anything else at the moment :)
+                return_values={"output": llm_output.split("Final Answer:")[-1].strip()},
+                log=llm_output,
+            )
+        # Parse out the action and action input
+        regex = r"Action\s*\d*\s*:(.*?)\nAction\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+        match = re.search(regex, llm_output, re.DOTALL)
+        if not match:
+            # raise ValueError(f"Could not parse LLM output: `{llm_output}`")
+            return AgentFinish(
+                # Return values is generally always a dictionary with a single `output` key
+                # It is not recommended to try anything else at the moment :)
+                return_values={"output": llm_output.split("Final Answer:")[-1].strip()},
+                log=llm_output,
+            )
+        action = match.group(1).strip()
+        action_input = match.group(2)
+        # Return the action and action input
+        return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
+
+prompt = CustomPromptTemplate(
+    template=template,
+    tools=tools,
+    # This omits the `agent_scratchpad`, `tools`, and `tool_names` variables because those are generated dynamically
+    # This includes the `intermediate_steps` variable because that is needed
+    input_variables=["input", "intermediate_steps", "memory"]
+)
+
+output_parser = CustomOutputParser()
+#------- end of agent definition -------#
 
 def openai_bot(history):
     history_langchain_format = ChatMessageHistory()
@@ -100,21 +190,20 @@ def openai_bot(history):
         history_langchain_format.add_ai_message(ai)
     memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
 
-    system_message = 'You are a helpful AI assistant. '
-    #system_message += user_prompt
-    system_message += '. ALWAYS return a "SOURCES" part in your answer.'
     agent_kwargs = {
         "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
     }
-    agent = initialize_agent(
-        tools=tools,
-        llm=bot_llm,
-        agent=AgentType.OPENAI_FUNCTIONS,
-        verbose=True,
-        agent_kwargs=agent_kwargs,
-        memory=memory,
+    llm_chain = LLMChain(llm=gpt3_llm, prompt=prompt)
+    agent = LLMSingleActionAgent(
+        llm_chain=llm_chain,
+        output_parser=output_parser,
+        stop=["\nObservation:"],
+        allowed_tools=tool_names
     )
-    agent.agent.prompt.messages[0].content = system_message
+
+    agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
+    bot_message = agent_executor.run(history[-1][0])
+
     bot_message = agent.run(history[-1][0])
     history[-1][1] = bot_message
     yield history

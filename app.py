@@ -64,9 +64,8 @@ def process_search(results):
     # if('sports_results' in results):
     #     new_dict['sports_results'] = results['sports_results']
     if('organic_results' in results):
-        new_dict['organic_results'] = results['organic_results']
-        pool = Pool()
-        pool.map(search_helper_summarizer, new_dict["organic_results"])
+        pool = Pool(5)
+        new_dict['organic_results'] = pool.map(search_helper_summarizer, results['organic_results']])
 
     return new_dict
 
@@ -209,7 +208,6 @@ def openai_bot(history):
     agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
     bot_message = agent_executor.run(history[-1][0])
 
-    bot_message = agent.run(history[-1][0])
     history[-1][1] = bot_message
     yield history
 ##----------------------- end of backend  (llm stuff)-----------------------##

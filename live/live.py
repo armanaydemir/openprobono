@@ -5,7 +5,7 @@ import os
 import json
 import sagemaker
 
-from langchain.vectorstores import Vectara
+from langchain.vectorstores import Vectara, Chroma
 from langchain.vectorstores.vectara import VectaraRetriever
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage
@@ -15,7 +15,8 @@ from langchain.chains import ConversationalRetrievalChain, ConversationChain, LL
 
 from typing import Dict
 
-from langchain import PromptTemplate
+from langchain import PromptTemplate, SagemakerEndpoint
+from langchain.prompts import MessagesPlaceholder
 from langchain.llms.sagemaker_endpoint import LLMContentHandler
 
 # parts of a model: chat, bot
@@ -26,20 +27,31 @@ from abc import abstractmethod
 from typing import Any, List, Optional
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.utils import enforce_stop_tokens
+from langchain.llms.sagemaker_endpoint import SagemakerEndpoint
 import boto3, time, os, uuid
 from botocore.exceptions import ClientError
 
+from langchain.utilities import SerpAPIWrapper
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
 from langchain.llms import OpenAI
-from langchain.prompts import MessagesPlaceholder
+
+#web retriever
+from langchain.retrievers.web_research import WebResearchRetriever
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.utilities import GoogleSearchAPIWrapper
+
+from serpapi import GoogleSearch
+
+GoogleSearch.SERP_API_KEY = "5567e356a3e19133465bc68755a124268543a7dd0b2809d75b038797b43626ab"
 
 import langchain
 
 langchain.debug = True
 
-from serpapi import GoogleSearch
+# search = SerpAPIWrapper()
 
-GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
+#'sports_results'
+#'organic_results'
 
 def filtered_search(results):
     new_dict = {}
@@ -62,28 +74,29 @@ def general_search(q):
         }).get_dict())
 
 
-# system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
+
+system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
 # too much safety, hurts accuracy
 
-with gr.Blocks(title="OpenProBono",
-    theme=gr.themes.Default(
-        primary_hue=gr.themes.colors.indigo, 
-        secondary_hue=gr.themes.colors.blue,
-        font=gr.themes.GoogleFont("Open Sans"),
-        radius_size=gr.themes.sizes.radius_lg),
-        # .set(
-        #     button_primary_background_fill="*primary_200",
-        #     button_primary_background_fill_hover="*primary_300",
-        # ),
-    css="footer {visibility: hidden}"
-    ) as demo:
+
+with gr.Blocks(title="Workspace",
+    #font=gr.themes.GoogleFont("Open Sans"),
+    css="footer {visibility: hidden}") as demo:
+
+    # Vectorstore
+    vectorstore = Chroma(embedding_function=OpenAIEmbeddings(),persist_directory="./chroma_db_oai")
+
+    # Search 
+    search = GoogleSearchAPIWrapper()
 
     gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
 
-    def print_email(email):
-        print(email)
-        print("^^ this is the email ^^")
-        return email
+    # Initialize
+    web_research_retriever = WebResearchRetriever.from_llm(
+        vectorstore=vectorstore,
+        llm=gpt3_llm, 
+        search=search
+    )
     
     def add_text(history, text):
         history = history + [(text, None)]
@@ -97,8 +110,27 @@ with gr.Blocks(title="OpenProBono",
         history = history + [((file.name,), None)]
         return history
 
+    def web_research_bot(user_input):
+        # history_langchain_format = ChatMessageHistory()
+        # for i in range(0, len(history)-1):
+        #     (human, ai) = history[i]
+        #     history_langchain_format.add_user_message(human)
+        #     history_langchain_format.add_ai_message(ai)
+        # memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory", input_key='question', output_key='answer')
 
-    def openai_bot(history):
+
+        import logging
+        logging.basicConfig()
+        logging.getLogger("langchain.retrievers.web_research").setLevel(logging.INFO)
+        from langchain.chains import RetrievalQAWithSourcesChain
+        qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
+            llm=gpt3_llm,
+            retriever=web_research_retriever,
+        )
+        result = qa_chain({"question": user_input})
+        return result['answer'] + '\n' + result['sources']
+
+    def openai_bot(history, context, user_prompt):
         tools = [
             Tool(
                 name="search",
@@ -109,7 +141,12 @@ with gr.Blocks(title="OpenProBono",
                 name="government-search",
                 func=gov_search,
                 description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-            )
+            ),
+            # Tool(
+            #     name="search",
+            #     func=web_research_retriever.get_relevant_documents,
+            #     description="useful for when you need to answer questions you about recent events. You should ask targeted questions. Always cite your sources.",
+            # ),
         ]
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
@@ -117,12 +154,13 @@ with gr.Blocks(title="OpenProBono",
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
-
+        
         system_message = 'You are a helpful AI assistant. '
-        #system_message += user_prompt
+        system_message += user_prompt
         system_message += '. ALWAYS return a "SOURCES" part in your answer.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+            #"system_message": system_message,
         }
         agent = initialize_agent(
             tools=tools,
@@ -140,59 +178,64 @@ with gr.Blocks(title="OpenProBono",
         yield history
     
 
-
-    gr.Markdown("OpenProBono")
     with gr.Row():
         openai_chat = gr.Chatbot(
             [],
-            elem_id="chat",
+            elem_id="OpenProBono",
             label="OpenProBono",
-            show_label=True,
             #bubble_full_width=True,
             #avatar_images=(None, (os.path.join(os.path.dirname(__file__), "avatar.png"))),
         )
 
     with gr.Row():
+        contxt = gr.Textbox(
+            scale=4,
+            show_label=False,
+            placeholder="Enter any context you want the AI to reference", #, or upload an image",
+            container=False,
+            visible=False,
+        )
+
+    with gr.Row():
         txt = gr.Textbox(
             scale=4,
-            label="input",
             show_label=False,
             placeholder="Enter query", #, or upload an image",
             container=False,
         )
-        subbtn = gr.Button("Submit", variant="primary")
-        clearopenai = gr.ClearButton([txt, openai_chat])
+        subbtn = gr.Button("Submit")
         #btn = gr.UploadButton("📁", file_types=["text"])
 
-
+    with gr.Row():
+        clearopenai = gr.ClearButton([txt, openai_chat])
+    
     # file_msg = btn.upload(add_file, [openai, btn], [openai], queue=False).then(
     #     bot, openai, openai
     # )
-    with gr.Accordion("Details"):
-        with gr.Row():
-            emailtxt = gr.Textbox(
-                scale=4,
-                label="input",
-                show_label=False,
-                placeholder="Enter your email to sign up for updates", #, or upload an image",
-                container=False,
-            )
-            emailbtn = gr.Button("Submit")
-        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
+    with gr.Accordion("This is my workspace where I am doing live iterations."):
+        user_prompt = gr.Textbox(
+            scale=4,
+            show_label=False,
+            placeholder="Enter any additional prompt prefix for the AI", #, or upload an image",
+            container=False,
+        )
+        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates.")
+
 
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
-        openai_bot, [openai_chat], openai_chat
+        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
     )
+
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
-    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
-        openai_bot, [openai_chat], openai_chat
+    sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+        openai_bot, [openai_chat, contxt, user_prompt], openai_chat
     )
+
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
-    email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False)
-    email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
+
     
 demo.queue()
 
-demo.launch(root_path="/",favicon_path="./missing.ico")
+demo.launch(root_path="/wip",server_port=7861,favicon_path="./missing.ico")

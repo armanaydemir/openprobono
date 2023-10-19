@@ -10,7 +10,7 @@ from langchain.prompts import MessagesPlaceholder
 from langchain.schema import AIMessage, HumanMessage
 import os
 from serpapi import GoogleSearch
-
+import sys
 
 # two main components: chat, bot
 # - "___chat" is the actualy chat history / output on the screen
@@ -21,7 +21,6 @@ langchain.debug = True
 
 #manually set the api key for now
 GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
-
 
 ##----------------------- tools -----------------------##
 
@@ -194,4 +193,8 @@ with gr.Blocks(
     
 app.queue()
 
-app.launch(root_path="/",favicon_path="./missing.ico")
+#using command line arguments to set port and root path
+if(len(sys.argv) < 3):
+    app.launch(share=True, favicon_path="./missing.ico")
+else:
+    app.launch(root_path=sys.argv[1],server_port=sys.argv[2],favicon_path="./missing.ico")

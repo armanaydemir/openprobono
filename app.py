@@ -12,6 +12,7 @@ from multiprocessing import Pool
 import os
 from serpapi import GoogleSearch
 import sys
+from typing import List, Union
 
 # two main components: chat, bot
 # - "___chat" is the actualy chat history / output on the screen

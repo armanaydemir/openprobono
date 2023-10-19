@@ -1,12 +1,12 @@
 import gradio as gr
 import langchain
 from langchain import PromptTemplate
-from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
+from langchain.agents import AgentExecutor, AgentType, LLMSingleActionAgent, initialize_agent, Tool, ZeroShotAgent
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
-from langchain.prompts import MessagesPlaceholder
+from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import AIMessage, HumanMessage
 from multiprocessing import Pool
 import os

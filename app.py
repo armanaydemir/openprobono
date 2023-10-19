@@ -195,7 +195,7 @@ def openai_bot(history):
     agent_kwargs = {
         "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
     }
-    llm_chain = LLMChain(llm=gpt3_llm, prompt=prompt)
+    llm_chain = LLMChain(llm=bot_llm, prompt=prompt)
     agent = LLMSingleActionAgent(
         llm_chain=llm_chain,
         output_parser=output_parser,

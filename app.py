@@ -189,7 +189,7 @@ with gr.Blocks(
     email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
 
     #loading google analytics script
-    demo.load(None, None, None, _js=ga_script)
+    app.load(None, None, None, _js=ga_script)
 ##----------------------- frontend -----------------------##
     
 app.queue()

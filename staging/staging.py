@@ -199,10 +199,15 @@ async () => {
     script.onload = () =>  console.log("tag manager loaded") ;
     script.src = "https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ";
     document.head.appendChild(script);
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-MKDNM9G2PQ');
+
+    const script2 = document.createElement("script");
+    script2.onload = () => {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-MKDNM9G2PQ');
+    }
+    document.head.appendChild(script2);
 }
 """
 
@@ -212,7 +217,8 @@ with gr.Blocks(title="OpenProBono",
         secondary_hue=gr.themes.colors.blue,
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg),
-    css="footer {visibility: hidden}"
+    css="footer {visibility: hidden}",
+    analytics_enabled=False
     ) as demo:
 
     #here is where we actually define our llm

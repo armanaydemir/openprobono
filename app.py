@@ -16,7 +16,6 @@ from serpapi import GoogleSearch
 # - "___chat" is the actualy chat history / output on the screen
 # - "___bot" is the function which calls the llm endpoint with some prompts and context and langchain magic
 
-
 #makes it so it logs everything made by langchain basically
 langchain.debug = True
 
@@ -24,7 +23,7 @@ langchain.debug = True
 GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
 
 
-##Search Tool for Google
+##----------------------- tools -----------------------##
 
 #General Search (no filters)
 def general_search(q):
@@ -62,10 +61,13 @@ tools = [
         description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
     )
 ]
+##----------------------- end of tools -----------------------##
 
+##----------------------- backend   (llm stuff)-----------------------##
 #definition of llm used for bot
 bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
 
+#need a better way to store emails
 def print_email(email):
         print(email)
         print("^^ this is the email ^^")
@@ -97,7 +99,9 @@ def openai_bot(history):
     bot_message = agent.run(history[-1][0])
     history[-1][1] = bot_message
     yield history
+##----------------------- end of backend  (llm stuff)-----------------------##
 
+##----------------------- frontend -----------------------##
 with gr.Blocks(
     title = "OpenProBono",
     theme = gr.themes.Default(
@@ -162,6 +166,7 @@ with gr.Blocks(
     #hitting enter and clicking submit for email
     email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False)
     email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
+##----------------------- frontend -----------------------##
     
 app.queue()
 

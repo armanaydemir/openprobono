@@ -3,7 +3,7 @@ import langchain
 from langchain import PromptTemplate
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
 from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import TextLoader
+from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.prompts import MessagesPlaceholder

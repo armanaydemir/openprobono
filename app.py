@@ -197,4 +197,4 @@ app.queue()
 if(len(sys.argv) < 3):
     app.launch(share=True, favicon_path="./missing.ico")
 else:
-    app.launch(root_path=sys.argv[1],server_port=sys.argv[2],favicon_path="./missing.ico")
+    app.launch(root_path=sys.argv[1], server_port=int(sys.argv[2]), favicon_path="./missing.ico")

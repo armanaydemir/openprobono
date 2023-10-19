@@ -34,17 +34,31 @@ def general_search(q):
 #Government Search (filtered on whitelist sites of relialbe sources for government))
 def gov_search(q):
     return filtered_search(GoogleSearch({
-        'q': "site:*.gov " + q,
+        'q': "site:*.gov | site:*scholar.google.com | site:*case.law | site:*findlaw.com " + q,
         'num': 5
         }).get_dict())
 
 #Filter search results retured by serpapi to only include relavant results
 def filtered_search(results):
     new_dict = {}
-    if('sports_results' in results):
-        new_dict['sports_results'] = results['sports_results']
+    # if('sports_results' in results):
+    #     new_dict['sports_results'] = results['sports_results']
     if('organic_results' in results):
         new_dict['organic_results'] = results['organic_results']
+        for result in new_dict["organic_results"]:
+            result.pop("displayed_link", None)
+            result.pop("favicon", None)
+            result.pop("about_page_link", None)
+            result.pop("about_page_serpapi_link", None)
+
+            summary_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-16k-0613')
+            llm_input = """Summarize this web page in less than 100 words.
+
+            Web Page:
+            """
+            llm_input += str(UnstructuredURLLoader(urls=[result["link"]]).load())
+            result["page_summary"] = summary_llm.predict(llm_input)
+
     return new_dict
 
 #Definition and descriptions of tools aviailable to the bot

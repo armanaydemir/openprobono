@@ -1,46 +1,49 @@
 import gradio as gr
-import random
-import time
 import os
-import json
-import sagemaker
 
-from langchain.vectorstores import Vectara
-from langchain.vectorstores.vectara import VectaraRetriever
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import AIMessage, HumanMessage
-from langchain.document_loaders import TextLoader
-from langchain.memory import ConversationBufferMemory, ChatMessageHistory
-from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain, LLMCheckerChain
-
-from typing import Dict
-
-from langchain import PromptTemplate
-from langchain.llms.sagemaker_endpoint import LLMContentHandler
-
-# parts of a model: chat, bot
-# - chat is the actualy chat history / output on the screen
-# - bot calls the llm endpoint with some prompts and context and langchain magic
-
-from abc import abstractmethod
-from typing import Any, List, Optional
-from langchain.callbacks.manager import CallbackManagerForLLMRun
-from langchain.llms.utils import enforce_stop_tokens
-import boto3, time, os, uuid
-from botocore.exceptions import ClientError
-
-from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
-from langchain.llms import OpenAI
-from langchain.prompts import MessagesPlaceholder
 
 import langchain
-
-langchain.debug = True
+from langchain import PromptTemplate
+from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
+from langchain.chat_models import ChatOpenAI
+from langchain.document_loaders import TextLoader
+from langchain.llms import OpenAI
+from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain.prompts import MessagesPlaceholder
+from langchain.schema import AIMessage, HumanMessage
 
 from serpapi import GoogleSearch
 
+
+# two main components: chat, bot
+# - "___chat" is the actualy chat history / output on the screen
+# - "___bot" is the function which calls the llm endpoint with some prompts and context and langchain magic
+
+
+#makes it so it logs everything made by langchain basically
+langchain.debug = True
+
+#manually set the api key for now
 GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
 
+
+##Search Tool for Google
+
+#General Search (no filters)
+def general_search(q):
+    return filtered_search(GoogleSearch({
+        'q': q,
+        'num': 5
+        }).get_dict())
+
+#Government Search (filtered on whitelist sites of relialbe sources for government))
+def gov_search(q):
+    return filtered_search(GoogleSearch({
+        'q': "site:*.gov " + q,
+        'num': 5
+        }).get_dict())
+
+#Filter Search results retured by serpapi to only include relavant results
 def filtered_search(results):
     new_dict = {}
     if('sports_results' in results):
@@ -49,36 +52,33 @@ def filtered_search(results):
         new_dict['organic_results'] = results['organic_results']
     return new_dict
 
-def gov_search(q):
-    return filtered_search(GoogleSearch({
-        'q': "site:*.gov " + q,
-        'num': 5
-        }).get_dict())
+#Definition and descriptions of tools aviailable to the bot
+tools = [
+    Tool(
+        name="search",
+        func=general_search,
+        description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
+    ),
+    Tool(
+        name="government-search",
+        func=gov_search,
+        description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+    )
+]
 
-def general_search(q):
-    return filtered_search(GoogleSearch({
-        'q': q,
-        'num': 5
-        }).get_dict())
+with gr.Blocks(
+    title = "OpenProBono",
+    theme = gr.themes.Default(
+        primary_hue = gr.themes.colors.indigo, 
+        secondary_hue = gr.themes.colors.blue,
+        font = gr.themes.GoogleFont("Open Sans"),
+        radius_size =g r.themes.sizes.radius_lg,
+    ),
+    css = "footer {visibility: hidden}"
+    ) as app:
 
-
-# system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
-# too much safety, hurts accuracy
-
-with gr.Blocks(title="OpenProBono",
-    theme=gr.themes.Default(
-        primary_hue=gr.themes.colors.indigo, 
-        secondary_hue=gr.themes.colors.blue,
-        font=gr.themes.GoogleFont("Open Sans"),
-        radius_size=gr.themes.sizes.radius_lg),
-        # .set(
-        #     button_primary_background_fill="*primary_200",
-        #     button_primary_background_fill_hover="*primary_300",
-        # ),
-    css="footer {visibility: hidden}"
-    ) as demo:
-
-    gpt3_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
+    #definition of llm used for bot
+    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
 
     def print_email(email):
         print(email)
@@ -99,18 +99,6 @@ with gr.Blocks(title="OpenProBono",
 
 
     def openai_bot(history):
-        tools = [
-            Tool(
-                name="search",
-                func=general_search,
-                description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-            ),
-            Tool(
-                name="government-search",
-                func=gov_search,
-                description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-            )
-        ]
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -126,15 +114,13 @@ with gr.Blocks(title="OpenProBono",
         }
         agent = initialize_agent(
             tools=tools,
-            llm=gpt3_llm,
+            llm=bot_llm,
             agent=AgentType.OPENAI_FUNCTIONS,
             verbose=True,
             agent_kwargs=agent_kwargs,
             memory=memory,
         )
         agent.agent.prompt.messages[0].content = system_message
-        print(agent.agent.prompt)
-        print("^^ this agent here^^")
         bot_message = agent.run(history[-1][0])
         history[-1][1] = bot_message
         yield history
@@ -193,6 +179,6 @@ with gr.Blocks(title="OpenProBono",
     email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False)
     email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
     
-demo.queue()
+app.queue()
 
-demo.launch(root_path="/",favicon_path="./missing.ico")
+app.launch(root_path="/",favicon_path="./missing.ico")

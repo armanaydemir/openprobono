@@ -242,12 +242,11 @@ with gr.Blocks(
             [],
             elem_id="chat",
             label="OpenProBono",
-            show_label=True,
+            show_label=False,
         )
 
     with gr.Row(equal_height=False):
         with gr.Column(scale=5):
-            prompts = gr.Button("Example Prompts", scale=0, elem_id='open-popup')
             txt = gr.Textbox(
                 label="input",
                 show_label=False,
@@ -255,6 +254,7 @@ with gr.Blocks(
                 container=False,
                 elem_id='userquery'
             )
+            prompts = gr.Button("Example Prompts", scale=0, elem_id='open-popup')
         with gr.Column():
             subbtn = gr.Button("Submit", variant="primary")
             clearopenai = gr.ClearButton([txt, openai_chat])

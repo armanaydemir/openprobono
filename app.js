@@ -112,6 +112,7 @@ async () => {
                 var selectedQuestion = this.innerHTML;
                 var textInput = document.querySelector("#userquery textarea");
                 textInput.value = selectedQuestion;
+                textInput.dispatchEvent(new Event("input", { bubbles: true }));
                 closePopup.click();  // Close the popup after selecting a question
             });
             categoryPanel.appendChild(question);

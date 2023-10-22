@@ -214,24 +214,11 @@ def openai_bot(history):
 
 ##----------------------- frontend -----------------------##
 
-#script for google analytics
-ga_script = """
-async () => {
-    const script = document.createElement("script");
-    script.onload = () =>  console.log("tag manager loaded") ;
-    script.src = "https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ";
-    document.head.appendChild(script);
+with open('app.js', 'r') as jsfile:
+    custom_js = jsfile.read()
 
-    const script2 = document.createElement("script");
-    script2.onload = () => {
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-MKDNM9G2PQ');
-    }
-    document.head.appendChild(script2);
-}
-"""
+with open('app.css', 'r') as cssfile:
+    custom_css = cssfile.read()
 
 with gr.Blocks(
     title="OpenProBono",
@@ -241,7 +228,7 @@ with gr.Blocks(
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg,
     ),
-    css="footer {visibility: hidden}",
+    css=custom_css,
     analytics_enabled=False
     ) as app:
     
@@ -258,16 +245,19 @@ with gr.Blocks(
             show_label=True,
         )
 
-    with gr.Row():
-        txt = gr.Textbox(
-            scale=4,
-            label="input",
-            show_label=False,
-            placeholder="Enter query",
-            container=False,
-        )
-        subbtn = gr.Button("Submit", variant="primary")
-        clearopenai = gr.ClearButton([txt, openai_chat])
+    with gr.Row(equal_height=False):
+        with gr.Column(scale=5):
+            prompts = gr.Button("Example Prompts", scale=0, elem_id='open-popup')
+            txt = gr.Textbox(
+                label="input",
+                show_label=False,
+                placeholder="Enter a message",
+                container=False,
+                elem_id='userquery'
+            )
+        with gr.Column():
+            subbtn = gr.Button("Submit", variant="primary")
+            clearopenai = gr.ClearButton([txt, openai_chat])
        
     with gr.Accordion("Details"):
         with gr.Row():
@@ -277,6 +267,7 @@ with gr.Blocks(
                 show_label=False,
                 placeholder="Enter your email to sign up for updates",
                 container=False,
+                type="email"
             )
             emailbtn = gr.Button("Submit")
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
@@ -300,7 +291,7 @@ with gr.Blocks(
     email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
 
     #loading google analytics script
-    app.load(None, None, None, _js=ga_script)
+    app.load(None, None, None, _js=custom_js)
 ##----------------------- frontend -----------------------##
     
 app.queue()

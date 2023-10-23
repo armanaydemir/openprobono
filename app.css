@@ -89,4 +89,5 @@ footer {
   padding: 6px 0 6px 16px;
   border-radius: 10px;
   width: calc(100% - 18px);
+  cursor: pointer;
 }

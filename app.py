@@ -107,7 +107,7 @@ ga_script = """
 async () => {
     const script = document.createElement("script");
     script.onload = () =>  console.log("tag manager loaded") ;
-    script.src = "https://www.googletagmanager.com/gtag/js?id=G-MKDNM9G2PQ";
+    script.src = "https://www.googletagmanager.com/gtag/js?id=G-1FSYB9S6X6";
     document.head.appendChild(script);
 
     const script2 = document.createElement("script");
@@ -115,7 +115,7 @@ async () => {
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-MKDNM9G2PQ');
+        gtag('config', 'G-1FSYB9S6X6');
     }
     document.head.appendChild(script2);
 }

@@ -121,6 +121,13 @@ async () => {
 }
 """
 
+#script for email submission event google analytics
+email_ga_script = """
+gtag('event', 'email_submission', {
+    'event_category': 'email',
+});
+"""
+
 with gr.Blocks(
     title="OpenProBono",
     theme=gr.themes.Default(
@@ -184,8 +191,8 @@ with gr.Blocks(
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
     #hitting enter and clicking submit for email
-    email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False)
-    email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False)
+    email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
+    email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

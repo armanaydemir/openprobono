@@ -7,12 +7,12 @@ async () => {
     document.head.appendChild(scriptLoadGtm);
 
     const scriptRunGtm = document.createElement("script");
-    scriptRunGtm.onload = () => {
+    scriptRunGtm.innerHTML = `
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-MKDNM9G2PQ');
-    }
+    `;
     document.head.appendChild(scriptRunGtm);
 
     // dynamically resize user input textbox
@@ -149,9 +149,9 @@ async () => {
                 this.classList.toggle("active");
                 var panel = this.nextElementSibling;
                 if (panel.style.maxHeight) {
-                panel.style.maxHeight = null;
+                    panel.style.maxHeight = null;
                 } else {
-                panel.style.maxHeight = panel.scrollHeight + "px";
+                    panel.style.maxHeight = panel.scrollHeight + "px";
                 } 
             });
         }

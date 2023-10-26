@@ -111,12 +111,12 @@ async () => {
     document.head.appendChild(script);
 
     const script2 = document.createElement("script");
-    script2.innerHTML = () => {
+    script2.innerHTML = `
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-1FSYB9S6X6');
-    }
+    `;
     document.head.appendChild(script2);
 }
 """

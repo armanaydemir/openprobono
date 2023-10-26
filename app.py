@@ -123,9 +123,11 @@ async () => {
 
 #script for email submission event google analytics
 email_ga_script = """
-gtag('event', 'email_submission', {
-    'event_category': 'email',
-});
+(email) => {
+    gtag('event', 'email_submission', {
+      'email': email,
+    })
+}
 """
 
 with gr.Blocks(

@@ -124,11 +124,10 @@ async () => {
 #script for email submission event google analytics
 email_ga_script = """
 (email) => {
-    console.log("email loaded")
-    console.log(email)
     gtag('event', 'email_submission', {
       'email': email,
     })
+    return email
 }
 """
 

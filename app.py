@@ -71,10 +71,6 @@ def print_email(email):
     print(email)
     print("^^ this is the email ^^")
     return email
-    
-def print_chat(params):
-    print(params)
-    print("^^ this is the params ^^")
 
 def openai_bot(history):
     history_langchain_format = ChatMessageHistory()
@@ -204,7 +200,6 @@ with gr.Blocks(
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
     
     #corresponds to clicking the submit button
-    subbtn.click(print_chat, [openai_chat, txt], [openai_chat, txt], _js=chat_ga_script)
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
         lambda x: x, [openai_chat], [openai_chat], _js=chat_ga_script
     ).then(

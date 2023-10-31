@@ -133,11 +133,11 @@ email_ga_script = """
 
 #script for chat submission event google analytics
 chat_ga_script = """
-(openai_chat, txt) => {
+(chat) => {
     gtag('event', 'chat_submission', {
-      'chat_history_length': openai_chat.length,
+      'chat_history_length': chat.length,
     })
-    return (openai_chat, txt)
+    return chat
 }
 """
 
@@ -201,9 +201,9 @@ with gr.Blocks(
     
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
-        lambda x: x, openai_chat, openai_chat, _js=chat_ga_script
+        lambda x: x, [openai_chat], [openai_chat], _js=chat_ga_script
     ).then(
-        openai_bot, openai_chat, openai_chat
+        openai_bot, [openai_chat], [openai_chat]
     )
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 

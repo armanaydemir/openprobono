@@ -68,13 +68,14 @@ bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
 
 #need a better way to store emails
 def print_email(email):
-        print(email)
-        print("^^ this is the email ^^")
-        return email
+    print(email)
+    print("^^ this is the email ^^")
+    return email
+def print_chat(params):
+    print(params)
+    print("^^ this is the params ^^")
 
 def openai_bot(history):
-    print(history)
-    print("^^ this is the history ^^")
     history_langchain_format = ChatMessageHistory()
     for i in range(0, len(history)-1):
         (human, ai) = history[i]
@@ -194,14 +195,14 @@ with gr.Blocks(
     #connecting frontend interactions to backend
 
     #corresponds to enter in the text box
-    txt.submit(_js=chat_ga_script)
+    txt.submit(print_chat, _js=chat_ga_script)
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
         openai_bot, [openai_chat], openai_chat
     )
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
     
     #corresponds to clicking the submit button
-    subbtn.click(_js=chat_ga_script)
+    subbtn.click(print_chat, _js=chat_ga_script)
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
         openai_bot, [openai_chat], openai_chat
     )

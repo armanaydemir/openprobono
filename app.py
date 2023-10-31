@@ -71,6 +71,7 @@ def print_email(email):
     print(email)
     print("^^ this is the email ^^")
     return email
+    
 def print_chat(params):
     print(params)
     print("^^ this is the params ^^")
@@ -195,14 +196,14 @@ with gr.Blocks(
     #connecting frontend interactions to backend
 
     #corresponds to enter in the text box
-    txt.submit(print_chat, _js=chat_ga_script)
+    txt.submit(print_chat, [openai_chat, txt], [openai_chat, txt], _js=chat_ga_script)
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
         openai_bot, [openai_chat], openai_chat
     )
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
     
     #corresponds to clicking the submit button
-    subbtn.click(print_chat, _js=chat_ga_script)
+    subbtn.click(print_chat, [openai_chat, txt], [openai_chat, txt], _js=chat_ga_script)
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
         openai_bot, [openai_chat], openai_chat
     )

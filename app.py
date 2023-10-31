@@ -192,12 +192,13 @@ with gr.Blocks(
             )
             emailbtn = gr.Button("Submit")
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
-
+    
     #connecting frontend interactions to backend
 
     #corresponds to enter in the text box
-    txt.submit(print_chat, [openai_chat, txt], [openai_chat, txt], _js=chat_ga_script)
     txt_msg = txt.submit(add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+        lambda x: x, [openai_chat], [openai_chat], _js=chat_ga_script
+    ).then(
         openai_bot, [openai_chat], openai_chat
     )
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
@@ -205,6 +206,8 @@ with gr.Blocks(
     #corresponds to clicking the submit button
     subbtn.click(print_chat, [openai_chat, txt], [openai_chat, txt], _js=chat_ga_script)
     sub_msg = subbtn.click(add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
+        lambda x: x, [openai_chat], [openai_chat], _js=chat_ga_script
+    ).then(
         openai_bot, [openai_chat], openai_chat
     )
     sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)

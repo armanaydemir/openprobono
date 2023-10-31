@@ -153,7 +153,9 @@ with gr.Blocks(
     analytics_enabled=False
     ) as app:
     
-    def add_text(history, text):
+    def add_text(params):
+        history = params[0]
+        text = params[1]
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
 

@@ -134,6 +134,7 @@ email_ga_script = """
 #script for chat submission event google analytics
 chat_ga_script = """
 (chat) => {
+    console.log("chat loaded") 
     gtag('event', 'chat_submission')
     return chat
 }

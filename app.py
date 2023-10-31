@@ -64,7 +64,7 @@ tools = [
 
 ##----------------------- backend   (llm stuff)-----------------------##
 #definition of llm used for bot
-bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
+bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613',  request_timeout=60*2)
 
 #need a better way to store emails
 def print_email(email):
@@ -136,7 +136,7 @@ chat_ga_script = """
 (chat) => {
     console.log(chat)
     console.log("chat loaded") 
-    gtag('event', 'chat_submission',  {
+    gtag('event', 'chat_submission', {
       'chat_length': chat.length,
     })
     return chat

@@ -73,6 +73,8 @@ def print_email(email):
         return email
 
 def openai_bot(history):
+    print(history)
+    print("^^ this is the history ^^")
     history_langchain_format = ChatMessageHistory()
     for i in range(0, len(history)-1):
         (human, ai) = history[i]
@@ -154,6 +156,8 @@ with gr.Blocks(
     ) as app:
     
     def add_text(params):
+        print(params)
+        print("^^ this is the params ^^")
         history = params[0]
         text = params[1]
         history = history + [(text, None)]

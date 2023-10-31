@@ -191,14 +191,14 @@ with gr.Blocks(
     #connecting frontend interactions to backend
 
     #corresponds to enter in the text box
-    txt_msg = txt.submit(None, [openai_chat], openai_chat, _js=chat_ga_script).then(
+    txt_msg = txt.submit(lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
         openai_bot, [openai_chat], [openai_chat]
     )
     txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
     
     #corresponds to clicking the submit button
-    sub_msg = subbtn.click(None, [openai_chat], openai_chat, _js=chat_ga_script).then(
+    sub_msg = subbtn.click(lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
         openai_bot, [openai_chat], [openai_chat]
     )

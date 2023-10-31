@@ -135,7 +135,9 @@ email_ga_script = """
 chat_ga_script = """
 (chat) => {
     console.log("chat loaded") 
-    gtag('event', 'chat_submission')
+    gtag('event', 'chat_submission',  {
+      'chat_length': chat.length,
+    })
     return chat
 }
 """

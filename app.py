@@ -143,6 +143,56 @@ chat_ga_script = """
 }
 """
 
+example_prompts = {
+    "Criminal Law": [
+        "What are my rights if I'm arrested?",
+        "Is it legal to record a conversation without consent?",
+        "What is the difference between assault and battery?",
+        "Can you explain the process of plea bargaining?"
+    ],
+    "Family Law": [
+        "How is child custody determined during a divorce?",
+        "What are the legal requirements for getting a restraining order?",
+        "What's the process for adoption in my state?",
+        "How does spousal support work?"
+    ],
+    "Employment Law": [
+        "Can my employer fire me without cause?",
+        "What should I do if I'm facing workplace discrimination?",
+        "What are the wage and hour laws in my jurisdiction?",
+        "How do I negotiate a fair employment contract?"
+    ],
+    "Intellectual Property Law": [
+        "How do I copyright my creative work?",
+        "What is the process for filing a patent?",
+        "What constitutes fair use in copyright law?",
+        "How can I protect my company's trademarks?"
+    ],
+    "Real Estate Law": [
+        "What's the process for buying a home and closing a deal?",
+        "Can you explain zoning laws and their impact on property use?",
+        "What are my rights and responsibilities as a tenant?",
+        "How do easements work in real estate?"
+    ],
+    "Personal Injury Law": [
+        "What should I do if I've been injured in a car accident?",
+        "How can I prove liability in a personal injury case?",
+        "What damages can I claim in a personal injury lawsuit?",
+        "What is the statute of limitations for personal injury claims?"
+    ],
+    "Immigration Law": [
+        "What are the different types of U.S. visas available?",
+        "How does the naturalization process work for permanent residents?",
+        "Can you explain the asylum application process?",
+        "What are the consequences of overstaying a visa?"
+    ]
+}
+
+def toggle_examples(state):
+    state = not state
+    return gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = state), state
+
+
 with gr.Blocks(
     title="OpenProBono",
     theme=gr.themes.Default(
@@ -160,7 +210,7 @@ with gr.Blocks(
         return history, gr.update(value="", interactive=False)
 
     gr.Markdown("OpenProBono")
-    with gr.Row():
+    with gr.Row() as chat_row:
         openai_chat = gr.Chatbot(
             [],
             elem_id="chat",
@@ -168,7 +218,7 @@ with gr.Blocks(
             show_label=True,
         )
 
-    with gr.Row():
+    with gr.Row() as input_row:
         txt = gr.Textbox(
             scale=4,
             label="input",
@@ -178,19 +228,31 @@ with gr.Blocks(
         )
         subbtn = gr.Button("Submit", variant="primary")
         clearopenai = gr.ClearButton([txt, openai_chat])
-       
-    with gr.Accordion("Details"):
-        with gr.Row():
-            emailtxt = gr.Textbox(
-                scale=4,
-                label="input",
-                show_label=False,
-                placeholder="Enter your email to sign up for updates",
-                container=False,
-            )
-            emailbtn = gr.Button("Submit")
+    
+    examples_state = gr.State(False)
+    example_prompts_button = gr.Button("Example Prompts")
+
+    with gr.Accordion("Details", open=False) as details_accordion:
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
     
+    with gr.Row() as email_row:    
+        emailtxt = gr.Textbox(
+            scale=4,
+            label="input",
+            show_label=False,
+            placeholder="Enter your email to sign up for updates",
+            container=False,
+        )
+        emailbtn = gr.Button("Submit")
+
+    with gr.Column(visible=False) as examples_box:
+        for prompt in example_prompts:
+            with gr.Accordion(prompt, open=False):
+                for example in example_prompts[prompt]:
+                    exbtn = gr.Button(example)
+                    exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_state], [chat_row, details_accordion, email_row, examples_box, examples_state])
+    
+    example_prompts_button.click(toggle_examples, [examples_state], [chat_row, details_accordion, email_row, examples_box, examples_state])
     #connecting frontend interactions to backend
 
     #corresponds to enter in the text box

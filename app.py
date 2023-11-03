@@ -263,25 +263,34 @@ with gr.Blocks(
                     exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
     
     #connecting frontend interactions to backend
-    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
+    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown])
 
     #corresponds to enter in the text box
-    txt_msg = txt.submit(lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script).then(
+    txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
+        add_text, [openai_chat, txt], [openai_chat, txt], queue=False
+    ).then(
         hide_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False
     ).then(
-        add_text, [openai_chat, txt], [openai_chat, txt], queue=False).then(
+        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
+    ).then(
         openai_bot, [openai_chat], [openai_chat]
+    ).then(
+        lambda: gr.update(interactive=True), None, [txt], queue=False
     )
-    txt_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
+
     
     #corresponds to clicking the submit button
-    sub_msg = subbtn.click(lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script).then(
+    sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
+        add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit"
+    ).then(
         hide_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False
     ).then(
-        add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit").then(
+        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
+    ).then(
         openai_bot, [openai_chat], [openai_chat]
+    ).then(
+        lambda: gr.update(interactive=True), None, [txt], queue=False
     )
-    sub_msg.then(lambda: gr.update(interactive=True), None, [txt], queue=False)
 
     #hitting enter and clicking submit for email
     email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)

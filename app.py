@@ -263,7 +263,7 @@ with gr.Blocks(
                     exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
     
     #connecting frontend interactions to backend
-    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown])
+    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     #corresponds to enter in the text box
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(

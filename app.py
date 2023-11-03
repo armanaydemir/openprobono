@@ -64,7 +64,7 @@ tools = [
 
 ##----------------------- backend   (llm stuff)-----------------------##
 #definition of llm used for bot
-bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613',  request_timeout=60*2)
+bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
 
 #need a better way to store emails
 def print_email(email):

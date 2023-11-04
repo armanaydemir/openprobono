@@ -76,7 +76,7 @@ bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeou
 
 #need a better way to store emails
 def print_email(email):
-    doc_ref = db.collection("emails").document(email)
+    doc_ref = db.collection("emails").document(email).set({"email": email})
     print(email)
     print("^^ this is the email ^^")
     return email

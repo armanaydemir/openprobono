@@ -1,3 +1,6 @@
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 import gradio as gr
 import langchain
 from langchain import PromptTemplate
@@ -23,9 +26,6 @@ langchain.debug = True
 GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
 
 #setting up firebase
-import firebase_admin
-from firebase_admin import firestore
-
 cred = credentials.Certificate("../../creds.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()

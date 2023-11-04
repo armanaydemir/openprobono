@@ -26,8 +26,8 @@ GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde5899
 import firebase_admin
 from firebase_admin import firestore
 
-# Application Default credentials are automatically created.
-app = firebase_admin.initialize_app()
+cred = credentials.Certificate("../../creds.json")
+firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 ##----------------------- tools -----------------------##

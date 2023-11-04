@@ -22,6 +22,14 @@ langchain.debug = True
 #manually set the api key for now
 GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
 
+#setting up firebase
+import firebase_admin
+from firebase_admin import firestore
+
+# Application Default credentials are automatically created.
+app = firebase_admin.initialize_app()
+db = firestore.client()
+
 ##----------------------- tools -----------------------##
 
 #General Search (no filters)
@@ -68,6 +76,7 @@ bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeou
 
 #need a better way to store emails
 def print_email(email):
+    doc_ref = db.collection("emails").document(email)
     print(email)
     print("^^ this is the email ^^")
     return email

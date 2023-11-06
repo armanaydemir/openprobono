@@ -1,3 +1,6 @@
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 import gradio as gr
 import langchain
 from langchain import PromptTemplate
@@ -11,6 +14,7 @@ from langchain.schema import AIMessage, HumanMessage
 import os
 from serpapi import GoogleSearch
 import sys
+import uuid
 
 # two main components: chat, bot
 # - "___chat" is the actualy chat history / output on the screen
@@ -21,6 +25,18 @@ langchain.debug = True
 
 #manually set the api key for now
 GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
+
+#setting up firebase
+cred = credentials.Certificate("../../creds.json")
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+if(len(sys.argv) < 3):
+    root_path = "gradio_"
+elif(sys.argv[1] == "/"):
+    root_path = ""
+else:
+    root_path = sys.argv[1][1:] + "_"
 
 ##----------------------- tools -----------------------##
 
@@ -65,12 +81,6 @@ tools = [
 ##----------------------- backend   (llm stuff)-----------------------##
 #definition of llm used for bot
 bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
-
-#need a better way to store emails
-def print_email(email):
-    print(email)
-    print("^^ this is the email ^^")
-    return email
 
 def openai_bot(history):
     history_langchain_format = ChatMessageHistory()
@@ -203,6 +213,9 @@ def hide_examples(state):
     button_text = "Example Prompts"
     return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = state), state
 
+def get_uuid_id():
+    return str(uuid.uuid4())
+
 with gr.Blocks(
     title="OpenProBono",
     theme=gr.themes.Default(
@@ -214,7 +227,9 @@ with gr.Blocks(
     css="footer {visibility: hidden}",
     analytics_enabled=False
     ) as app:
-    
+
+    session = gr.State(get_uuid_id)
+
     def add_text(history, text):
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
@@ -265,6 +280,20 @@ with gr.Blocks(
     #connecting frontend interactions to backend
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
+    #storing conversations and emails in firebase
+    def store_conversation(conversation, session):
+        doc_ref = db.collection(root_path + "conversations").document(session)
+        new_convo = []
+        for i in range(0, len(conversation)):
+            (human, ai) = conversation[i]
+            new_convo.append({"human": human, "ai": ai})
+        doc_ref.set({"conversation": new_convo})
+
+    def store_email(email, session):
+        doc_ref = db.collection(root_path + "emails").document(session).set({"email": email})
+        print(email)
+        print("^^ this is the email ^^")
+
     #corresponds to enter in the text box
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False
@@ -276,9 +305,8 @@ with gr.Blocks(
         openai_bot, [openai_chat], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    )
+    ).then(store_conversation, [openai_chat, session], None, queue=False)
 
-    
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit"
@@ -290,11 +318,17 @@ with gr.Blocks(
         openai_bot, [openai_chat], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
+    ).then(
+        store_conversation, [openai_chat, session], None, queue=False
     )
 
     #hitting enter and clicking submit for email
-    email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
-    email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
+    email_txt = emailtxt.submit(lambda x: x, [emailtxt], [emailtxt], queue=False, _js=email_ga_script).then(
+        store_email, [emailtxt, session], None, queue=False
+    )
+    email_msg = emailbtn.click(store_email, [emailtxt, session], None, queue=False, _js=email_ga_script).then(
+        store_email, [emailtxt, session], None, queue=False
+    )
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

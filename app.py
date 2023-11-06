@@ -279,7 +279,7 @@ with gr.Blocks(
     def store_conversation(conversation):
         doc_ref = db.collection("conversations").document(uuid)
         new_convo = []
-        for i in range(0, len(conversation)-1):
+        for i in range(0, len(conversation)):
             (human, ai) = conversation[i]
             new_convo.append({"human": human, "ai": ai})
         doc_ref.set({"conversation": new_convo})

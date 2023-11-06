@@ -14,6 +14,7 @@ from langchain.schema import AIMessage, HumanMessage
 import os
 from serpapi import GoogleSearch
 import sys
+import uuid
 
 # two main components: chat, bot
 # - "___chat" is the actualy chat history / output on the screen
@@ -74,7 +75,6 @@ tools = [
 #definition of llm used for bot
 bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
 
-#need a better way to store emails
 def print_email(email):
     doc_ref = db.collection("emails").document(email).set({"email": email})
     print(email)
@@ -224,6 +224,8 @@ with gr.Blocks(
     analytics_enabled=False
     ) as app:
     
+    uuid = str(uuid.uuid4())
+
     def add_text(history, text):
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
@@ -274,6 +276,11 @@ with gr.Blocks(
     #connecting frontend interactions to backend
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
+    def store_conversation(conversation):
+        doc_ref = db.collection("conversations").document(uuid)
+        doc_ref.set({"conversation": conversation})
+        return conversation
+
     #corresponds to enter in the text box
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False
@@ -285,9 +292,8 @@ with gr.Blocks(
         openai_bot, [openai_chat], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    )
+    ).then(store_conversation, [openai_chat], [openai_chat], queue=False)
 
-    
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit"
@@ -299,7 +305,7 @@ with gr.Blocks(
         openai_bot, [openai_chat], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    )
+    ).then(store_conversation, [openai_chat], [openai_chat], queue=False)
 
     #hitting enter and clicking submit for email
     email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)

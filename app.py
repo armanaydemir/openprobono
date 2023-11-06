@@ -218,7 +218,7 @@ with gr.Blocks(
     analytics_enabled=False
     ) as app:
     
-    session = gr.State(str(uuid.uuid4))
+    session = gr.State(str(uuid.uuid4()))
 
     def add_text(history, text):
         history = history + [(text, None)]

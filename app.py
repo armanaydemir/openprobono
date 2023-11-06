@@ -271,7 +271,7 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     def store_conversation(conversation):
-        doc_ref = db.collection("conversations").document(session)
+        doc_ref = db.collection("conversations").document(session.value)
         new_convo = []
         for i in range(0, len(conversation)):
             (human, ai) = conversation[i]
@@ -280,7 +280,7 @@ with gr.Blocks(
         return conversation
 
     def store_email(email):
-        doc_ref = db.collection("emails").document(session).set({"email": email})
+        doc_ref = db.collection("emails").document(session.value).set({"email": email})
         print(email)
         print("^^ this is the email ^^")
         return email

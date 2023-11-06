@@ -278,6 +278,7 @@ with gr.Blocks(
 
     def store_conversation(conversation):
         doc_ref = db.collection("conversations").document(uuid)
+        flat_list = [item for sublist in conversation for item in sublist]
         doc_ref.set({"conversation": conversation})
         return conversation
 

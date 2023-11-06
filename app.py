@@ -31,6 +31,13 @@ cred = credentials.Certificate("../../creds.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+if(len(sys.argv) < 3):
+    root_path = "gradio_"
+elif(sys.argv[1] == "/"):
+    root_path = ""
+else:
+    root_path = sys.argv[1][1:] + "_"
+
 ##----------------------- tools -----------------------##
 
 #General Search (no filters)
@@ -273,8 +280,9 @@ with gr.Blocks(
     #connecting frontend interactions to backend
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
+    #storing conversations and emails in firebase
     def store_conversation(conversation, session):
-        doc_ref = db.collection("conversations").document(session)
+        doc_ref = db.collection(root_path + "conversations").document(session)
         new_convo = []
         for i in range(0, len(conversation)):
             (human, ai) = conversation[i]
@@ -282,8 +290,7 @@ with gr.Blocks(
         doc_ref.set({"conversation": new_convo})
 
     def store_email(email, session):
-        print("email")
-        doc_ref = db.collection("emails").document(session).set({"email": email})
+        doc_ref = db.collection(root_path + "emails").document(session).set({"email": email})
         print(email)
         print("^^ this is the email ^^")
 

@@ -282,6 +282,7 @@ with gr.Blocks(
         doc_ref.set({"conversation": new_convo})
 
     def store_email(email, session):
+        print("email")
         doc_ref = db.collection("emails").document(session).set({"email": email})
         print(email)
         print("^^ this is the email ^^")
@@ -310,11 +311,17 @@ with gr.Blocks(
         openai_bot, [openai_chat], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, session], None, queue=False)
+    ).then(
+        store_conversation, [openai_chat, session], None, queue=False
+    )
 
     #hitting enter and clicking submit for email
-    email_txt = emailtxt.submit(store_email, [emailtxt, session], None, queue=False, _js=email_ga_script)
-    email_msg = emailbtn.click(store_email, [emailtxt, session], None, queue=False, _js=email_ga_script)
+    email_txt = emailtxt.submit(lambda x: x, [emailtxt], [emailtxt], queue=False, _js=email_ga_script).then(
+        store_email, [emailtxt, session], None, queue=False
+    )
+    email_msg = emailbtn.click(store_email, [emailtxt, session], None, queue=False, _js=email_ga_script).then(
+        store_email, [emailtxt, session], None, queue=False
+    )
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

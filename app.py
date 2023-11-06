@@ -278,8 +278,11 @@ with gr.Blocks(
 
     def store_conversation(conversation):
         doc_ref = db.collection("conversations").document(uuid)
-        flat_list = [item for sublist in conversation for item in sublist]
-        doc_ref.set({"conversation": conversation})
+        new_convo = []
+        for i in range(0, len(conversation)-1):
+            (human, ai) = conversation[i]
+            new_convo.append({"human": human, "ai": ai})
+        doc_ref.set({"conversation": new_convo})
         return conversation
 
     #corresponds to enter in the text box

@@ -75,12 +75,6 @@ tools = [
 #definition of llm used for bot
 bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
 
-def print_email(email):
-    doc_ref = db.collection("emails").document(email).set({"email": email})
-    print(email)
-    print("^^ this is the email ^^")
-    return email
-
 def openai_bot(history):
     history_langchain_format = ChatMessageHistory()
     for i in range(0, len(history)-1):
@@ -224,7 +218,7 @@ with gr.Blocks(
     analytics_enabled=False
     ) as app:
     
-    uuid = str(uuid.uuid4())
+    session = gr.State(str(uuid.uuid4))
 
     def add_text(history, text):
         history = history + [(text, None)]
@@ -277,13 +271,19 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     def store_conversation(conversation):
-        doc_ref = db.collection("conversations").document(uuid)
+        doc_ref = db.collection("conversations").document(session)
         new_convo = []
         for i in range(0, len(conversation)):
             (human, ai) = conversation[i]
             new_convo.append({"human": human, "ai": ai})
         doc_ref.set({"conversation": new_convo})
         return conversation
+
+    def store_email(email):
+        doc_ref = db.collection("emails").document(session).set({"email": email})
+        print(email)
+        print("^^ this is the email ^^")
+        return email
 
     #corresponds to enter in the text box
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -312,8 +312,8 @@ with gr.Blocks(
     ).then(store_conversation, [openai_chat], [openai_chat], queue=False)
 
     #hitting enter and clicking submit for email
-    email_txt = emailtxt.submit(print_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
-    email_msg = emailbtn.click(print_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
+    email_txt = emailtxt.submit(store_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
+    email_msg = emailbtn.click(store_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

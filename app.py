@@ -217,8 +217,6 @@ with gr.Blocks(
     css="footer {visibility: hidden}",
     analytics_enabled=False
     ) as app:
-    
-    session = gr.State(uuid.uuid4())
 
     def add_text(history, text):
         history = history + [(text, None)]
@@ -232,6 +230,7 @@ with gr.Blocks(
             label="OpenProBono",
             show_label=True,
         )
+        session = str(uuid.uuid4())
 
     with gr.Row() as input_row:
         txt = gr.Textbox(
@@ -271,19 +270,17 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     def store_conversation(conversation):
-        doc_ref = db.collection("conversations").document(str(session.value))
+        doc_ref = db.collection("conversations").document(session)
         new_convo = []
         for i in range(0, len(conversation)):
             (human, ai) = conversation[i]
             new_convo.append({"human": human, "ai": ai})
         doc_ref.set({"conversation": new_convo})
-        return conversation
 
     def store_email(email):
-        doc_ref = db.collection("emails").document(str(session.value)).set({"email": email})
+        doc_ref = db.collection("emails").document(session).set({"email": email})
         print(email)
         print("^^ this is the email ^^")
-        return email
 
     #corresponds to enter in the text box
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -296,7 +293,7 @@ with gr.Blocks(
         openai_bot, [openai_chat], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat], [openai_chat], queue=False)
+    ).then(store_conversation, [openai_chat], None, queue=False)
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -309,11 +306,11 @@ with gr.Blocks(
         openai_bot, [openai_chat], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat], [openai_chat], queue=False)
+    ).then(store_conversation, [openai_chat], None, queue=False)
 
     #hitting enter and clicking submit for email
-    email_txt = emailtxt.submit(store_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
-    email_msg = emailbtn.click(store_email, [emailtxt], [emailtxt], queue=False, _js=email_ga_script)
+    email_txt = emailtxt.submit(store_email, [emailtxt], None, queue=False, _js=email_ga_script)
+    email_msg = emailbtn.click(store_email, [emailtxt], None, queue=False, _js=email_ga_script)
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

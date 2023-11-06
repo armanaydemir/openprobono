@@ -206,6 +206,9 @@ def hide_examples(state):
     button_text = "Example Prompts"
     return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = state), state
 
+def get_uuid_id():
+    return str(uuid.uuid4())
+
 with gr.Blocks(
     title="OpenProBono",
     theme=gr.themes.Default(
@@ -218,7 +221,7 @@ with gr.Blocks(
     analytics_enabled=False
     ) as app:
 
-    session = gr.State(str(uuid.uuid4()))
+    session = gr.State(get_uuid_id())
 
     def add_text(history, text):
         history = history + [(text, None)]

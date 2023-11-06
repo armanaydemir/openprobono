@@ -218,6 +218,8 @@ with gr.Blocks(
     analytics_enabled=False
     ) as app:
 
+    session = gr.State(str(uuid.uuid4()))
+
     def add_text(history, text):
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
@@ -230,7 +232,6 @@ with gr.Blocks(
             label="OpenProBono",
             show_label=True,
         )
-        session = gr.State(str(uuid.uuid4()))
 
     with gr.Row() as input_row:
         txt = gr.Textbox(

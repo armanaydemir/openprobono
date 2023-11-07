@@ -266,7 +266,8 @@ with gr.Blocks(
             scale=4,
             label="Enter list of whitelisted urls for search with google syntax",
             show_label=True,
-            container=False,
+            container=True,
+            interactive=True,
         )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
     
@@ -277,6 +278,7 @@ with gr.Blocks(
             show_label=False,
             placeholder="Enter your email to sign up for updates",
             container=False,
+            type="email",
         )
         emailbtn = gr.Button("Submit")
 

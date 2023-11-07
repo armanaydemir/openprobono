@@ -39,78 +39,6 @@ elif(sys.argv[1] == "/"):
 else:
     root_path = sys.argv[1][1:] + "_"
 
-##----------------------- tools -----------------------##
-
-#General Search (no filters)
-def general_search(q):
-    return filtered_search(GoogleSearch({
-        'q': q,
-        'num': 5
-        }).get_dict())
-
-#Government Search (filtered on whitelist sites of relialbe sources for government))
-def gov_search(q):
-    return filtered_search(GoogleSearch({
-        'q': "site:*.gov " + q,
-        'num': 5
-        }).get_dict())
-
-#Filter search results retured by serpapi to only include relavant results
-def filtered_search(results):
-    new_dict = {}
-    if('sports_results' in results):
-        new_dict['sports_results'] = results['sports_results']
-    if('organic_results' in results):
-        new_dict['organic_results'] = results['organic_results']
-    return new_dict
-
-#Definition and descriptions of tools aviailable to the bot
-tools = [
-    Tool(
-        name="search",
-        func=general_search,
-        description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-    ),
-    Tool(
-        name="government-search",
-        func=gov_search,
-        description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-    )
-]
-##----------------------- end of tools -----------------------##
-
-##----------------------- backend   (llm stuff)-----------------------##
-#definition of llm used for bot
-bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
-
-def openai_bot(history):
-    history_langchain_format = ChatMessageHistory()
-    for i in range(0, len(history)-1):
-        (human, ai) = history[i]
-        history_langchain_format.add_user_message(human)
-        history_langchain_format.add_ai_message(ai)
-    memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
-
-    system_message = 'You are a helpful AI assistant. '
-    #system_message += user_prompt
-    system_message += '. ALWAYS return a "SOURCES" part in your answer.'
-    agent_kwargs = {
-        "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
-    }
-    agent = initialize_agent(
-        tools=tools,
-        llm=bot_llm,
-        agent=AgentType.OPENAI_FUNCTIONS,
-        verbose=True,
-        agent_kwargs=agent_kwargs,
-        memory=memory,
-    )
-    agent.agent.prompt.messages[0].content = system_message
-    bot_message = agent.run(history[-1][0])
-    history[-1][1] = bot_message
-    yield history
-##----------------------- end of backend  (llm stuff)-----------------------##
-
 ##----------------------- frontend -----------------------##
 
 #script for google analytics
@@ -292,6 +220,78 @@ with gr.Blocks(
     #connecting frontend interactions to backend
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
+    ##----------------------- tools -----------------------##
+
+    #General Search (no filters)
+    def general_search(q):
+        return filtered_search(GoogleSearch({
+            'q': q,
+            'num': 5
+            }).get_dict())
+
+    #Government Search (filtered on whitelist sites of reliable sources for government))
+    def gov_search(q):
+        return filtered_search(GoogleSearch({
+            'q': urltxt + " " + q,
+            'num': 5
+            }).get_dict())
+
+    #Filter search results retured by serpapi to only include relavant results
+    def filtered_search(results):
+        new_dict = {}
+        if('sports_results' in results):
+            new_dict['sports_results'] = results['sports_results']
+        if('organic_results' in results):
+            new_dict['organic_results'] = results['organic_results']
+        return new_dict
+
+    #Definition and descriptions of tools aviailable to the bot
+    tools = [
+        Tool(
+            name="search",
+            func=general_search,
+            description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
+        ),
+        Tool(
+            name="government-search",
+            func=gov_search,
+            description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+        )
+    ]
+    ##----------------------- end of tools -----------------------##
+
+    ##----------------------- backend   (llm stuff)-----------------------##
+    #definition of llm used for bot
+    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
+
+    def openai_bot(history):
+        history_langchain_format = ChatMessageHistory()
+        for i in range(0, len(history)-1):
+            (human, ai) = history[i]
+            history_langchain_format.add_user_message(human)
+            history_langchain_format.add_ai_message(ai)
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+
+        system_message = 'You are a helpful AI assistant. '
+        #system_message += user_prompt
+        system_message += '. ALWAYS return a "SOURCES" part in your answer.'
+        agent_kwargs = {
+            "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+        }
+        agent = initialize_agent(
+            tools=tools,
+            llm=bot_llm,
+            agent=AgentType.OPENAI_FUNCTIONS,
+            verbose=True,
+            agent_kwargs=agent_kwargs,
+            memory=memory,
+        )
+        agent.agent.prompt.messages[0].content = system_message
+        bot_message = agent.run(history[-1][0])
+        history[-1][1] = bot_message
+        yield history
+    ##----------------------- end of backend  (llm stuff)-----------------------##
+    
     #storing conversations and emails in firebase
     def store_conversation(conversation, session):
         doc_ref = db.collection(root_path + "conversations").document(session)

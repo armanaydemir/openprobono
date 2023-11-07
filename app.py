@@ -220,59 +220,59 @@ with gr.Blocks(
     #connecting frontend interactions to backend
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
-    ##----------------------- tools -----------------------##
-
-    #General Search (no filters)
-    def general_search(q):
-        return filtered_search(GoogleSearch({
-            'q': q,
-            'num': 5
-            }).get_dict())
-
-    #Government Search (filtered on whitelist sites of reliable sources for government))
-    def gov_search(q):
-        print(urltxt.value + " " + q)
-        print("^^gov search^^")
-        return filtered_search(GoogleSearch({
-            'q': urltxt.value + " " + q,
-            'num': 5
-            }).get_dict())
-
-    #Filter search results retured by serpapi to only include relavant results
-    def filtered_search(results):
-        new_dict = {}
-        if('sports_results' in results):
-            new_dict['sports_results'] = results['sports_results']
-        if('organic_results' in results):
-            new_dict['organic_results'] = results['organic_results']
-        return new_dict
-
-    #Definition and descriptions of tools aviailable to the bot
-    tools = [
-        Tool(
-            name="search",
-            func=general_search,
-            description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-        ),
-        Tool(
-            name="government-search",
-            func=gov_search,
-            description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-        )
-    ]
-    ##----------------------- end of tools -----------------------##
-
     ##----------------------- backend   (llm stuff)-----------------------##
     #definition of llm used for bot
     bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
 
-    def openai_bot(history):
+    def openai_bot(history, urltxt):
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+
+        ##----------------------- tools -----------------------##
+
+        #General Search (no filters)
+        def general_search(q):
+            return filtered_search(GoogleSearch({
+                'q': q,
+                'num': 5
+                }).get_dict())
+
+        #Government Search (filtered on whitelist sites of reliable sources for government))
+        def gov_search(q):
+            print(urltxt + " " + q)
+            print("^^gov search^^")
+            return filtered_search(GoogleSearch({
+                'q': urltxt + " " + q,
+                'num': 5
+                }).get_dict())
+
+        #Filter search results retured by serpapi to only include relavant results
+        def filtered_search(results):
+            new_dict = {}
+            if('sports_results' in results):
+                new_dict['sports_results'] = results['sports_results']
+            if('organic_results' in results):
+                new_dict['organic_results'] = results['organic_results']
+            return new_dict
+
+        #Definition and descriptions of tools aviailable to the bot
+        tools = [
+            Tool(
+                name="search",
+                func=general_search,
+                description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
+            ),
+            Tool(
+                name="government-search",
+                func=gov_search,
+                description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+            )
+        ]
+        ##----------------------- end of tools -----------------------##
 
         system_message = 'You are a helpful AI assistant. '
         #system_message += user_prompt
@@ -316,7 +316,7 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat], [openai_chat]
+        openai_bot, [openai_chat, urltxt], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(store_conversation, [openai_chat, session], None, queue=False)
@@ -329,7 +329,7 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat], [openai_chat]
+        openai_bot, [openai_chat, urltxt], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(

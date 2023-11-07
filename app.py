@@ -261,6 +261,13 @@ with gr.Blocks(
     example_prompts_button = gr.Button("Example Prompts")
 
     with gr.Accordion("Details", open=False) as details_accordion:
+        urltxt = gr.Textbox(
+            value="site:*.gov | site:*.edu",
+            scale=4,
+            label="Enter list of whitelisted urls for search with google syntax",
+            show_label=True,
+            container=False,
+        )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
     
     with gr.Row() as email_row:    

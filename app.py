@@ -231,6 +231,8 @@ with gr.Blocks(
 
     #Government Search (filtered on whitelist sites of reliable sources for government))
     def gov_search(q):
+        print(urltxt + " " + q)
+        print("^^gov search^^")
         return filtered_search(GoogleSearch({
             'q': urltxt + " " + q,
             'num': 5
@@ -291,7 +293,7 @@ with gr.Blocks(
         history[-1][1] = bot_message
         yield history
     ##----------------------- end of backend  (llm stuff)-----------------------##
-    
+
     #storing conversations and emails in firebase
     def store_conversation(conversation, session):
         doc_ref = db.collection(root_path + "conversations").document(session)

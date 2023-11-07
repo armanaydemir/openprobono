@@ -1,3 +1,4 @@
+from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -31,6 +32,7 @@ cred = credentials.Certificate("../../creds.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+#setting up root path for firebase db purposes
 if(len(sys.argv) < 3):
     root_path = "gradio_"
 elif(sys.argv[1] == "/"):
@@ -200,14 +202,16 @@ example_prompts = {
 
 def toggle_examples(state):
     state = not state
-    #if examples being shown
+    #if examples are to be shown
     if(state):
         button_text = "Back"
+    #if examples are to be hidden
     else:
         button_text = "Example Prompts"
     return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = state), state
 
 def hide_examples(state):
+    #if examples are currently shown, change state
     if(state):
         state = not state
     button_text = "Example Prompts"
@@ -287,10 +291,10 @@ with gr.Blocks(
         for i in range(0, len(conversation)):
             (human, ai) = conversation[i]
             new_convo.append({"human": human, "ai": ai})
-        doc_ref.set({"conversation": new_convo})
+        doc_ref.set({"conversation": new_convo, 'timestamp': str(datetime.now())})
 
     def store_email(email, session):
-        doc_ref = db.collection(root_path + "emails").document(session).set({"email": email})
+        doc_ref = db.collection(root_path + "emails").document(session).set({"email": email, 'timestamp': str(datetime.now())})
         print(email)
         print("^^ this is the email ^^")
 

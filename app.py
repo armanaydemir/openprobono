@@ -231,10 +231,10 @@ with gr.Blocks(
 
     #Government Search (filtered on whitelist sites of reliable sources for government))
     def gov_search(q):
-        print(urltxt + " " + q)
+        print(urltxt.value + " " + q)
         print("^^gov search^^")
         return filtered_search(GoogleSearch({
-            'q': urltxt + " " + q,
+            'q': urltxt.value + " " + q,
             'num': 5
             }).get_dict())
 

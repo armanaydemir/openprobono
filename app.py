@@ -1,4 +1,3 @@
-from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -291,10 +290,10 @@ with gr.Blocks(
         for i in range(0, len(conversation)):
             (human, ai) = conversation[i]
             new_convo.append({"human": human, "ai": ai})
-        doc_ref.set({"conversation": new_convo, 'timestamp': str(datetime.now())})
+        doc_ref.set({"conversation": new_convo, 'timestamp': firestore.SERVER_TIMESTAMP})
 
     def store_email(email, session):
-        doc_ref = db.collection(root_path + "emails").document(session).set({"email": email, 'timestamp': str(datetime.now())})
+        doc_ref = db.collection(root_path + "emails").document(session).set({"email": email, 'timestamp': firestore.SERVER_TIMESTAMP})
         print(email)
         print("^^ this is the email ^^")
 

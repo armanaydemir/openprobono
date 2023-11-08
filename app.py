@@ -300,7 +300,7 @@ with gr.Blocks(
     def store_conversation(conversation, urltxt, session):
         (human, ai) = conversation[-1]
         data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp':  firestore.SERVER_TIMESTAMP}
-        db.collection(root_path + "conversations").document(session).collection('conversations').document("search" + str(len(conversation))).set(data)
+        db.collection(root_path + "conversations").document(session).collection('conversations').document("msg" + str(len(conversation))).set(data)
 
     def store_email(email, session):
         doc_ref = db.collection(root_path + "emails").document(session).set({"email": email, 'timestamp': firestore.SERVER_TIMESTAMP})

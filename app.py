@@ -331,7 +331,7 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, urltxt], [openai_chat]
+        openai_bot, [openai_chat, urltxt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(

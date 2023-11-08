@@ -321,7 +321,7 @@ with gr.Blocks(
         openai_bot, [openai_chat, urltxt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, session], None, queue=False)
+    ).then(store_conversation, [openai_chat, urltxt, session], None, queue=False)
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -335,7 +335,7 @@ with gr.Blocks(
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(
-        store_conversation, [openai_chat, session], None, queue=False
+        store_conversation, [openai_chat, urltxt, session], None, queue=False
     )
 
     #hitting enter and clicking submit for email

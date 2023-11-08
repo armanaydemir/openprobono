@@ -236,6 +236,7 @@ with gr.Blocks(
 
         #General Search (no filters)
         def general_search(q):
+            timestamp = firestore.Timestamp.now()
             data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
             doc_ref = db.collection(root_path + "search").document(session)
             doc_ref.update({"searches": firestore.ArrayUnion([data])})
@@ -246,7 +247,8 @@ with gr.Blocks(
 
         #Government Search (filtered on whitelist sites of reliable sources for government))
         def gov_search(q):
-            data = {"search": urltxt + " " + q, 'timestamp': firestore.SERVER_TIMESTAMP}
+            timestamp = firestore.Timestamp.now()
+            data = {"search": urltxt + " " + q, 'timestamp': timestamp}
             doc_ref = db.collection(root_path + "search").document(session)
             doc_ref.update({"searches": firestore.ArrayUnion([data])})
             return filtered_search(GoogleSearch({
@@ -301,7 +303,8 @@ with gr.Blocks(
     #storing conversations and emails in firebase
     def store_conversation(conversation, urltxt, session):
         (human, ai) = conversation[-1]
-        data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp': firestore.SERVER_TIMESTAMP}
+        timestamp = firestore.Timestamp.now()
+        data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp': timestamp}
         doc_ref = db.collection(root_path + "conversations").document(session)
         doc_ref.update({"conversation": firestore.ArrayUnion([data])})
 

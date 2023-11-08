@@ -224,7 +224,7 @@ with gr.Blocks(
     #definition of llm used for bot
     bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
 
-    def openai_bot(history, urltxt):
+    def openai_bot(history, urltxt, session):
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -236,6 +236,9 @@ with gr.Blocks(
 
         #General Search (no filters)
         def general_search(q):
+            data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
+            doc_ref = db.collection(root_path + "search").document(session)
+            doc_ref.update({"searches": firestore.ArrayUnion([data])})
             return filtered_search(GoogleSearch({
                 'q': q,
                 'num': 5
@@ -243,8 +246,9 @@ with gr.Blocks(
 
         #Government Search (filtered on whitelist sites of reliable sources for government))
         def gov_search(q):
-            print(urltxt + " " + q)
-            print("^^gov search^^")
+            data = {"search": urltxt + " " + q, 'timestamp': firestore.SERVER_TIMESTAMP}
+            doc_ref = db.collection(root_path + "search").document(session)
+            doc_ref.update({"searches": firestore.ArrayUnion([data])})
             return filtered_search(GoogleSearch({
                 'q': urltxt + " " + q,
                 'num': 5
@@ -295,13 +299,11 @@ with gr.Blocks(
     ##----------------------- end of backend  (llm stuff)-----------------------##
 
     #storing conversations and emails in firebase
-    def store_conversation(conversation, session):
+    def store_conversation(conversation, urltxt, session):
+        (human, ai) = conversation[-1]
+        data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp': firestore.SERVER_TIMESTAMP}
         doc_ref = db.collection(root_path + "conversations").document(session)
-        new_convo = []
-        for i in range(0, len(conversation)):
-            (human, ai) = conversation[i]
-            new_convo.append({"human": human, "ai": ai})
-        doc_ref.set({"conversation": new_convo, 'timestamp': firestore.SERVER_TIMESTAMP})
+        doc_ref.update({"conversation": firestore.ArrayUnion([data])})
 
     def store_email(email, session):
         doc_ref = db.collection(root_path + "emails").document(session).set({"email": email, 'timestamp': firestore.SERVER_TIMESTAMP})
@@ -316,7 +318,7 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, urltxt], [openai_chat]
+        openai_bot, [openai_chat, urltxt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(store_conversation, [openai_chat, session], None, queue=False)

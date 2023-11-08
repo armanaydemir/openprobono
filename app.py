@@ -39,78 +39,6 @@ elif(sys.argv[1] == "/"):
 else:
     root_path = sys.argv[1][1:] + "_"
 
-##----------------------- tools -----------------------##
-
-#General Search (no filters)
-def general_search(q):
-    return filtered_search(GoogleSearch({
-        'q': q,
-        'num': 5
-        }).get_dict())
-
-#Government Search (filtered on whitelist sites of relialbe sources for government))
-def gov_search(q):
-    return filtered_search(GoogleSearch({
-        'q': "site:*.gov " + q,
-        'num': 5
-        }).get_dict())
-
-#Filter search results retured by serpapi to only include relavant results
-def filtered_search(results):
-    new_dict = {}
-    if('sports_results' in results):
-        new_dict['sports_results'] = results['sports_results']
-    if('organic_results' in results):
-        new_dict['organic_results'] = results['organic_results']
-    return new_dict
-
-#Definition and descriptions of tools aviailable to the bot
-tools = [
-    Tool(
-        name="search",
-        func=general_search,
-        description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-    ),
-    Tool(
-        name="government-search",
-        func=gov_search,
-        description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-    )
-]
-##----------------------- end of tools -----------------------##
-
-##----------------------- backend   (llm stuff)-----------------------##
-#definition of llm used for bot
-bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
-
-def openai_bot(history):
-    history_langchain_format = ChatMessageHistory()
-    for i in range(0, len(history)-1):
-        (human, ai) = history[i]
-        history_langchain_format.add_user_message(human)
-        history_langchain_format.add_ai_message(ai)
-    memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
-
-    system_message = 'You are a helpful AI assistant. '
-    #system_message += user_prompt
-    system_message += '. ALWAYS return a "SOURCES" part in your answer.'
-    agent_kwargs = {
-        "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
-    }
-    agent = initialize_agent(
-        tools=tools,
-        llm=bot_llm,
-        agent=AgentType.OPENAI_FUNCTIONS,
-        verbose=True,
-        agent_kwargs=agent_kwargs,
-        memory=memory,
-    )
-    agent.agent.prompt.messages[0].content = system_message
-    bot_message = agent.run(history[-1][0])
-    history[-1][1] = bot_message
-    yield history
-##----------------------- end of backend  (llm stuff)-----------------------##
-
 ##----------------------- frontend -----------------------##
 
 #script for google analytics
@@ -261,6 +189,14 @@ with gr.Blocks(
     example_prompts_button = gr.Button("Example Prompts")
 
     with gr.Accordion("Details", open=False) as details_accordion:
+        urltxt = gr.Textbox(
+            value="site:*.gov | site:*.edu",
+            scale=4,
+            label="Enter list of whitelisted urls for search with google syntax",
+            show_label=True,
+            container=True,
+            interactive=True,
+        )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
     
     with gr.Row() as email_row:    
@@ -270,6 +206,7 @@ with gr.Blocks(
             show_label=False,
             placeholder="Enter your email to sign up for updates",
             container=False,
+            type="email",
         )
         emailbtn = gr.Button("Submit")
 
@@ -283,14 +220,87 @@ with gr.Blocks(
     #connecting frontend interactions to backend
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
+    ##----------------------- backend   (llm stuff)-----------------------##
+    #definition of llm used for bot
+    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
+
+    def openai_bot(history, urltxt, session):
+        history_langchain_format = ChatMessageHistory()
+        for i in range(0, len(history)-1):
+            (human, ai) = history[i]
+            history_langchain_format.add_user_message(human)
+            history_langchain_format.add_ai_message(ai)
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+
+        ##----------------------- tools -----------------------##
+
+        #General Search (no filters)
+        def general_search(q):
+            data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
+            db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
+            return filtered_search(GoogleSearch({
+                'q': q,
+                'num': 5
+                }).get_dict())
+
+        #Government Search (filtered on whitelist sites of reliable sources for government))
+        def gov_search(q):
+            data = {"search": urltxt + " " + q, 'timestamp': firestore.SERVER_TIMESTAMP}
+            db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
+            return filtered_search(GoogleSearch({
+                'q': urltxt + " " + q,
+                'num': 5
+                }).get_dict())
+
+        #Filter search results retured by serpapi to only include relavant results
+        def filtered_search(results):
+            new_dict = {}
+            if('sports_results' in results):
+                new_dict['sports_results'] = results['sports_results']
+            if('organic_results' in results):
+                new_dict['organic_results'] = results['organic_results']
+            return new_dict
+
+        #Definition and descriptions of tools aviailable to the bot
+        tools = [
+            Tool(
+                name="search",
+                func=general_search,
+                description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
+            ),
+            Tool(
+                name="government-search",
+                func=gov_search,
+                description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+            )
+        ]
+        ##----------------------- end of tools -----------------------##
+
+        system_message = 'You are a helpful AI assistant. '
+        #system_message += user_prompt
+        system_message += '. ALWAYS return a "SOURCES" part in your answer.'
+        agent_kwargs = {
+            "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+        }
+        agent = initialize_agent(
+            tools=tools,
+            llm=bot_llm,
+            agent=AgentType.OPENAI_FUNCTIONS,
+            verbose=True,
+            agent_kwargs=agent_kwargs,
+            memory=memory,
+        )
+        agent.agent.prompt.messages[0].content = system_message
+        bot_message = agent.run(history[-1][0])
+        history[-1][1] = bot_message
+        yield history
+    ##----------------------- end of backend  (llm stuff)-----------------------##
+
     #storing conversations and emails in firebase
-    def store_conversation(conversation, session):
-        doc_ref = db.collection(root_path + "conversations").document(session)
-        new_convo = []
-        for i in range(0, len(conversation)):
-            (human, ai) = conversation[i]
-            new_convo.append({"human": human, "ai": ai})
-        doc_ref.set({"conversation": new_convo, 'timestamp': firestore.SERVER_TIMESTAMP})
+    def store_conversation(conversation, urltxt, session):
+        (human, ai) = conversation[-1]
+        data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp':  firestore.SERVER_TIMESTAMP}
+        db.collection(root_path + "conversations").document(session).collection('conversations').document("msg" + str(len(conversation))).set(data)
 
     def store_email(email, session):
         doc_ref = db.collection(root_path + "emails").document(session).set({"email": email, 'timestamp': firestore.SERVER_TIMESTAMP})
@@ -305,10 +315,10 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat], [openai_chat]
+        openai_bot, [openai_chat, urltxt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, session], None, queue=False)
+    ).then(store_conversation, [openai_chat, urltxt, session], None, queue=False)
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -318,11 +328,11 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat], [openai_chat]
+        openai_bot, [openai_chat, urltxt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(
-        store_conversation, [openai_chat, session], None, queue=False
+        store_conversation, [openai_chat, urltxt, session], None, queue=False
     )
 
     #hitting enter and clicking submit for email

@@ -236,10 +236,8 @@ with gr.Blocks(
 
         #General Search (no filters)
         def general_search(q):
-            timestamp = firestore.Timestamp.now()
             data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
-            doc_ref = db.collection(root_path + "search").document(session)
-            doc_ref.update({"searches": firestore.ArrayUnion([data])})
+            db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return filtered_search(GoogleSearch({
                 'q': q,
                 'num': 5
@@ -247,10 +245,8 @@ with gr.Blocks(
 
         #Government Search (filtered on whitelist sites of reliable sources for government))
         def gov_search(q):
-            timestamp = firestore.Timestamp.now()
-            data = {"search": urltxt + " " + q, 'timestamp': timestamp}
-            doc_ref = db.collection(root_path + "search").document(session)
-            doc_ref.update({"searches": firestore.ArrayUnion([data])})
+            data = {"search": urltxt + " " + q, 'timestamp': firestore.SERVER_TIMESTAMP}
+            db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return filtered_search(GoogleSearch({
                 'q': urltxt + " " + q,
                 'num': 5
@@ -303,10 +299,8 @@ with gr.Blocks(
     #storing conversations and emails in firebase
     def store_conversation(conversation, urltxt, session):
         (human, ai) = conversation[-1]
-        timestamp = firestore.Timestamp.now()
-        data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp': timestamp}
-        doc_ref = db.collection(root_path + "conversations").document(session)
-        doc_ref.update({"conversation": firestore.ArrayUnion([data])})
+        data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp':  firestore.SERVER_TIMESTAMP}
+        db.collection(root_path + "conversations").document(session).collection('conversations').document("search" + str(len(conversation))).set(data)
 
     def store_email(email, session):
         doc_ref = db.collection(root_path + "emails").document(session).set({"email": email, 'timestamp': firestore.SERVER_TIMESTAMP})

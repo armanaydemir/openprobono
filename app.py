@@ -1,3 +1,4 @@
+from anyio.from_thread import start_blocking_portal
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -13,6 +14,8 @@ from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.prompts import MessagesPlaceholder
 from langchain.schema import AIMessage, HumanMessage
 import os
+from queue import Queue
+from typing import Any
 from serpapi import GoogleSearch
 import sys
 import uuid
@@ -248,8 +251,16 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     ##----------------------- backend   (llm stuff)-----------------------##
+    class MyCallbackHandler(BaseCallbackHandler):
+        def __init__(self, q):
+            self.q = q
+        def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+            self.q.put(token)
 
-    async def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
+    def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
+        q = Queue()
+        job_done = object()
+
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -314,29 +325,38 @@ with gr.Blocks(
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
-        class MyCallbackHandler(BaseCallbackHandler):
-            def __init__(self,history=""):
-                self.history = history
-            def on_llm_new_token(self, token, **kwargs):
-                self.history[-1][1] += token
-                print(history)
+        async def task(prompt):
+            #definition of llm used for bot
+            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(history)])
+            
+            agent = initialize_agent(
+                tools=tools,
+                llm=bot_llm,
+                agent=AgentType.OPENAI_FUNCTIONS,
+                verbose=False,
+                agent_kwargs=agent_kwargs,
+                memory=memory,
+                # stream=True,
+                #return_intermediate_steps=True
+            )
+            agent.agent.prompt.messages[0].content = system_message
+            ret = await agent.arun(prompt)
+            q.put(job_done)
+            return ret
+
+        with start_blocking_portal() as portal:
+            portal.start_task_soon(task, prompt)
+
+            content = ""
+            while True:
+                next_token = q.get(True)
+                if next_token is job_done:
+                    break
+                content += next_token
+                history[-1][1] = content
+
                 yield history
         
-        #definition of llm used for bot
-        bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(history)])
-        
-        agent = initialize_agent(
-            tools=tools,
-            llm=bot_llm,
-            agent=AgentType.OPENAI_FUNCTIONS,
-            verbose=False,
-            agent_kwargs=agent_kwargs,
-            memory=memory,
-            # stream=True,
-            #return_intermediate_steps=True
-        )
-        agent.agent.prompt.messages[0].content = system_message
-        await agent.arun(history[-1][0])
 
     ##----------------------- end of backend  (llm stuff)-----------------------##
 

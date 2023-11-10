@@ -330,7 +330,7 @@ with gr.Blocks(
         partial_message = ""
         for chunk in response:
             print(chunk)
-            partial_message = partial_message + chunk['choices'][0]['delta']['content']
+            partial_message = partial_message + chunk
             history[-1][1] = partial_message
             yield history
     ##----------------------- end of backend  (llm stuff)-----------------------##

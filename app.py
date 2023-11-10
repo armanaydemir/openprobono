@@ -446,6 +446,7 @@ with gr.Blocks(
             agent_kwargs = {
                 "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
             }
+            print('debug6')
             llm_chain = LLMChain(llm=bot_llm, prompt=prompt)
             agent = LLMSingleActionAgent(
                 llm_chain=llm_chain,
@@ -453,15 +454,14 @@ with gr.Blocks(
                 stop=["\nObservation:"],
                 allowed_tools=tool_names
             )
-
-            agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
             print('debug7')
+            agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
+            print('debug8')
             ret = await agent_executor.arun(prompt)
             q.put(job_done)
             return ret
 
         with start_blocking_portal() as portal:
-            print('debug6')
             portal.start_task_soon(task, history[-1][0])
 
             content = ""

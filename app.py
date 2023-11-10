@@ -8,11 +8,12 @@ from langchain import PromptTemplate
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import TextLoader
+from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.prompts import MessagesPlaceholder
 from langchain.schema import AIMessage, HumanMessage
+from multiprocessing import Pool
 import os
 from queue import Queue
 from typing import Any
@@ -278,20 +279,10 @@ with gr.Blocks(
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
 
         ##----------------------- tools -----------------------##
-
-        # #General Search (no filters)
-        # def general_search(q):
-        #     data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
-        #     db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
-        #     return filtered_search(GoogleSearch({
-        #         'q': q,
-        #         'num': 5
-        #         }).get_dict())
-
         def gov_search(q):
             data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
-            return filtered_search(GoogleSearch({
+            return process_search(GoogleSearch({
                 'q': t1txt + " " + q,
                 'num': 5
                 }).get_dict())
@@ -299,7 +290,7 @@ with gr.Blocks(
         def case_search(q):
             data = {"search": t2txt + " " + q, 'prompt': t2prompt, 'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
-            return filtered_search(GoogleSearch({
+            return process_search(GoogleSearch({
                 'q': t2txt + " " + q,
                 'num': 5
                 }).get_dict())
@@ -310,14 +301,33 @@ with gr.Blocks(
         async def async_case_search(q):
             return case_search(q)
 
+        #Helper function for concurrent processing of search results, calls the summarizer llm
+        def search_helper_summarizer(result):
+            result.pop("displayed_link", None)
+            result.pop("favicon", None)
+            result.pop("about_page_link", None)
+            result.pop("about_page_serpapi_link", None)
+
+            summary_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-16k-0613')
+            llm_input = """Summarize this web page in less than 100 words.
+
+            Web Page:
+            """
+            llm_input += str(UnstructuredURLLoader(urls=[result["link"]]).load())
+            result["page_summary"] = summary_llm.predict(llm_input)
+            return result
+
         #Filter search results retured by serpapi to only include relavant results
-        def filtered_search(results):
+        def process_search(results):
             new_dict = {}
-            if('sports_results' in results):
-                new_dict['sports_results'] = results['sports_results']
+            # if('sports_results' in results):
+            #     new_dict['sports_results'] = results['sports_results']
             if('organic_results' in results):
-                new_dict['organic_results'] = results['organic_results']
+                pool = Pool(5)
+                new_dict['organic_results'] = pool.map(search_helper_summarizer, results['organic_results'])
+
             return new_dict
+
 
         #Definition and descriptions of tools aviailable to the bot
         tools = [
@@ -335,27 +345,112 @@ with gr.Blocks(
             )
         ]
         ##----------------------- end of tools -----------------------##
+        #------- agent definition -------#
+        # Set up the base template
+        template = user_prompt + """Complete the user's request as best you can. You have access to the following tools:
 
-        system_message = 'You are a helpful AI assistant. '
-        system_message += user_prompt
-        system_message += '. ALWAYS return a "SOURCES" part in your answer.'
-        agent_kwargs = {
-            "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
-        }
+        {tools}
+
+        The following is the chat history so far:
+        {memory}
+
+        Use the following format:
+
+        Question: the input question you must answer
+        Thought: you should always think about what to do
+        Action: the action to take, should be one of [{tool_names}]
+        Action Input: the input to the action
+        Observation: the result of the action
+        ... (this Thought/Action/Action Input/Observation can repeat N times)
+        Thought: I now know the final answer
+        Final Answer: the final answer to the original input question, including your sources
+
+        These were previous tasks you completed:
+
+
+
+        Begin!
+
+        {input}
+        {agent_scratchpad}"""
+
+        # Set up a prompt template
+        class CustomPromptTemplate(BaseChatPromptTemplate):
+            # The template to use
+            template: str
+            # The list of tools available
+            tools: List[Tool]
+
+            def format_messages(self, **kwargs) -> str:
+                # Get the intermediate steps (AgentAction, Observation tuples)
+                # Format them in a particular way
+                intermediate_steps = kwargs.pop("intermediate_steps")
+                thoughts = ""
+                for action, observation in intermediate_steps:
+                    thoughts += action.log
+                    thoughts += f"\nObservation: {observation}\nThought: "
+                # Set the agent_scratchpad variable to that value
+                kwargs["agent_scratchpad"] = thoughts
+                # Create a tools variable from the list of tools provided
+                kwargs["tools"] = "\n".join([f"{tool.name}: {tool.description}" for tool in self.tools])
+                # Create a list of tool names for the tools provided
+                kwargs["tool_names"] = ", ".join([tool.name for tool in self.tools])
+                formatted = self.template.format(**kwargs)
+                return [HumanMessage(content=formatted)]
+            
+        class CustomOutputParser(AgentOutputParser):
+            def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
+                # Check if agent should finish
+                if "Final Answer:" in llm_output:
+                    return AgentFinish(
+                        # Return values is generally always a dictionary with a single `output` key
+                        # It is not recommended to try anything else at the moment :)
+                        return_values={"output": llm_output.split("Final Answer:")[-1].strip()},
+                        log=llm_output,
+                    )
+                # Parse out the action and action input
+                regex = r"Action\s*\d*\s*:(.*?)\nAction\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
+                match = re.search(regex, llm_output, re.DOTALL)
+                if not match:
+                    # raise ValueError(f"Could not parse LLM output: `{llm_output}`")
+                    return AgentFinish(
+                        # Return values is generally always a dictionary with a single `output` key
+                        # It is not recommended to try anything else at the moment :)
+                        return_values={"output": llm_output.split("Final Answer:")[-1].strip()},
+                        log=llm_output,
+                    )
+                action = match.group(1).strip()
+                action_input = match.group(2)
+                # Return the action and action input
+                return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
+
+        prompt = CustomPromptTemplate(
+            template=template,
+            tools=tools,
+            # This omits the `agent_scratchpad`, `tools`, and `tool_names` variables because those are generated dynamically
+            # This includes the `intermediate_steps` variable because that is needed
+            input_variables=["input", "intermediate_steps", "memory"]
+        )
+
+        output_parser = CustomOutputParser()
+        #------- end of agent definition -------#
+
         async def task(prompt):
             #definition of llm used for bot
             bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
-            
-            agent = initialize_agent(
-                tools=tools,
-                llm=bot_llm,
-                agent=AgentType.OPENAI_FUNCTIONS,
-                verbose=False,
-                agent_kwargs=agent_kwargs,
-                memory=memory,
-                #return_intermediate_steps=True
+            agent_kwargs = {
+                "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+            }
+            llm_chain = LLMChain(llm=bot_llm, prompt=prompt)
+            agent = LLMSingleActionAgent(
+                llm_chain=llm_chain,
+                output_parser=output_parser,
+                stop=["\nObservation:"],
+                allowed_tools=tool_names
             )
-            agent.agent.prompt.messages[0].content = system_message
+
+            agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
+
             ret = await agent.arun(prompt)
             q.put(job_done)
             return ret

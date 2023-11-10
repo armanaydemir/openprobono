@@ -183,7 +183,6 @@ with gr.Blocks(
             container=False,
         )
         subbtn = gr.Button("Submit", variant="primary")
-        # clearopenai = gr.ClearButton([txt, openai_chat])
     
     examples_shown = gr.State(False)
     example_prompts_button = gr.Button("Example Prompts")
@@ -224,7 +223,8 @@ with gr.Blocks(
                 interactive=True,
             )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
-    
+        clearopenai = gr.ClearButton([txt, openai_chat])
+
     with gr.Row() as email_row:    
         emailtxt = gr.Textbox(
             scale=4,
@@ -248,7 +248,7 @@ with gr.Blocks(
 
     ##----------------------- backend   (llm stuff)-----------------------##
     #definition of llm used for bot
-    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
+    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, stream=True)
 
     def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
         history_langchain_format = ChatMessageHistory()
@@ -324,9 +324,13 @@ with gr.Blocks(
             memory=memory,
         )
         agent.agent.prompt.messages[0].content = system_message
-        bot_message = agent.run(history[-1][0])
-        history[-1][1] = bot_message
-        yield history
+        response = agent.run(history[-1][0])
+        partial_message = ""
+        for chunk in response:
+            if len(chunk['choices'][0]['delta']) != 0:
+                partial_message = partial_message + chunk['choices'][0]['delta']['content']
+                history[-1][1] = partial_message
+                yield history
     ##----------------------- end of backend  (llm stuff)-----------------------##
 
     #storing conversations and emails in firebase

@@ -345,7 +345,7 @@ with gr.Blocks(
             return ret
 
         with start_blocking_portal() as portal:
-            portal.start_task_soon(task, prompt)
+            portal.start_task_soon(task, history[-1][0])
 
             content = ""
             while True:

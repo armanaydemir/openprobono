@@ -329,10 +329,10 @@ with gr.Blocks(
         response = agent(history[-1][0])
         partial_message = ""
         for chunk in response:
-            if len(chunk['choices'][0]['delta']) != 0:
-                partial_message = partial_message + chunk['choices'][0]['delta']['content']
-                history[-1][1] = partial_message
-                yield history
+            print(chunk)
+            partial_message = partial_message + chunk['choices'][0]['delta']['content']
+            history[-1][1] = partial_message
+            yield history
     ##----------------------- end of backend  (llm stuff)-----------------------##
 
     #storing conversations and emails in firebase

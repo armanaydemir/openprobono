@@ -1,3 +1,4 @@
+from anyio.from_thread import start_blocking_portal
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -5,6 +6,7 @@ import gradio as gr
 import langchain
 from langchain import PromptTemplate
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
+from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
 from langchain.llms import OpenAI
@@ -12,6 +14,8 @@ from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.prompts import MessagesPlaceholder
 from langchain.schema import AIMessage, HumanMessage
 import os
+from queue import Queue
+from typing import Any
 from serpapi import GoogleSearch
 import sys
 import uuid
@@ -183,22 +187,57 @@ with gr.Blocks(
             container=False,
         )
         subbtn = gr.Button("Submit", variant="primary")
-        # clearopenai = gr.ClearButton([txt, openai_chat])
     
     examples_shown = gr.State(False)
     example_prompts_button = gr.Button("Example Prompts")
 
     with gr.Accordion("Details", open=False) as details_accordion:
-        urltxt = gr.Textbox(
-            value="site:*.gov | site:*.edu",
-            scale=4,
-            label="Enter list of whitelisted urls for search with google syntax",
-            show_label=True,
-            container=True,
-            interactive=True,
-        )
+        with gr.Row() as tool_row:
+            t1txt = gr.Textbox(
+                value="site:*.gov | site:*.edu",
+                scale=4,
+                label="Enter list of whitelisted urls for search with google syntax",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
+            t1prompt = t1txt = gr.Textbox(
+                value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+                scale=4,
+                label="Enter prompt for search",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
+        with gr.Row() as tool_row:
+            t2txt = gr.Textbox(
+                value="site:*case.law",
+                scale=4,
+                label="Enter list of whitelisted urls for search with google syntax",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
+            t2prompt = gr.Textbox(
+                value="Use for finding case law. Always cite your sources.",
+                scale=4,
+                label="Enter prompt for search",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
+        with gr.Row() as user_prompt_row:
+            user_prompt = gr.Textbox(
+                value="",
+                scale=4,
+                label="Enter additional system prompt",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
-    
+        clearopenai = gr.ClearButton([txt, openai_chat])
+
     with gr.Row() as email_row:    
         emailtxt = gr.Textbox(
             scale=4,
@@ -221,10 +260,16 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     ##----------------------- backend   (llm stuff)-----------------------##
-    #definition of llm used for bot
-    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
+    class MyCallbackHandler(BaseCallbackHandler):
+        def __init__(self, q):
+            self.q = q
+        def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+            self.q.put(token)
 
-    def openai_bot(history, urltxt, session):
+    def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session):
+        q = Queue()
+        job_done = object()
+
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -234,23 +279,36 @@ with gr.Blocks(
 
         ##----------------------- tools -----------------------##
 
-        #General Search (no filters)
-        def general_search(q):
-            data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
+        # #General Search (no filters)
+        # def general_search(q):
+        #     data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
+        #     db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
+        #     return filtered_search(GoogleSearch({
+        #         'q': q,
+        #         'num': 5
+        #         }).get_dict())
+
+        def gov_search(q):
+            data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return filtered_search(GoogleSearch({
-                'q': q,
+                'q': t1txt + " " + q,
                 'num': 5
                 }).get_dict())
 
-        #Government Search (filtered on whitelist sites of reliable sources for government))
-        def gov_search(q):
-            data = {"search": urltxt + " " + q, 'timestamp': firestore.SERVER_TIMESTAMP}
+        def case_search(q):
+            data = {"search": t2txt + " " + q, 'prompt': t2prompt, 'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return filtered_search(GoogleSearch({
-                'q': urltxt + " " + q,
+                'q': t2txt + " " + q,
                 'num': 5
                 }).get_dict())
+
+        async def async_gov_search(q):
+            return gov_search(q)
+
+        async def async_case_search(q):
+            return case_search(q)
 
         #Filter search results retured by serpapi to only include relavant results
         def filtered_search(results):
@@ -264,42 +322,64 @@ with gr.Blocks(
         #Definition and descriptions of tools aviailable to the bot
         tools = [
             Tool(
-                name="search",
-                func=general_search,
-                description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-            ),
-            Tool(
                 name="government-search",
                 func=gov_search,
-                description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+                coroutine=async_gov_search,
+                description=t1prompt,
+            ),
+            Tool(
+                name="case-search",
+                func=case_search,
+                coroutine=async_case_search,
+                description=t2prompt,
             )
         ]
         ##----------------------- end of tools -----------------------##
 
         system_message = 'You are a helpful AI assistant. '
-        #system_message += user_prompt
+        system_message += user_prompt
         system_message += '. ALWAYS return a "SOURCES" part in your answer.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
-        agent = initialize_agent(
-            tools=tools,
-            llm=bot_llm,
-            agent=AgentType.OPENAI_FUNCTIONS,
-            verbose=True,
-            agent_kwargs=agent_kwargs,
-            memory=memory,
-        )
-        agent.agent.prompt.messages[0].content = system_message
-        bot_message = agent.run(history[-1][0])
-        history[-1][1] = bot_message
-        yield history
+        async def task(prompt):
+            #definition of llm used for bot
+            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
+            
+            agent = initialize_agent(
+                tools=tools,
+                llm=bot_llm,
+                agent=AgentType.OPENAI_FUNCTIONS,
+                verbose=False,
+                agent_kwargs=agent_kwargs,
+                memory=memory,
+                #return_intermediate_steps=True
+            )
+            agent.agent.prompt.messages[0].content = system_message
+            ret = await agent.arun(prompt)
+            q.put(job_done)
+            return ret
+
+        with start_blocking_portal() as portal:
+            portal.start_task_soon(task, history[-1][0])
+
+            content = ""
+            while True:
+                next_token = q.get(True)
+                if next_token is job_done:
+                    break
+                content += next_token
+                history[-1][1] = content
+
+                yield history
+        
+
     ##----------------------- end of backend  (llm stuff)-----------------------##
 
     #storing conversations and emails in firebase
-    def store_conversation(conversation, urltxt, session):
+    def store_conversation(conversation, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session):
         (human, ai) = conversation[-1]
-        data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp':  firestore.SERVER_TIMESTAMP}
+        data = {"human": human, "ai": ai, 't1txt': t1txt, "t1prompt":t1prompt, "t2txt":t2txt, "t2prompt":t2prompt, 'user_prompt': user_prompt, 'timestamp':  firestore.SERVER_TIMESTAMP}
         db.collection(root_path + "conversations").document(session).collection('conversations').document("msg" + str(len(conversation))).set(data)
 
     def store_email(email, session):
@@ -315,10 +395,10 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, urltxt, session], [openai_chat]
+        openai_bot, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, urltxt, session], None, queue=False)
+    ).then(store_conversation, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], None, queue=False)
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -328,11 +408,11 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, urltxt, session], [openai_chat]
+        openai_bot, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(
-        store_conversation, [openai_chat, urltxt, session], None, queue=False
+        store_conversation, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], None, queue=False
     )
 
     #hitting enter and clicking submit for email

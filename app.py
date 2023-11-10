@@ -315,7 +315,7 @@ with gr.Blocks(
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
         class MyCallbackHandler(BaseCallbackHandler):
-            self.response = ""
+            response = ""
             def on_llm_new_token(self, token, **kwargs) -> None:
                 response += token
                 print(response)

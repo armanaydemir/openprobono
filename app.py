@@ -403,6 +403,7 @@ with gr.Blocks(
             
         class CustomOutputParser(AgentOutputParser):
             def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
+                print(llm_output)
                 print('inside parse')
                 # Check if agent should finish
                 if "Final Answer:" in llm_output:

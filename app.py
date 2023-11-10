@@ -406,6 +406,7 @@ with gr.Blocks(
                 print('inside parse')
                 # Check if agent should finish
                 if "Final Answer:" in llm_output:
+                    print('inside final answer')
                     return AgentFinish(
                         # Return values is generally always a dictionary with a single `output` key
                         # It is not recommended to try anything else at the moment :)
@@ -416,6 +417,7 @@ with gr.Blocks(
                 regex = r"Action\s*\d*\s*:(.*?)\nAction\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
                 match = re.search(regex, llm_output, re.DOTALL)
                 if not match:
+                    print('inside no match')
                     # raise ValueError(f"Could not parse LLM output: `{llm_output}`")
                     return AgentFinish(
                         # Return values is generally always a dictionary with a single `output` key
@@ -426,6 +428,7 @@ with gr.Blocks(
                 action = match.group(1).strip()
                 action_input = match.group(2)
                 # Return the action and action input
+                print('inside return action')
                 return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
         prompt_template = CustomPromptTemplate(

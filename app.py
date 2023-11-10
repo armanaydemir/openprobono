@@ -335,9 +335,13 @@ with gr.Blocks(
     ##----------------------- end of backend  (llm stuff)-----------------------##
 
     #storing conversations and emails in firebase
-    def store_conversation(conversation, urltxt, session):
+    def store_conversation(conversation, tools, session):
+        t1txt = tools[0][0]
+        t1prompt = tools[0][1]
+        t2txt = tools[1][0]
+        t2prompt = tools[1][1]
         (human, ai) = conversation[-1]
-        data = {"human": human, "ai": ai, 'urltxt': urltxt, 'timestamp':  firestore.SERVER_TIMESTAMP}
+        data = {"human": human, "ai": ai, 't1txt': t1txt, "t1prompt":t1prompt, "t2txt":t2txt, "t2prompt":t2prompt, 'timestamp':  firestore.SERVER_TIMESTAMP}
         db.collection(root_path + "conversations").document(session).collection('conversations').document("msg" + str(len(conversation))).set(data)
 
     def store_email(email, session):
@@ -353,10 +357,10 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, t1txt, session], [openai_chat]
+        openai_bot, [openai_chat, [[t1txt, t1prompt], [t2txt, t2prompt]], session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, t1txt, session], None, queue=False)
+    ).then(store_conversation, [openai_chat, [[t1txt, t1prompt], [t2txt, t2prompt]], session], None, queue=False)
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -366,11 +370,11 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, t1txt, session], [openai_chat]
+        openai_bot, [openai_chat, [[t1txt, t1prompt], [t2txt, t2prompt]], session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(
-        store_conversation, [openai_chat, t1txt, session], None, queue=False
+        store_conversation, [openai_chat, [[t1txt, t1prompt], [t2txt, t2prompt]], session], None, queue=False
     )
 
     #hitting enter and clicking submit for email

@@ -317,7 +317,7 @@ with gr.Blocks(
         class MyCallbackHandler(BaseCallbackHandler):
             def __init__(self,history=""):
                 self.history = history
-            def on_llm_new_token(self, token, **kwargs) -> None:
+            def on_llm_new_token(self, token, **kwargs):
                 self.history[-1][1] += token
                 print(history)
                 yield history

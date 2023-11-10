@@ -319,7 +319,7 @@ with gr.Blocks(
             def on_llm_new_token(self, token, **kwargs) -> None:
                 # print every token on a new line
                 print(token)
-                print("^^ this is the token ^^"")
+                print("^^ this is the token ^^")
                 response += token
                 history[-1][1] = response
                 yield history

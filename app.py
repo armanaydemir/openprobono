@@ -189,14 +189,40 @@ with gr.Blocks(
     example_prompts_button = gr.Button("Example Prompts")
 
     with gr.Accordion("Details", open=False) as details_accordion:
-        urltxt = gr.Textbox(
-            value="site:*.gov | site:*.edu",
-            scale=4,
-            label="Enter list of whitelisted urls for search with google syntax",
-            show_label=True,
-            container=True,
-            interactive=True,
-        )
+        with gr.Row() as tool_row:
+            t1txt = gr.Textbox(
+                value="site:*.gov | site:*.edu",
+                scale=4,
+                label="Enter list of whitelisted urls for search with google syntax",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
+            t1prompt = t1txt = gr.Textbox(
+                value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+                scale=4,
+                label="Enter prompt for search",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
+        with gr.Row() as tool_row:
+            t2txt = gr.Textbox(
+                value="site:*case.law",
+                scale=4,
+                label="Enter list of whitelisted urls for search with google syntax",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
+            t2prompt = gr.Textbox(
+                value="Use for finding case law. Always cite your sources.",
+                scale=4,
+                label="Enter prompt for search",
+                show_label=True,
+                container=True,
+                interactive=True,
+            )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
     
     with gr.Row() as email_row:    
@@ -224,7 +250,12 @@ with gr.Blocks(
     #definition of llm used for bot
     bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
 
-    def openai_bot(history, urltxt, session):
+    def openai_bot(history, tools, session):
+        t1txt = tools[0][0]
+        t1prompt = tools[0][1]
+        t2txt = tools[1][0]
+        t2prompt = tools[1][1]
+
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -234,18 +265,25 @@ with gr.Blocks(
 
         ##----------------------- tools -----------------------##
 
-        #General Search (no filters)
-        def general_search(q):
-            data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
+        # #General Search (no filters)
+        # def general_search(q):
+        #     data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
+        #     db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
+        #     return filtered_search(GoogleSearch({
+        #         'q': q,
+        #         'num': 5
+        #         }).get_dict())
+
+        def gov_search(q):
+            data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return filtered_search(GoogleSearch({
-                'q': q,
+                'q': urltxt + " " + q,
                 'num': 5
                 }).get_dict())
 
-        #Government Search (filtered on whitelist sites of reliable sources for government))
-        def gov_search(q):
-            data = {"search": urltxt + " " + q, 'timestamp': firestore.SERVER_TIMESTAMP}
+        def case_search(q):
+            data = {"search": t2txt + " " + q, 'prompt': t2prompt, 'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return filtered_search(GoogleSearch({
                 'q': urltxt + " " + q,
@@ -264,14 +302,14 @@ with gr.Blocks(
         #Definition and descriptions of tools aviailable to the bot
         tools = [
             Tool(
-                name="search",
-                func=general_search,
-                description="useful for when you need to answer questions about current events. You should ask targeted questions. Always cite your sources.",
-            ),
-            Tool(
                 name="government-search",
                 func=gov_search,
-                description="useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+                description=t1prompt,
+            ),
+            Tool(
+                name="case-search",
+                func=case_search,
+                description="t2prompt",
             )
         ]
         ##----------------------- end of tools -----------------------##
@@ -315,10 +353,10 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, urltxt, session], [openai_chat]
+        openai_bot, [openai_chat, t1txt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, urltxt, session], None, queue=False)
+    ).then(store_conversation, [openai_chat, t1txt, session], None, queue=False)
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -328,11 +366,11 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, urltxt, session], [openai_chat]
+        openai_bot, [openai_chat, t1txt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(
-        store_conversation, [openai_chat, urltxt, session], None, queue=False
+        store_conversation, [openai_chat, t1txt, session], None, queue=False
     )
 
     #hitting enter and clicking submit for email

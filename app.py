@@ -314,8 +314,8 @@ with gr.Blocks(
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
-        response = ""
         class MyCallbackHandler(BaseCallbackHandler):
+            self.response = ""
             def on_llm_new_token(self, token, **kwargs) -> None:
                 response += token
                 print(response)

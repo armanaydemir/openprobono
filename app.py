@@ -317,8 +317,9 @@ with gr.Blocks(
         response = ""
         class MyCallbackHandler(BaseCallbackHandler):
             def on_llm_new_token(self, token, **kwargs) -> None:
-                # print every token on a new line
-                print(f"#{token}#")
+                response += token
+                history[-1][1] = response
+                yield history
         
         #definition of llm used for bot
         bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler()])

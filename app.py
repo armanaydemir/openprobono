@@ -428,7 +428,7 @@ with gr.Blocks(
                 # Return the action and action input
                 return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
-        prompt = CustomPromptTemplate(
+        prompt_template = CustomPromptTemplate(
             template=template,
             tools=tools,
             # This omits the `agent_scratchpad`, `tools`, and `tool_names` variables because those are generated dynamically
@@ -442,12 +442,12 @@ with gr.Blocks(
         async def task(prompt):
             print('debug5')
             #definition of llm used for bot
-            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)#, streaming=True, callbacks=[MyCallbackHandler(q)])
+            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5) #, streaming=True, callbacks=[MyCallbackHandler(q)])
             agent_kwargs = {
                 "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
             }
             print('debug6')
-            llm_chain = LLMChain(llm=bot_llm, prompt=prompt)
+            llm_chain = LLMChain(llm=bot_llm, prompt=prompt_template)
             print('debug7')
             agent = LLMSingleActionAgent(
                 llm_chain=llm_chain,

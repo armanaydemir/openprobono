@@ -314,7 +314,7 @@ with gr.Blocks(
 
             Web Page:
             """
-            llm_input += str(UnstructuredURLLoader(urls=[result["link"]]).load())
+            llm_input += str(UnstructuredURLLoader(urls=[result["link"]]).load())[:16385]
             result["page_summary"] = summary_llm.predict(llm_input)
             return result
 

@@ -248,8 +248,6 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     ##----------------------- backend   (llm stuff)-----------------------##
-    #definition of llm used for bot
-    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, callbacks=[FinalStreamingStdOutCallbackHandler()])
 
     def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
         history_langchain_format = ChatMessageHistory()
@@ -316,6 +314,15 @@ with gr.Blocks(
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
+        response = ""
+        def update_response(token):
+            response += token
+            history[-1][1] = response
+            yield history
+        
+        #definition of llm used for bot
+        bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, stream=True, callbacks=[FinalStreamingStdOutCallbackHandler(on_llm_new_token(update_response))])
+        
         agent = initialize_agent(
             tools=tools,
             llm=bot_llm,
@@ -327,13 +334,8 @@ with gr.Blocks(
             #return_intermediate_steps=True
         )
         agent.agent.prompt.messages[0].content = system_message
-        response = agent(history[-1][0])
-        partial_message = ""
-        for chunk in response:
-            print(chunk)
-            partial_message = partial_message + chunk
-            history[-1][1] = partial_message
-            yield history
+        await agent.arun(history[-1][0])
+
     ##----------------------- end of backend  (llm stuff)-----------------------##
 
     #storing conversations and emails in firebase

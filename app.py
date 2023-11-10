@@ -353,7 +353,7 @@ with gr.Blocks(
                 verbose=False,
                 agent_kwargs=agent_kwargs,
                 memory=memory,
-                return_intermediate_steps=True
+                #return_intermediate_steps=True
             )
             agent.agent.prompt.messages[0].content = system_message
             ret = await agent.arun(prompt)

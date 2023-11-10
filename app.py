@@ -5,18 +5,19 @@ from firebase_admin import firestore
 import gradio as gr
 import langchain
 from langchain import PromptTemplate
-from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
+from langchain.agents import AgentExecutor, AgentOutputParser, AgentType, LLMSingleActionAgent, initialize_agent, Tool, ZeroShotAgent
+from langchain.chains import LLMChain
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
-from langchain.prompts import MessagesPlaceholder
-from langchain.schema import AIMessage, HumanMessage
+from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder
+from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from multiprocessing import Pool
 import os
 from queue import Queue
-from typing import Any
+from typing import Any, List, Union
 from serpapi import GoogleSearch
 import sys
 import uuid

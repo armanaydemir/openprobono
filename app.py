@@ -453,7 +453,7 @@ with gr.Blocks(
 
             agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
 
-            ret = await agent.arun(prompt)
+            ret = await agent_executor.arun(prompt)
             q.put(job_done)
             return ret
 

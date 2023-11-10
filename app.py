@@ -204,7 +204,7 @@ with gr.Blocks(
                 container=True,
                 interactive=True,
             )
-            t1prompt = t1txt = gr.Textbox(
+            t1prompt = gr.Textbox(
                 value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
                 scale=4,
                 label="Enter prompt for search",
@@ -281,7 +281,7 @@ with gr.Blocks(
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
         ##----------------------- tools -----------------------##
         def gov_search(q):
-            data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
+            data = {"search": t1txt + " " + q, 'prompt': t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return process_search(GoogleSearch({
                 'q': t1txt + " " + q,

@@ -308,9 +308,11 @@ with gr.Blocks(
             result.pop("favicon", None)
             result.pop("about_page_link", None)
             result.pop("about_page_serpapi_link", None)
+            result.pop("cached_page_link", None)
+            result.pop("snippet_highlighted_words", None)
 
             summary_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-16k-0613')
-            llm_input = """Summarize this web page in less than 100 words.
+            llm_input = """Summarize this web page in less than 50 words.
 
             Web Page:
             """

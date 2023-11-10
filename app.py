@@ -249,7 +249,7 @@ with gr.Blocks(
 
     ##----------------------- backend   (llm stuff)-----------------------##
 
-    def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
+    async def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -334,7 +334,7 @@ with gr.Blocks(
             #return_intermediate_steps=True
         )
         agent.agent.prompt.messages[0].content = system_message
-        agent.arun(history[-1][0])
+        await agent.arun(history[-1][0])
 
     ##----------------------- end of backend  (llm stuff)-----------------------##
 

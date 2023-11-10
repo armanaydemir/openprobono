@@ -345,6 +345,7 @@ with gr.Blocks(
                 description=t2prompt,
             )
         ]
+        tool_names = [tool.name for tool in tools]
         ##----------------------- end of tools -----------------------##
         #------- agent definition -------#
         # Set up the base template

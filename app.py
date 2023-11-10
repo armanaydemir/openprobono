@@ -273,7 +273,7 @@ with gr.Blocks(
             data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return filtered_search(GoogleSearch({
-                'q': urltxt + " " + q,
+                'q': t1txt + " " + q,
                 'num': 5
                 }).get_dict())
 
@@ -281,7 +281,7 @@ with gr.Blocks(
             data = {"search": t2txt + " " + q, 'prompt': t2prompt, 'timestamp': firestore.SERVER_TIMESTAMP}
             db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
             return filtered_search(GoogleSearch({
-                'q': urltxt + " " + q,
+                'q': t2txt + " " + q,
                 'num': 5
                 }).get_dict())
 

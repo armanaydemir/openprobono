@@ -334,7 +334,7 @@ with gr.Blocks(
             #return_intermediate_steps=True
         )
         agent.agent.prompt.messages[0].content = system_message
-        await agent.arun(history[-1][0])
+        agent.run(history[-1][0])
 
     ##----------------------- end of backend  (llm stuff)-----------------------##
 

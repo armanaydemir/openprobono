@@ -17,9 +17,10 @@ from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from multiprocessing import Pool
 import os
 from queue import Queue
-from typing import Any, List, Union
+import re
 from serpapi import GoogleSearch
 import sys
+from typing import Any, List, Union
 import uuid
 
 # two main components: chat, bot

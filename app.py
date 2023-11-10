@@ -315,13 +315,14 @@ with gr.Blocks(
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
         class MyCallbackHandler(BaseCallbackHandler):
-            response = ""
+            def __init__(self,history=""):
+                self.history = history
             def on_llm_new_token(self, token, **kwargs) -> None:
-                response += token
-                print(response)
+                self.history[-1][1] += token
+                yield history
         
         #definition of llm used for bot
-        bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler()])
+        bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(history)])
         
         agent = initialize_agent(
             tools=tools,

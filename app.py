@@ -327,7 +327,7 @@ with gr.Blocks(
         }
         async def task(prompt):
             #definition of llm used for bot
-            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(history)])
+            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
             
             agent = initialize_agent(
                 tools=tools,

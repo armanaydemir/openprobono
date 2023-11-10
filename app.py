@@ -295,6 +295,12 @@ with gr.Blocks(
                 'num': 5
                 }).get_dict())
 
+        async def async_gov_search(q):
+            return gov_search(q)
+
+        async def async_case_search(q):
+            return case_search(q)
+
         #Filter search results retured by serpapi to only include relavant results
         def filtered_search(results):
             new_dict = {}
@@ -309,12 +315,14 @@ with gr.Blocks(
             Tool(
                 name="government-search",
                 func=gov_search,
+                coroutine=async_gov_search,
                 description=t1prompt,
             ),
             Tool(
                 name="case-search",
                 func=case_search,
-                description="t2prompt",
+                coroutine=async_case_search,
+                description=t2prompt,
             )
         ]
         ##----------------------- end of tools -----------------------##

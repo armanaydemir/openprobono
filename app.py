@@ -318,6 +318,7 @@ with gr.Blocks(
         class MyCallbackHandler(BaseCallbackHandler):
             def on_llm_new_token(self, token, **kwargs) -> None:
                 response += token
+                print(response)
                 history[-1][1] = response
                 yield history
         

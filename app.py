@@ -322,7 +322,7 @@ with gr.Blocks(
             verbose=True,
             agent_kwargs=agent_kwargs,
             memory=memory,
-            stream=True,
+            # stream=True,
             return_intermediate_steps=True
         )
         agent.agent.prompt.messages[0].content = system_message

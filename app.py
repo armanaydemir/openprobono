@@ -326,7 +326,7 @@ with gr.Blocks(
             return_intermediate_steps=True
         )
         agent.agent.prompt.messages[0].content = system_message
-        response = agent.run(history[-1][0])
+        response = agent(history[-1][0])
         partial_message = ""
         for chunk in response:
             if len(chunk['choices'][0]['delta']) != 0:

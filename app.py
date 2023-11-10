@@ -411,7 +411,7 @@ with gr.Blocks(
                     return AgentFinish(
                         # Return values is generally always a dictionary with a single `output` key
                         # It is not recommended to try anything else at the moment :)
-                        return_values={"output":  '\n' + llm_output.split("Final Answer:")[-1].strip()},
+                        return_values={"output":  llm_output.split("Final Answer:")[-1]},
                         log=llm_output,
                     )
                 # Parse out the action and action input
@@ -423,7 +423,7 @@ with gr.Blocks(
                     return AgentFinish(
                         # Return values is generally always a dictionary with a single `output` key
                         # It is not recommended to try anything else at the moment :)
-                        return_values={"output":  '\n' + llm_output.split("Final Answer:")[-1].strip()},
+                        return_values={"output":  llm_output.split("Final Answer:")[-1]},
                         log=llm_output,
                     )
                 action = match.group(1).strip()

@@ -319,6 +319,7 @@ with gr.Blocks(
                 self.history = history
             def on_llm_new_token(self, token, **kwargs) -> None:
                 self.history[-1][1] += token
+                print(history)
                 yield history
         
         #definition of llm used for bot

@@ -379,7 +379,7 @@ with gr.Blocks(
     #storing conversations and emails in firebase
     def store_conversation(conversation, t1txt, t1prompt, t2txt, t2prompt, session):
         (human, ai) = conversation[-1]
-        data = {"human": human, "ai": ai, 't1txt': t1txt, "t1prompt":t1prompt, "t2txt":t2txt, "t2prompt":t2prompt, 'user_prompt': user_prompt, timestamp':  firestore.SERVER_TIMESTAMP}
+        data = {"human": human, "ai": ai, 't1txt': t1txt, "t1prompt":t1prompt, "t2txt":t2txt, "t2prompt":t2prompt, 'user_prompt': user_prompt, 'timestamp':  firestore.SERVER_TIMESTAMP}
         db.collection(root_path + "conversations").document(session).collection('conversations').document("msg" + str(len(conversation))).set(data)
 
     def store_email(email, session):

@@ -248,7 +248,7 @@ with gr.Blocks(
 
     ##----------------------- backend   (llm stuff)-----------------------##
     #definition of llm used for bot
-    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
+    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True)
 
     def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
         history_langchain_format = ChatMessageHistory()
@@ -323,7 +323,7 @@ with gr.Blocks(
             agent_kwargs=agent_kwargs,
             memory=memory,
             # stream=True,
-            return_intermediate_steps=True
+            #return_intermediate_steps=True
         )
         agent.agent.prompt.messages[0].content = system_message
         response = agent(history[-1][0])

@@ -250,12 +250,7 @@ with gr.Blocks(
     #definition of llm used for bot
     bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
 
-    def openai_bot(history, tools, session):
-        t1txt = tools[0][0]
-        t1prompt = tools[0][1]
-        t2txt = tools[1][0]
-        t2prompt = tools[1][1]
-
+    def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
         history_langchain_format = ChatMessageHistory()
         for i in range(0, len(history)-1):
             (human, ai) = history[i]
@@ -335,11 +330,7 @@ with gr.Blocks(
     ##----------------------- end of backend  (llm stuff)-----------------------##
 
     #storing conversations and emails in firebase
-    def store_conversation(conversation, tools, session):
-        t1txt = tools[0][0]
-        t1prompt = tools[0][1]
-        t2txt = tools[1][0]
-        t2prompt = tools[1][1]
+    def store_conversation(conversation, t1txt, t1prompt, t2txt, t2prompt, session):
         (human, ai) = conversation[-1]
         data = {"human": human, "ai": ai, 't1txt': t1txt, "t1prompt":t1prompt, "t2txt":t2txt, "t2prompt":t2prompt, 'timestamp':  firestore.SERVER_TIMESTAMP}
         db.collection(root_path + "conversations").document(session).collection('conversations').document("msg" + str(len(conversation))).set(data)
@@ -357,10 +348,10 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, [[t1txt, t1prompt], [t2txt, t2prompt]], session], [openai_chat]
+        openai_bot, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, [[t1txt, t1prompt], [t2txt, t2prompt]], session], None, queue=False)
+    ).then(store_conversation, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, session], None, queue=False)
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -370,11 +361,11 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, [[t1txt, t1prompt], [t2txt, t2prompt]], session], [openai_chat]
+        openai_bot, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(
-        store_conversation, [openai_chat, [[t1txt, t1prompt], [t2txt, t2prompt]], session], None, queue=False
+        store_conversation, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, session], None, queue=False
     )
 
     #hitting enter and clicking submit for email

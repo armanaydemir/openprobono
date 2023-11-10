@@ -324,8 +324,7 @@ with gr.Blocks(
             # if('sports_results' in results):
             #     new_dict['sports_results'] = results['sports_results']
             if('organic_results' in results):
-                pool = Pool(5)
-                new_dict['organic_results'] = pool.map(search_helper_summarizer, results['organic_results'])
+                new_dict['organic_results'] = [search_helper_summarizer(result) for result in results['organic_results']]
 
             return new_dict
 
@@ -449,9 +448,7 @@ with gr.Blocks(
                 stop=["\nObservation:"],
                 allowed_tools=tool_names
             )
-            print('debug8')
             agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
-            print('debug9')
             ret = await agent_executor.arun(prompt)
             q.put(job_done)
             return ret

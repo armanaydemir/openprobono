@@ -448,15 +448,16 @@ with gr.Blocks(
             }
             print('debug6')
             llm_chain = LLMChain(llm=bot_llm, prompt=prompt)
+            print('debug7')
             agent = LLMSingleActionAgent(
                 llm_chain=llm_chain,
                 output_parser=output_parser,
                 stop=["\nObservation:"],
                 allowed_tools=tool_names
             )
-            print('debug7')
-            agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
             print('debug8')
+            agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
+            print('debug9')
             ret = await agent_executor.arun(prompt)
             q.put(job_done)
             return ret

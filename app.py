@@ -5,6 +5,7 @@ import gradio as gr
 import langchain
 from langchain import PromptTemplate
 from langchain.agents import AgentExecutor, AgentType, initialize_agent, Tool, ZeroShotAgent
+from langchain.callbacks.streaming_stdout_final_only import FinalStreamingStdOutCallbackHandler
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
 from langchain.llms import OpenAI
@@ -248,7 +249,7 @@ with gr.Blocks(
 
     ##----------------------- backend   (llm stuff)-----------------------##
     #definition of llm used for bot
-    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True)
+    bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, callbacks=[FinalStreamingStdOutCallbackHandler()])
 
     def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, session):
         history_langchain_format = ChatMessageHistory()

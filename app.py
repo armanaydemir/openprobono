@@ -270,7 +270,6 @@ with gr.Blocks(
             self.q.put(token)
 
     def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session):
-        print('debug1')
         q = Queue()
         job_done = object()
 
@@ -280,7 +279,6 @@ with gr.Blocks(
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
-        print('debug2')
         ##----------------------- tools -----------------------##
         def gov_search(q):
             data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
@@ -348,7 +346,6 @@ with gr.Blocks(
             )
         ]
         tool_names = [tool.name for tool in tools]
-        print('debug3')
         ##----------------------- end of tools -----------------------##
         #------- agent definition -------#
         # Set up the base template
@@ -439,17 +436,13 @@ with gr.Blocks(
 
         output_parser = CustomOutputParser()
         #------- end of agent definition -------#
-        print('debug4')
         async def task(prompt):
-            print('debug5')
             #definition of llm used for bot
-            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5) #, streaming=True, callbacks=[MyCallbackHandler(q)])
+            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
             agent_kwargs = {
                 "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
             }
-            print('debug6')
             llm_chain = LLMChain(llm=bot_llm, prompt=prompt_template)
-            print('debug7')
             agent = LLMSingleActionAgent(
                 llm_chain=llm_chain,
                 output_parser=output_parser,

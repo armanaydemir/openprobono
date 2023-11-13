@@ -20,7 +20,7 @@ from queue import Queue
 import re
 from serpapi import GoogleSearch
 import sys
-from typing import Any, List, Union
+from typing import Any, List, Union, Tuple
 import uuid
 
 # two main components: chat, bot

@@ -465,8 +465,8 @@ with gr.Blocks(
                 """
                 if len(intermediate_steps) == 0:
                     return [
-                        AgentAction(tool="Search", tool_input=kwargs["input"], log=""),
-                        AgentAction(tool="RandomWord", tool_input=kwargs["input"], log=""),
+                        AgentAction(tool="government-search", tool_input=kwargs["input"], log=""),
+                        AgentAction(tool="case-search", tool_input=kwargs["input"], log=""),
                     ]
                 else:
                     return AgentFinish(return_values={"output": "bar"}, log="")
@@ -486,8 +486,8 @@ with gr.Blocks(
                 """
                 if len(intermediate_steps) == 0:
                     return [
-                        AgentAction(tool="Search", tool_input=kwargs["input"], log=""),
-                        AgentAction(tool="RandomWord", tool_input=kwargs["input"], log=""),
+                        AgentAction(tool="government-search", tool_input=kwargs["input"], log=""),
+                        AgentAction(tool="case-search", tool_input=kwargs["input"], log=""),
                     ]
                 else:
                     return AgentFinish(return_values={"output": "bar"}, log="")

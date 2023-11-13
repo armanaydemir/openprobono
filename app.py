@@ -8,6 +8,7 @@ from langchain import PromptTemplate
 from langchain.agents import AgentExecutor, AgentOutputParser, AgentType, LLMSingleActionAgent, initialize_agent, Tool, ZeroShotAgent
 from langchain.chains import LLMChain
 from langchain.callbacks.base import BaseCallbackHandler
+from langchain.callbacks.streaming_stdout_final_only import FinalStreamingStdOutCallbackHandler
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
@@ -20,7 +21,7 @@ from queue import Queue
 import re
 from serpapi import GoogleSearch
 import sys
-from typing import Any, List, Union
+from typing import Any, Dict, List, Optional, Union
 import uuid
 
 # two main components: chat, bot
@@ -263,11 +264,88 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     ##----------------------- backend   (llm stuff)-----------------------##
-    class MyCallbackHandler(BaseCallbackHandler):
-        def __init__(self, q):
-            self.q = q
+    from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+
+    DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
+
+    class MyCallbackHandler(StreamingStdOutCallbackHandler):
+        """Callback handler for streaming in agents.
+        Only works with agents using LLMs that support streaming.
+
+        Only the final output of the agent will be streamed.
+        """
+
+        def append_to_last_tokens(self, token: str) -> None:
+            self.last_tokens.append(token)
+            self.last_tokens_stripped.append(token.strip())
+            if len(self.last_tokens) > len(self.answer_prefix_tokens):
+                self.last_tokens.pop(0)
+                self.last_tokens_stripped.pop(0)
+
+        def check_if_answer_reached(self) -> bool:
+            if self.strip_tokens:
+                return self.last_tokens_stripped == self.answer_prefix_tokens_stripped
+            else:
+                return self.last_tokens == self.answer_prefix_tokens
+
+        def __init__(
+            self,
+            *,
+            answer_prefix_tokens: Optional[List[str]] = None,
+            strip_tokens: bool = True,
+            stream_prefix: bool = False
+        ) -> None:
+            """Instantiate FinalStreamingStdOutCallbackHandler.
+
+            Args:
+                answer_prefix_tokens: Token sequence that prefixes the answer.
+                    Default is ["Final", "Answer", ":"]
+                strip_tokens: Ignore white spaces and new lines when comparing
+                    answer_prefix_tokens to last tokens? (to determine if answer has been
+                    reached)
+                stream_prefix: Should answer prefix itself also be streamed?
+            """
+            super().__init__()
+            if answer_prefix_tokens is None:
+                self.answer_prefix_tokens = DEFAULT_ANSWER_PREFIX_TOKENS
+            else:
+                self.answer_prefix_tokens = answer_prefix_tokens
+            if strip_tokens:
+                self.answer_prefix_tokens_stripped = [
+                    token.strip() for token in self.answer_prefix_tokens
+                ]
+            else:
+                self.answer_prefix_tokens_stripped = self.answer_prefix_tokens
+            self.last_tokens = [""] * len(self.answer_prefix_tokens)
+            self.last_tokens_stripped = [""] * len(self.answer_prefix_tokens)
+            self.strip_tokens = strip_tokens
+            self.stream_prefix = stream_prefix
+            self.answer_reached = False
+
+        def on_llm_start(
+            self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
+        ) -> None:
+            """Run when LLM starts running."""
+            self.answer_reached = False
+
         def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
-            self.q.put(token)
+            """Run on new LLM token. Only available when streaming is enabled."""
+
+            # Remember the last n tokens, where n = len(answer_prefix_tokens)
+            self.append_to_last_tokens(token)
+
+            # Check if the last n tokens match the answer_prefix_tokens list ...
+            if self.check_if_answer_reached():
+                self.answer_reached = True
+                if self.stream_prefix:
+                    for t in self.last_tokens:
+                        self.q.put(token)
+                return
+
+            # ... if yes, then print tokens from now on
+            if self.answer_reached:
+                self.q.put(token)
+
 
     def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session):
         q = Queue()
@@ -445,7 +523,7 @@ with gr.Blocks(
         #------- end of agent definition -------#
         async def task(prompt):
             #definition of llm used for bot
-            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True)
+            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
             agent_kwargs = {
                 "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
             }
@@ -456,7 +534,7 @@ with gr.Blocks(
                 stop=["\nObservation:"],
                 allowed_tools=tool_names
             )
-            agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, callbacks=[MyCallbackHandler(q)], return_intermediate_steps=True)
+            agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
             ret = await agent_executor.arun(prompt)
             q.put(job_done)
             return ret

@@ -5,7 +5,7 @@ from firebase_admin import firestore
 import gradio as gr
 import langchain
 from langchain import PromptTemplate
-from langchain.agents import AgentExecutor, AgentOutputParser, AgentType, LLMSingleActionAgent, initialize_agent, Tool, ZeroShotAgent
+from langchain.agents import AgentExecutor, AgentOutputParser, AgentType, BaseMultiActionAgent, LLMSingleActionAgent, initialize_agent, Tool, ZeroShotAgent
 from langchain.chains import LLMChain
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chat_models import ChatOpenAI
@@ -450,7 +450,7 @@ with gr.Blocks(
                 "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
             }
             llm_chain = LLMChain(llm=bot_llm, prompt=prompt_template)
-            agent = LLMSingleActionAgent(
+            agent = BaseMultiActionAgent(
                 llm_chain=llm_chain,
                 output_parser=output_parser,
                 stop=["\nObservation:"],

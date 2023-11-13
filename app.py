@@ -442,7 +442,58 @@ with gr.Blocks(
         )
 
         output_parser = CustomOutputParser()
+
+        class FakeAgent(BaseMultiActionAgent): #https://python.langchain.com/docs/modules/agents/how_to/custom_multi_action_agent
+            """Fake Custom Agent."""
+
+            @property
+            def input_keys(self):
+                return ["input"]
+
+            def plan(
+                self, intermediate_steps: List[Tuple[AgentAction, str]], **kwargs: Any
+            ) -> Union[List[AgentAction], AgentFinish]:
+                """Given input, decided what to do.
+
+                Args:
+                    intermediate_steps: Steps the LLM has taken to date,
+                        along with observations
+                    **kwargs: User inputs.
+
+                Returns:
+                    Action specifying what tool to use.
+                """
+                if len(intermediate_steps) == 0:
+                    return [
+                        AgentAction(tool="Search", tool_input=kwargs["input"], log=""),
+                        AgentAction(tool="RandomWord", tool_input=kwargs["input"], log=""),
+                    ]
+                else:
+                    return AgentFinish(return_values={"output": "bar"}, log="")
+
+            async def aplan(
+                self, intermediate_steps: List[Tuple[AgentAction, str]], **kwargs: Any
+            ) -> Union[List[AgentAction], AgentFinish]:
+                """Given input, decided what to do.
+
+                Args:
+                    intermediate_steps: Steps the LLM has taken to date,
+                        along with observations
+                    **kwargs: User inputs.
+
+                Returns:
+                    Action specifying what tool to use.
+                """
+                if len(intermediate_steps) == 0:
+                    return [
+                        AgentAction(tool="Search", tool_input=kwargs["input"], log=""),
+                        AgentAction(tool="RandomWord", tool_input=kwargs["input"], log=""),
+                    ]
+                else:
+                    return AgentFinish(return_values={"output": "bar"}, log="")
+
         #------- end of agent definition -------#
+
         async def task(prompt):
             #definition of llm used for bot
             bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
@@ -450,12 +501,13 @@ with gr.Blocks(
                 "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
             }
             llm_chain = LLMChain(llm=bot_llm, prompt=prompt_template)
-            agent = BaseMultiActionAgent(
-                llm_chain=llm_chain,
-                output_parser=output_parser,
-                stop=["\nObservation:"],
-                allowed_tools=tool_names
-            )
+            agent = FakeAgent()
+            # LLMSingleActionAgent(
+            #     llm_chain=llm_chain,
+            #     output_parser=output_parser,
+            #     stop=["\nObservation:"],
+            #     allowed_tools=tool_names
+            # )
             agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory, verbose=True)
             ret = await agent_executor.arun(prompt)
             q.put(job_done)

@@ -264,25 +264,6 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     ##----------------------- backend   (llm stuff)-----------------------##
-    class MyCallbackHandler(BaseCallbackHandler):
-        def __init__(self, q):
-            self.q = q
-            self.last_tokens = ""
-            self.check_next_tokens = True
-            self.put_until_newline = False
-        def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
-            if(token == "\n"):
-                self.check_next_tokens = True
-                if(self.put_until_newline):
-                    self.q.put("\n")
-                self.put_until_newline = False
-            if(check_next_tokens):
-                self.last_tokens.append(token)
-                if(self.last_tokens == "Action:" or self.last_tokens == "Final Answer:"):
-                    self.put_until_newline = True
-            if(self.put_until_newline):
-                self.q.put(token)
-
     def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session):
         q = Queue()
         job_done = object()
@@ -364,7 +345,7 @@ with gr.Blocks(
         ##----------------------- end of tools -----------------------##
         #------- agent definition -------#
         # Set up the base template
-        template = user_prompt + """Complete the user's request as best you can. You have access to the following tools:
+        template = user_prompt + """Respond the user as best you can. You have access to the following tools:
 
         {tools}
 
@@ -423,6 +404,7 @@ with gr.Blocks(
                 # Check if agent should finish
                 if "Final Answer:" in llm_output:
                     print('inside final answer')
+                    q.put(llm_output.split("Final Answer:")[-1])
                     return AgentFinish(
                         # Return values is generally always a dictionary with a single `output` key
                         # It is not recommended to try anything else at the moment :)
@@ -434,6 +416,7 @@ with gr.Blocks(
                 match = re.search(regex, llm_output, re.DOTALL)
                 if not match:
                     print('inside no match')
+                    q.put(llm_output.split("Final Answer:")[-1])
                     # raise ValueError(f"Could not parse LLM output: `{llm_output}`")
                     return AgentFinish(
                         # Return values is generally always a dictionary with a single `output` key
@@ -445,6 +428,7 @@ with gr.Blocks(
                 action_input = match.group(2)
                 # Return the action and action input
                 print('inside return action')
+                q.put("Using tool:" + action)
                 return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
         prompt_template = CustomPromptTemplate(

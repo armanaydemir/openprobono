@@ -283,7 +283,9 @@ with gr.Blocks(
 
     ##----------------------- backend   (llm stuff)-----------------------##
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
+        print(history)
         if(history[-1][0].strip() == ""):
+            print("shorcut")
             history[-1][1] = "Hi, how can I assist you today?"
             return history 
         q = Queue()

@@ -283,9 +283,7 @@ with gr.Blocks(
 
     ##----------------------- backend   (llm stuff)-----------------------##
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
-        print(history)
         if(history[-1][0].strip() == ""):
-            print("shorcut")
             history[-1][1] = "Hi, how can I assist you today?"
             yield history 
         else:
@@ -466,7 +464,7 @@ with gr.Blocks(
             #------- end of agent definition -------#
             async def task(prompt):
                 #definition of llm used for bot
-                bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5)
+                bot_llm = ChatOpenAI(temperature=0.0, model='gpt-4', request_timeout=60*5)
                 agent_kwargs = {
                     "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
                 }

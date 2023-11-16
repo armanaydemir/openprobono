@@ -287,7 +287,7 @@ with gr.Blocks(
         if(history[-1][0].strip() == ""):
             print("shorcut")
             history[-1][1] = "Hi, how can I assist you today?"
-            return history 
+            yield history 
         else:
             q = Queue()
             job_done = object()

@@ -372,14 +372,14 @@ with gr.Blocks(
 
         Use the following format:
 
-        Question: the input query from the user you must answer
+        Question: the input question you must answer
         Thought: you should always think about what to do
         Action: the action to take, should be one of [{tool_names}]
         Action Input: the input to the action
         Observation: the result of the action
         ... (this Thought/Action/Action Input/Observation can repeat N times)
         Thought: I now know the final answer
-        Final Answer: the final answer to the original input question, including your sources. Always return a final answer.
+        Final Answer: the final answer to the original input question, including your sources.
 
         These were previous tasks you completed:
 
@@ -434,7 +434,7 @@ with gr.Blocks(
                 match = re.search(regex, llm_output, re.DOTALL)
                 if not match:
                     print('inside no match')
-                    q.put(llm_output.split("Question:")[-1])
+                    q.put(llm_output.split("Question:")[-1].split("\n")[0])
                     # raise ValueError(f"Could not parse LLM output: `{llm_output}`")
                     return AgentFinish(
                         # Return values is generally always a dictionary with a single `output` key

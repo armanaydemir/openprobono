@@ -427,7 +427,7 @@ with gr.Blocks(
                 action = match.group(1).strip()
                 action_input = match.group(2)
                 # Return the action and action input
-                q.put("Processing...")
+                q.put("Processing...\n")
                 return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
         prompt_template = CustomPromptTemplate(

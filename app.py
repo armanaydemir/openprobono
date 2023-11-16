@@ -196,49 +196,66 @@ with gr.Blocks(
     example_prompts_button = gr.Button("Example Prompts")
 
     with gr.Accordion("Details", open=False) as details_accordion:
-        with gr.Row() as tool_row:
-            t1txt = gr.Textbox(
-                value="site:*.gov | site:*.edu",
-                scale=4,
-                label="Enter list of whitelisted urls for search with google syntax",
-                show_label=True,
-                container=True,
-                interactive=True,
-            )
-            t1prompt = gr.Textbox(
-                value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-                scale=4,
-                label="Enter prompt for search",
-                show_label=True,
-                container=True,
-                interactive=True,
-            )
-        with gr.Row() as tool_row:
-            t2txt = gr.Textbox(
-                value="site:*case.law",
-                scale=4,
-                label="Enter list of whitelisted urls for search with google syntax",
-                show_label=True,
-                container=True,
-                interactive=True,
-            )
-            t2prompt = gr.Textbox(
-                value="Use for finding case law. Always cite your sources.",
-                scale=4,
-                label="Enter prompt for search",
-                show_label=True,
-                container=True,
-                interactive=True,
-            )
-        with gr.Row() as user_prompt_row:
-            user_prompt = gr.Textbox(
-                value="",
-                scale=4,
-                label="Enter additional system prompt",
-                show_label=True,
-                container=True,
-                interactive=True,
-            )
+        if("admin" in root_path):
+            with gr.Row() as tool_row:
+                t1name = gr.Textbox(
+                    value="government-search",
+                    scale=4,
+                    label="Enter name for tool",
+                    show_label=True,
+                    container=True,
+                    interactive=True,
+                )
+                t1txt = gr.Textbox(
+                    value="site:*.gov | site:*.edu",
+                    scale=4,
+                    label="Enter list of whitelisted urls for search with google syntax",
+                    show_label=True,
+                    container=True,
+                    interactive=True,
+                )
+                t1prompt = gr.Textbox(
+                    value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+                    scale=4,
+                    label="Enter prompt for search",
+                    show_label=True,
+                    container=True,
+                    interactive=True,
+                )
+            with gr.Row() as tool_row:
+                 t2name = gr.Textbox(
+                    value="case-search",
+                    scale=4,
+                    label="Enter name for tool",
+                    show_label=True,
+                    container=True,
+                    interactive=True,
+                )
+                t2txt = gr.Textbox(
+                    value="site:*case.law",
+                    scale=4,
+                    label="Enter list of whitelisted urls for search with google syntax",
+                    show_label=True,
+                    container=True,
+                    interactive=True,
+                )
+                t2prompt = gr.Textbox(
+                    value="Use for finding case law. Always cite your sources.",
+                    scale=4,
+                    label="Enter prompt for search",
+                    show_label=True,
+                    container=True,
+                    interactive=True,
+                )
+            with gr.Row() as user_prompt_row:
+                user_prompt = gr.Textbox(
+                    value="",
+                    scale=4,
+                    label="Enter additional system prompt",
+                    show_label=True,
+                    container=True,
+                    interactive=True,
+                )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
         clearopenai = gr.ClearButton([txt, openai_chat])
 
@@ -264,7 +281,7 @@ with gr.Blocks(
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
 
     ##----------------------- backend   (llm stuff)-----------------------##
-    def openai_bot(history, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session):
+    def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
         q = Queue()
         job_done = object()
 
@@ -329,13 +346,13 @@ with gr.Blocks(
         #Definition and descriptions of tools aviailable to the bot
         tools = [
             Tool(
-                name="government-search",
+                name=t1name,
                 func=gov_search,
                 coroutine=async_gov_search,
                 description=t1prompt,
             ),
             Tool(
-                name="case-search",
+                name=t2name,
                 func=case_search,
                 coroutine=async_case_search,
                 description=t2prompt,
@@ -475,9 +492,9 @@ with gr.Blocks(
     ##----------------------- end of backend  (llm stuff)-----------------------##
 
     #storing conversations and emails in firebase
-    def store_conversation(conversation, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session):
+    def store_conversation(conversation, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
         (human, ai) = conversation[-1]
-        data = {"human": human, "ai": ai, 't1txt': t1txt, "t1prompt":t1prompt, "t2txt":t2txt, "t2prompt":t2prompt, 'user_prompt': user_prompt, 'timestamp':  firestore.SERVER_TIMESTAMP}
+        data = {"human": human, "ai": ai, "t1name": t1name, 't1txt': t1txt, "t1prompt":t1prompt, "t2name": t2name, "t2txt":t2txt, "t2prompt":t2prompt, 'user_prompt': user_prompt, 'timestamp':  firestore.SERVER_TIMESTAMP}
         db.collection(root_path + "conversations").document(session).collection('conversations').document("msg" + str(len(conversation))).set(data)
 
     def store_email(email, session):
@@ -493,10 +510,10 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], [openai_chat]
+        openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], None, queue=False)
+    ).then(store_conversation, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], None, queue=False)
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
@@ -506,11 +523,11 @@ with gr.Blocks(
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
-        openai_bot, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], [openai_chat]
+        openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(
-        store_conversation, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], None, queue=False
+        store_conversation, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], None, queue=False
     )
 
     #hitting enter and clicking submit for email

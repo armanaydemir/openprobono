@@ -223,7 +223,7 @@ with gr.Blocks(
                     interactive=True,
                 )
             with gr.Row() as tool_row:
-                 t2name = gr.Textbox(
+                t2name = gr.Textbox(
                     value="case-search",
                     scale=4,
                     label="Enter name for tool",
@@ -438,7 +438,7 @@ with gr.Blocks(
                     return AgentFinish(
                         # Return values is generally always a dictionary with a single `output` key
                         # It is not recommended to try anything else at the moment :)
-                        return_values={"output": llm_output.split("Question:")[-1]},
+                        return_values={"output": llm_output.split("Question:")[-1].split("\n")[0]},
                         log=llm_output,
                     )
                 action = match.group(1).strip()

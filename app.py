@@ -440,12 +440,12 @@ with gr.Blocks(
                     match = re.search(regex, llm_output, re.DOTALL)
                     if not match:
                         print('inside no match')
-                        q.put(llm_output.split("Question:")[-1].split("\n")[0])
+                        q.put(llm_output) #.split("Question:")[-1].split("\n")[0])
                         # raise ValueError(f"Could not parse LLM output: `{llm_output}`")
                         return AgentFinish(
                             # Return values is generally always a dictionary with a single `output` key
                             # It is not recommended to try anything else at the moment :)
-                            return_values={"output": llm_output.split("Question:")[-1].split("\n")[0]},
+                            return_values={"output": llm_output}, #.split("Question:")[-1].split("\n")[0]},
                             log=llm_output,
                         )
                     action = match.group(1).strip()

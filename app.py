@@ -423,22 +423,23 @@ with gr.Blocks(
                     print(llm_output)
                     print('inside parse')
                     llm_output = '\n' + llm_output
+                    q.put(llm_output)
                     # Check if agent should finish
-                    # if "Final Answer:" in llm_output:
-                    #     print('inside final answer')
-                    #     q.put(llm_output.split("Final Answer:")[-1])
-                    #     return AgentFinish(
-                    #         # Return values is generally always a dictionary with a single `output` key
-                    #         # It is not recommended to try anything else at the moment :)
-                    #         return_values={"output": llm_output.split("Final Answer:")[-1]},
-                    #         log=llm_output,
-                    #     )
+                    if "Final Answer:" in llm_output:
+                        print('inside final answer')
+                        # q.put(llm_output.split("Final Answer:")[-1])
+                        return AgentFinish(
+                            # Return values is generally always a dictionary with a single `output` key
+                            # It is not recommended to try anything else at the moment :)
+                            return_values={"output": llm_output.split("Final Answer:")[-1]},
+                            log=llm_output,
+                        )
                     # Parse out the action and action input
                     regex = r"Action\s*\d*\s*:(.*?)\nAction\s*\d*\s*Input\s*\d*\s*:[\s]*(.*)"
                     match = re.search(regex, llm_output, re.DOTALL)
                     if not match:
                         print('inside no match')
-                        q.put(llm_output) #.split("Question:")[-1].split("\n")[0])
+                        # q.put(llm_output) #.split("Question:")[-1].split("\n")[0])
                         # raise ValueError(f"Could not parse LLM output: `{llm_output}`")
                         return AgentFinish(
                             # Return values is generally always a dictionary with a single `output` key
@@ -449,7 +450,7 @@ with gr.Blocks(
                     action = match.group(1).strip()
                     action_input = match.group(2)
                     # Return the action and action input
-                    q.put("Processing...\n")
+                    # q.put("Processing...\n")
                     return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
             prompt_template = CustomPromptTemplate(

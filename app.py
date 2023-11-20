@@ -192,9 +192,9 @@ with gr.Blocks(
     example_prompts_button = gr.Button("Example Prompts")
 
     with gr.Accordion("Details", open=False) as details_accordion:
-        with gr.Row() as tool_row:
+        with gr.Row(visible=False) as tool_row:
             t1txt = gr.Textbox(
-                value="site:*.gov | site:*.edu",
+                value="site:*.gov | site:*.edu | site:*scholar.google.com",
                 scale=4,
                 label="Enter list of whitelisted urls for search with google syntax",
                 show_label=True,
@@ -209,9 +209,9 @@ with gr.Blocks(
                 container=True,
                 interactive=True,
             )
-        with gr.Row() as tool_row:
+        with gr.Row(visible=False) as tool_row:
             t2txt = gr.Textbox(
-                value="site:*case.law",
+                value="site:*case.law | site:*.gov | site:*.edu | site:*courtlistener.com | site:*scholar.google.com",
                 scale=4,
                 label="Enter list of whitelisted urls for search with google syntax",
                 show_label=True,
@@ -278,15 +278,6 @@ with gr.Blocks(
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
 
         ##----------------------- tools -----------------------##
-
-        # #General Search (no filters)
-        # def general_search(q):
-        #     data = {"search": q, 'timestamp': firestore.SERVER_TIMESTAMP}
-        #     db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
-        #     return filtered_search(GoogleSearch({
-        #         'q': q,
-        #         'num': 5
-        #         }).get_dict())
 
         def gov_search(q):
             data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}

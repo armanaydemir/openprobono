@@ -208,7 +208,7 @@ with gr.Blocks(
                     interactive=True,
                 )
                 t1txt = gr.Textbox(
-                    value="site:*.gov | site:*.edu",
+                    value="site:*.gov | site:*.edu | site:*scholar.google.com",
                     scale=4,
                     label="Enter list of whitelisted urls for search with google syntax",
                     show_label=True,
@@ -233,7 +233,7 @@ with gr.Blocks(
                     interactive=True,
                 )
                 t2txt = gr.Textbox(
-                    value="site:*case.law",
+                    value="site:*case.law | site:*.gov | site:*.edu | site:*courtlistener.com | site:*scholar.google.com",
                     scale=4,
                     label="Enter list of whitelisted urls for search with google syntax",
                     show_label=True,

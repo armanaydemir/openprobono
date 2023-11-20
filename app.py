@@ -226,7 +226,7 @@ with gr.Blocks(
                 container=True,
                 interactive=True,
             )
-        with gr.Row() as user_prompt_row:
+        with gr.Row(visible=False) as user_prompt_row:
             user_prompt = gr.Textbox(
                 value="",
                 scale=4,

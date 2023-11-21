@@ -327,9 +327,9 @@ with gr.Blocks(
         ]
         ##----------------------- end of tools -----------------------##
 
-        system_message = 'You are a helpful AI assistant. Always use the tools to get information.'
+        system_message = 'You are a helpful AI assistant.'
         system_message += user_prompt
-        system_message += '. ALWAYS return a "SOURCES" part in your answer.'
+        system_message += '. ALWAYS return a "SOURCES" part in your answer that you recieve from the tools.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
@@ -369,6 +369,7 @@ with gr.Blocks(
 
     #storing conversations and emails in firebase
     def store_conversation(conversation, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session):
+        print('storing convo')
         (human, ai) = conversation[-1]
         data = {"human": human, "ai": ai, 't1txt': t1txt, "t1prompt":t1prompt, "t2txt":t2txt, "t2prompt":t2prompt, 'user_prompt': user_prompt, 'timestamp':  firestore.SERVER_TIMESTAMP}
         db.collection(root_path + "conversations").document(session).collection('conversations').document("msg" + str(len(conversation))).set(data)

@@ -201,7 +201,7 @@ with gr.Blocks(
                 container=True,
                 interactive=True,
             )
-            t1prompt = t1txt = gr.Textbox(
+            t1prompt = gr.Textbox(
                 value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
                 scale=4,
                 label="Enter prompt for search",
@@ -329,7 +329,7 @@ with gr.Blocks(
 
         system_message = 'You are a helpful AI assistant.'
         system_message += user_prompt
-        system_message += '. ALWAYS return a "SOURCES" part in your answer that you recieve from the tools.'
+        system_message += '. If you used a tool, ALWAYS return a "SOURCES" part in your answer.'
         agent_kwargs = {
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
@@ -390,7 +390,9 @@ with gr.Blocks(
         openai_bot, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], None, queue=False)
+    ).then(
+        store_conversation, [openai_chat, t1txt, t1prompt, t2txt, t2prompt, user_prompt, session], None, queue=False
+    )
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(

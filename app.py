@@ -327,7 +327,7 @@ with gr.Blocks(
         ]
         ##----------------------- end of tools -----------------------##
 
-        system_message = 'You are a helpful AI assistant. '
+        system_message = 'You are a helpful AI assistant. Always use the tools to get information.'
         system_message += user_prompt
         system_message += '. ALWAYS return a "SOURCES" part in your answer.'
         agent_kwargs = {

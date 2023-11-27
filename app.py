@@ -163,7 +163,7 @@ with gr.Blocks(
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg,
     ),
-    css="footer {visibility: hidden}",
+    #css="footer {visibility: hidden}",
     analytics_enabled=False
     ) as app:
 

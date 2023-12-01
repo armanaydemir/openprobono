@@ -13,7 +13,7 @@ from langchain.vectorstores import FAISS
 langchain.debug = True
 
 # Two Karpathy lecture videos
-urls = ["https://youtu.be/kCc8FmEb1nY", "https://youtu.be/VMj-3S1tku0"]
+urls = ["https://www.youtube.com/watch?v=QLQ87Rk3Zwk"]
 
 # Directory to save audio files
 save_dir = "./audio/"

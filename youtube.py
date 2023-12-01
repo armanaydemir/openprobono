@@ -21,15 +21,17 @@ print('debug1')
 loader = GenericLoader(audio, OpenAIWhisperParser())
 print('debug2')
 docs = loader.load()
-
+print('debug3')
 
 # Combine doc
 combined_docs = [doc.page_content for doc in docs]
 text = " ".join(combined_docs)
+print('debug4')
 
 # Split them
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=150)
 splits = text_splitter.split_text(text)
+print('debug5')
 
 # Build an index
 embeddings = OpenAIEmbeddings()

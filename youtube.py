@@ -13,10 +13,13 @@ from langchain.vectorstores import FAISS
 urls = ["https://youtu.be/kCc8FmEb1nY", "https://youtu.be/VMj-3S1tku0"]
 
 # Directory to save audio files
-save_dir = "./"
+save_dir = "./audio/"
 
+audio = YoutubeAudioLoader(urls, save_dir)
+print('debug1')
 # Transcribe the videos to text
-loader = GenericLoader(YoutubeAudioLoader(urls, save_dir), OpenAIWhisperParser())
+loader = GenericLoader(audio, OpenAIWhisperParser())
+print('debug2')
 docs = loader.load()
 
 

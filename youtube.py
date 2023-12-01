@@ -1,3 +1,4 @@
+import langchain
 from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
 from langchain.document_loaders.generic import GenericLoader
 from langchain.document_loaders.parsers import (

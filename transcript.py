@@ -19,7 +19,7 @@ Question: {question}
 Response:"""
 prompt_template = PromptTemplate.from_template(template)
 
-PROMPT = PromptTemplate( template=prompt_template, input_variables=["context", "question"] )
+PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"], validate_template=False)
 chain_type_kwargs = {"prompt": PROMPT} 
 
 def process(url, query):

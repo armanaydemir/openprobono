@@ -12,6 +12,12 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 import gradio as gr
 
+template = """Respond in the same style as the context below.
+{context}
+Question: {question}
+Response:"""
+rag_prompt_custom = PromptTemplate.from_template(template)
+
 def process(url, query):
     loader = YoutubeLoader.from_youtube_url(
         url, add_video_info=False
@@ -35,6 +41,7 @@ def process(url, query):
     qa_chain = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
         chain_type="stuff",
+        prompt=rag_prompt_custom,
         retriever=vectordb.as_retriever(),
     )
 
@@ -73,7 +80,7 @@ with gr.Blocks(
 
     with gr.Row() as output_row:
         output = gr.Textbox(
-            scale=4,
+            scale=40,
             label="input",
             show_label=False,
             placeholder="AI response",

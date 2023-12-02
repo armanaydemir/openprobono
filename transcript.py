@@ -43,7 +43,7 @@ def process(history, url):
         (human, ai) = history[i]
         history_langchain_format.add_user_message(human)
         history_langchain_format.add_ai_message(ai)
-    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True, output_key='answer')
+    memory = ConversationBufferMemory(memory_key='memory', return_messages=True, output_key='answer')
 
     prompt_template = """Respond in the same style as the context below.
     {context}

@@ -100,7 +100,7 @@ with gr.Blocks(
 
     def add_text(history, text):
         history = history + [(text, None)]
-        return history, gr.update(value="", interactive=False)
+        return history
 
     with gr.Row() as url_row:
         url_txt = gr.Textbox(
@@ -123,7 +123,7 @@ with gr.Blocks(
 
     subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False
     ).then(
-        add_text, [chat, txt], [chat, txt]
+        add_text, [chat, txt], chat
     ).then(
         process, [chat, url_txt], chat
     ).then(

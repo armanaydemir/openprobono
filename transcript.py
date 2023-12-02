@@ -48,12 +48,12 @@ def process(history, url):
     prompt_template = """Respond in the same style as the context below.
     {context}
 
-    {chat_history}
+    {memory}
     Question: {question}
     Response:"""
 
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "chat_history", "question"])
-    chain_type_kwargs = {"prompt": PROMPT} 
+    chain_type_kwargs = {"prompt": PROMPT, "memory": memory} 
 
     # qa_chat = ConversationalRetrievalChain.from_llm(
     #     llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
@@ -65,7 +65,6 @@ def process(history, url):
     qa_chain = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
         chain_type="stuff",
-        chat_history=memory,
         retriever=vectordb.as_retriever(),
         chain_type_kwargs=chain_type_kwargs,
     )

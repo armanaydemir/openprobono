@@ -60,7 +60,7 @@ def process(history, url):
         memory=memory,
         retriever=retriever, 
         return_source_documents=False,
-        chain_type_kwargs=chain_type_kwargs,
+        combine_docs_chain_kwargs=chain_type_kwargs,
     )
 
     # qa_chain = RetrievalQA.from_chain_type(

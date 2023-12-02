@@ -21,7 +21,7 @@ save_dir = "./audio/"
 audio = YoutubeAudioLoader(urls, save_dir)
 print('debug1')
 # Transcribe the videos to text
-loader = GenericLoader(audio, OpenAIWhisperParser().lazy_parse)
+loader = GenericLoader(audio, OpenAIWhisperParser.lazy_parse())
 print('debug2')
 docs = loader.load()
 print('debug3')

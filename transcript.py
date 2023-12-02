@@ -71,7 +71,7 @@ def process(history, url):
     #     chain_type_kwargs=chain_type_kwargs,
     # )
     query = history[-1][0]
-    history[-1][1] = qa_chat.run(query)
+    history[-1][1] = qa_chat.run({'question':query, 'chat_history':history_langchain_format})
     return history
 
 with gr.Blocks(

@@ -38,40 +38,44 @@ def process(history, url):
     retriever = vectordb.as_retriever()
 
     # Build a memory
-    history_langchain_format = ChatMessageHistory()
+    history = ""
     for i in range(0, len(history)-1):
         (human, ai) = history[i]
-        history_langchain_format.add_user_message(human)
-        history_langchain_format.add_ai_message(ai)
-    memory = ConversationBufferMemory(memory_key='memory', return_messages=True, output_key='answer')
+        history += human + "\n" + ai + "\n"
+    # history_langchain_format = ChatMessageHistory()
+    # for i in range(0, len(history)-1):
+    #     (human, ai) = history[i]
+    #     history_langchain_format.add_user_message(human)
+    #     history_langchain_format.add_ai_message(ai)
+    # memory = ConversationBufferMemory(memory_key='memory', return_messages=True, output_key='answer')
 
     prompt_template = """Respond in the same style as the context below.
     {context}
 
-    {memory}
+    Chat History:
+    """ + history + """
     Question: {question}
     Response:"""
 
-    PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "memory", "question"])
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     chain_type_kwargs = {"prompt": PROMPT} 
 
-    qa_chat = ConversationalRetrievalChain.from_llm(
-        llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
-        memory=memory,
-        retriever=retriever, 
-        return_source_documents=False,
-        combine_docs_chain_kwargs=chain_type_kwargs,
-    )
-
-    # qa_chain = RetrievalQA.from_chain_type(
+    # qa_chat = ConversationalRetrievalChain.from_llm(
     #     llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
-    #     chain_type="stuff",
     #     memory=memory,
-    #     retriever=vectordb.as_retriever(),
-    #     chain_type_kwargs=chain_type_kwargs,
+    #     retriever=retriever, 
+    #     return_source_documents=False,
+    #     combine_docs_chain_kwargs=chain_type_kwargs,
     # )
+
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
+        chain_type="stuff",
+        retriever=vectordb.as_retriever(),
+        chain_type_kwargs=chain_type_kwargs,
+    )
     query = history[-1][0]
-    history[-1][1] = qa_chat.run({'question':query, 'chat_history':history_langchain_format})
+    history[-1][1] = qa_chain.run(query)
     return history
 
 with gr.Blocks(

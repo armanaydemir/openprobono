@@ -55,22 +55,23 @@ def process(history, url):
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "memory", "question"])
     chain_type_kwargs = {"prompt": PROMPT} 
 
-    # qa_chat = ConversationalRetrievalChain.from_llm(
-    #     llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
-    #     memory=memory,
-    #     retriever=retriever, 
-    #     return_source_documents=False,
-    # )
-
-    qa_chain = RetrievalQA.from_chain_type(
+    qa_chat = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
-        chain_type="stuff",
         memory=memory,
-        retriever=vectordb.as_retriever(),
+        retriever=retriever, 
+        return_source_documents=False,
         chain_type_kwargs=chain_type_kwargs,
     )
+
+    # qa_chain = RetrievalQA.from_chain_type(
+    #     llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
+    #     chain_type="stuff",
+    #     memory=memory,
+    #     retriever=vectordb.as_retriever(),
+    #     chain_type_kwargs=chain_type_kwargs,
+    # )
     query = history[-1][0]
-    history[-1][1] = qa_chain.run(query)
+    history[-1][1] = qa_chat.run(query)
     return history
 
 with gr.Blocks(

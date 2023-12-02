@@ -55,7 +55,7 @@ def process(history, url):
         history_langchain_format.add_ai_message(ai)
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True, output_key='answer')
 
-    qachat = ConversationalRetrievalChain.from_llm(
+    qa_chat = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
         memory=memory,
         retriever=retriever, 
@@ -65,7 +65,7 @@ def process(history, url):
 
 
     query = history[-1][0]
-    history[-1][1] = qa_chain.run(query)
+    history[-1][1] = qa_chat.run(query)
     return history
 
 with gr.Blocks(

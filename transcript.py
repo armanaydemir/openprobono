@@ -1,4 +1,15 @@
 from langchain.document_loaders import YoutubeLoader
+import langchain
+from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
+from langchain.document_loaders.generic import GenericLoader
+from langchain.document_loaders.parsers import (
+    OpenAIWhisperParser
+)
+from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import FAISS
 
 loader = YoutubeLoader.from_youtube_url(
     "https://www.youtube.com/watch?v=QsYGlZkevEg", add_video_info=False

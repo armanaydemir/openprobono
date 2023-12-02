@@ -17,7 +17,10 @@ template = """Respond in the same style as the context below.
 {context}
 Question: {question}
 Response:"""
-rag_prompt_custom = PromptTemplate.from_template(template)
+prompt_template = PromptTemplate.from_template(template)
+
+PROMPT = PromptTemplate( template=prompt_template, input_variables=["context", "question"] )
+chain_type_kwargs = {"prompt": PROMPT} 
 
 def process(url, query):
     loader = YoutubeLoader.from_youtube_url(
@@ -38,12 +41,13 @@ def process(url, query):
     embeddings = OpenAIEmbeddings()
     vectordb = FAISS.from_texts(splits, embeddings)
 
+    
     # Build a QA chain
     qa_chain = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
         chain_type="stuff",
-        prompt=rag_prompt_custom,
         retriever=vectordb.as_retriever(),
+        chain_type_kwargs=chain_type_kwargs,
     )
 
     return qa_chain.run(query)

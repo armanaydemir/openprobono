@@ -15,13 +15,15 @@ import gradio as gr
 
 prompt_template = """Respond in the same style as the context below.
 {context}
+
+{chat_history}
 Question: {question}
 Response:"""
 
-PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "chat_history", "question"])
 chain_type_kwargs = {"prompt": PROMPT} 
 
-def process(url, query):
+def process(history, url):
     loader = YoutubeLoader.from_youtube_url(
         url, add_video_info=False
     )
@@ -39,17 +41,28 @@ def process(url, query):
     # Build an index
     embeddings = OpenAIEmbeddings()
     vectordb = FAISS.from_texts(splits, embeddings)
+    retriever = vectordb.as_retriever()
 
-    
-    # Build a QA chain
-    qa_chain = RetrievalQA.from_chain_type(
+    # Build a memory
+    history_langchain_format = ChatMessageHistory()
+    for i in range(0, len(history)-1):
+        (human, ai) = history[i]
+        history_langchain_format.add_user_message(human)
+        history_langchain_format.add_ai_message(ai)
+    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True, output_key='answer')
+
+    qachat = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
-        chain_type="stuff",
-        retriever=vectordb.as_retriever(),
-        chain_type_kwargs=chain_type_kwargs,
+        memory=memory,
+        retriever=retriever, 
+        return_source_documents=False,
     )
+    
 
-    return qa_chain.run(query)
+
+    query = history[-1][0]
+    history[-1][1] = qa_chain.run(query)
+    return history
 
 with gr.Blocks(
     title="Youtube QA",
@@ -62,6 +75,18 @@ with gr.Blocks(
     css="footer {visibility: hidden}",
     analytics_enabled=False
     ) as app:
+
+    with gr.Row() as chat_row:
+        chat = gr.Chatbot(
+            [],
+            elem_id="chat",
+            label="Youtube QA",
+            show_label=True,
+        )
+
+    def add_text(history, text):
+        history = history + [(text, None)]
+        return history, gr.update(value="", interactive=False)
 
     with gr.Row() as url_row:
         url_txt = gr.Textbox(
@@ -82,16 +107,11 @@ with gr.Blocks(
         )
         subbtn = gr.Button("Submit", variant="primary")
 
-    with gr.Row() as output_row:
-        output = gr.TextArea(
-            scale=4,
-            label="input",
-            show_label=False,
-            placeholder="AI response",
-            container=False,
-        )
-
-    subbtn.click(process, [url_txt, txt], outputs=[output])
+    subbtn.click(
+        add_text, [chat, txt], [chat, txt]
+    ).then(
+        process, [chat, url], chat
+    )
     
 
 app.queue()

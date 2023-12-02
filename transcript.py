@@ -111,10 +111,13 @@ with gr.Blocks(
         )
         subbtn = gr.Button("Submit", variant="primary")
 
-    subbtn.click(
+    subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False
+    ).then(
         add_text, [chat, txt], [chat, txt]
     ).then(
         process, [chat, url_txt], chat
+    ).then(
+        lambda: gr.update(interactive=True), None, [txt], queue=False
     )
     
 

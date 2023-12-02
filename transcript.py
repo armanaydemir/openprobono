@@ -11,6 +11,10 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder
+from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
+from langchain.chains import ConversationalRetrievalChain
 import gradio as gr
 
 prompt_template = """Respond in the same style as the context below.
@@ -110,7 +114,7 @@ with gr.Blocks(
     subbtn.click(
         add_text, [chat, txt], [chat, txt]
     ).then(
-        process, [chat, url], chat
+        process, [chat, url_txt], chat
     )
     
 

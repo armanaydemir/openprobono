@@ -40,10 +40,10 @@ def process(history, url):
     retriever = vectordb.as_retriever()
 
     # Build a memory
-    history = ""
+    history_txt = ""
     for i in range(0, len(history)-1):
         (human, ai) = history[i]
-        history += human + "\n" + ai + "\n"
+        history_txt += human + "\n" + ai + "\n"
     # history_langchain_format = ChatMessageHistory()
     # for i in range(0, len(history)-1):
     #     (human, ai) = history[i]
@@ -55,7 +55,7 @@ def process(history, url):
     {context}
 
     Chat History:
-    """ + history + """
+    """ + history_txt + """
     Question: {question}
     Response:"""
 

@@ -13,13 +13,12 @@ from langchain.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
 import gradio as gr
 
-template = """Respond in the same style as the context below.
+prompt_template = """Respond in the same style as the context below.
 {context}
 Question: {question}
 Response:"""
-prompt_template = PromptTemplate.from_template(template)
 
-PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"], validate_template=False)
+PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 chain_type_kwargs = {"prompt": PROMPT} 
 
 def process(url, query):

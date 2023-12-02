@@ -40,5 +40,5 @@ qa_chain = RetrievalQA.from_chain_type(
 )
 
 # Ask a question!
-query = "Hi!"
+query = "Hi! How many cousins do you have? "
 print(qa_chain.run(query))

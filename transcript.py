@@ -59,7 +59,7 @@ with gr.Blocks(
             show_label=False,
             placeholder="Enter youtube url",
             container=False,
-            type="url",
+            type="text",
         )
     with gr.Row() as input_row:
         txt = gr.Textbox(
@@ -83,4 +83,5 @@ with gr.Blocks(
     subbtn.click(process, [url_txt, txt], outputs=[output])
     
 
-
+app.queue()
+app.launch(share=True)

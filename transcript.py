@@ -17,16 +17,6 @@ from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from langchain.chains import ConversationalRetrievalChain
 import gradio as gr
 
-prompt_template = """Respond in the same style as the context below.
-{context}
-
-{chat_history}
-Question: {question}
-Response:"""
-
-PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "chat_history", "question"])
-chain_type_kwargs = {"prompt": PROMPT} 
-
 def process(history, url):
     loader = YoutubeLoader.from_youtube_url(
         url, add_video_info=False
@@ -55,17 +45,32 @@ def process(history, url):
         history_langchain_format.add_ai_message(ai)
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True, output_key='answer')
 
-    qa_chat = ConversationalRetrievalChain.from_llm(
+    prompt_template = """Respond in the same style as the context below.
+    {context}
+
+    {chat_history}
+    Question: {question}
+    Response:"""
+
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "chat_history", "question"])
+    chain_type_kwargs = {"prompt": PROMPT} 
+
+    # qa_chat = ConversationalRetrievalChain.from_llm(
+    #     llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
+    #     memory=memory,
+    #     retriever=retriever, 
+    #     return_source_documents=False,
+    # )
+
+    qa_chain = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0),
-        memory=memory,
-        retriever=retriever, 
-        return_source_documents=False,
+        chain_type="stuff",
+        chat_history=memory,
+        retriever=vectordb.as_retriever(),
+        chain_type_kwargs=chain_type_kwargs,
     )
-    
-
-
     query = history[-1][0]
-    history[-1][1] = qa_chat.run(query)
+    history[-1][1] = qa_chain.run(query)
     return history
 
 with gr.Blocks(

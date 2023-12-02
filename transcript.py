@@ -83,8 +83,8 @@ with gr.Blocks(
         subbtn = gr.Button("Submit", variant="primary")
 
     with gr.Row() as output_row:
-        output = gr.Textbox(
-            scale=40,
+        output = gr.TextArea(
+            scale=4,
             label="input",
             show_label=False,
             placeholder="AI response",

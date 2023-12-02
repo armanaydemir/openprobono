@@ -52,7 +52,7 @@ def process(history, url):
     Question: {question}
     Response:"""
 
-    PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "chat_history", "question"])
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "memory", "question"])
     chain_type_kwargs = {"prompt": PROMPT, "memory": memory} 
 
     # qa_chat = ConversationalRetrievalChain.from_llm(

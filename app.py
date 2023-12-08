@@ -148,7 +148,7 @@ with gr.Blocks(
     ),
     css="""
     footer {visibility: hidden}
-    #component-0 {max-height: 100%!important; height: 100%!important;}
+    #component-0 {min-height: 100%!important; max-height: 100%!important; height: 100%!important;}
     .gradio-container {max-width: 100%!important; width: 100%!important; max-height: 100%!important; height: 100%!important;}
     """,
     analytics_enabled=False

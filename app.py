@@ -163,12 +163,12 @@ with gr.Blocks(
         return history, gr.update(value="", interactive=False)
 
     gr.Markdown("OpenProBono")
-    with gr.Row(elem_id="chatbot") as the_row:
+    with gr.Row() as the_row:
         with gr.Column(scale=2) as chat_col:
             with gr.Row() as chat_row:
                 openai_chat = gr.Chatbot(
                     [],
-                    elem_id="chat",
+                    elem_id="chatbot",
                     label="OpenProBono",
                     show_label=False,
                 )

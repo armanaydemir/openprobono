@@ -168,7 +168,7 @@ with gr.Blocks(
         return history, gr.update(value="", interactive=False)
 
     gr.Markdown("OpenProBono")
-    with gr.Row(elem_id="therow") as the_row:
+    with gr.Row(elem_id="therow", min_height=600) as the_row:
         with gr.Column(scale=2, elem_id="chat_col") as chat_col:
             with gr.Row() as chat_row:
                 openai_chat = gr.Chatbot(

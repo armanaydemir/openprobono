@@ -146,7 +146,7 @@ with gr.Blocks(
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg,
     ),
-    css=".gradio-container {width: 100%!important;}",
+    css=".gradio-container {max-width: 100%!important; width: 100%!important;}",
     analytics_enabled=False
     ) as app:
 

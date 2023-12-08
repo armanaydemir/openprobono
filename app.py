@@ -135,23 +135,6 @@ example_prompts = {
     ]
 }
 
-def toggle_examples(state):
-    state = not state
-    #if examples are to be shown
-    if(state):
-        button_text = "Back"
-    #if examples are to be hidden
-    else:
-        button_text = "Example Prompts"
-    return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = state), state
-
-def hide_examples(state):
-    #if examples are currently shown, change state
-    if(state):
-        state = not state
-    button_text = "Example Prompts"
-    return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = not state), gr.update(visible = state), state
-
 def get_uuid_id():
     return str(uuid.uuid4())
 
@@ -172,30 +155,28 @@ with gr.Blocks(
     def add_text(history, text):
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
-
-    gr.Markdown("OpenProBono")
-    with gr.Row() as chat_row:
-        openai_chat = gr.Chatbot(
-            [],
-            elem_id="chat",
-            label="OpenProBono",
-            show_label=True,
-        )
-
-    with gr.Row() as input_row:
-        txt = gr.Textbox(
-            scale=4,
-            label="input",
-            show_label=False,
-            placeholder="Enter query",
-            container=False,
-        )
-        subbtn = gr.Button("Submit", variant="primary")
     
-    examples_shown = gr.State(False)
-    example_prompts_button = gr.Button("Example Prompts")
+    with gr.Tab("Chat"):
+        gr.Markdown("OpenProBono")
+        with gr.Row() as chat_row:
+            openai_chat = gr.Chatbot(
+                [],
+                elem_id="chat",
+                label="OpenProBono",
+                show_label=True,
+            )
 
-    with gr.Accordion("Details", open=False) as details_accordion:
+        with gr.Row() as input_row:
+            txt = gr.Textbox(
+                scale=4,
+                label="input",
+                show_label=False,
+                placeholder="Enter query",
+                container=False,
+            )
+            subbtn = gr.Button("Submit", variant="primary")
+
+    with gr.Tab("Details"):
         admin_visible = "admin" in root_path
         with gr.Column(visible=admin_visible) as tool_col:
             with gr.Row() as tool_row:
@@ -271,16 +252,13 @@ with gr.Blocks(
         )
         emailbtn = gr.Button("Submit")
 
-    with gr.Column(visible=False) as examples_box:
+    with gr.Tab("Example"):
         for prompt in example_prompts:
             with gr.Accordion(prompt, open=False):
                 for example in example_prompts[prompt]:
                     exbtn = gr.Button(example)
-                    exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
+                    exbtn.click(lambda x: x, exbtn, txt, queue=False)
     
-    #connecting frontend interactions to backend
-    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
-
     ##----------------------- backend   (llm stuff)-----------------------##
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
         if(history[-1][0].strip() == ""):
@@ -512,8 +490,6 @@ with gr.Blocks(
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False
     ).then(
-        hide_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False
-    ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
         openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat]
@@ -524,8 +500,6 @@ with gr.Blocks(
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit"
-    ).then(
-        hide_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(

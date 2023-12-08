@@ -158,7 +158,7 @@ with gr.Blocks(
 
     gr.Markdown("OpenProBono")
     
-    with gr.Row() as the_row:
+    with gr.Row(scale=2) as the_row:
         with gr.Column() as chat_col:
             with gr.Row() as chat_row:
                 openai_chat = gr.Chatbot(
@@ -179,7 +179,7 @@ with gr.Blocks(
                 subbtn = gr.Button("Submit", variant="primary") 
             clearopenai = gr.ClearButton([txt, openai_chat])
 
-        with gr.Column() as tools_col:
+        with gr.Column(scale=0) as tools_col:
             with gr.Tab("Examples"):
                 for prompt in example_prompts:
                     with gr.Accordion(prompt, open=False):

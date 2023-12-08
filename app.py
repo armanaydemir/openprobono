@@ -153,7 +153,9 @@ with gr.Blocks(
     #component-0 { height: 100vh!important; }
     #tools_col {height: 100vh!important;}
     #chat_col {height: 100vh!important;}
-    #chatbot { flex-grow: 1; }
+    #chatrow { flex-grow: 3; }
+    #inputrow { flex-grow: 1; }
+    #clearopenai {flex-grow: 1; }
     """,
     # .contain { display: flex; flex-direction: column; }
     # component-0 { height: 100%; }
@@ -171,7 +173,7 @@ with gr.Blocks(
     gr.Markdown("OpenProBono")
     with gr.Row(elem_id="therow") as the_row:
         with gr.Column(scale=2, elem_id="chat_col") as chat_col:
-            with gr.Row() as chat_row:
+            with gr.Row(elem_id="chatrow") as chat_row:
                 openai_chat = gr.Chatbot(
                     [],
                     elem_id="chatbot",
@@ -179,7 +181,7 @@ with gr.Blocks(
                     show_label=False,
                 )
 
-            with gr.Row() as input_row:
+            with gr.Row(elem_id="inputrow") as input_row:
                 txt = gr.Textbox(
                     scale=4,
                     label="input",
@@ -188,7 +190,7 @@ with gr.Blocks(
                     container=False,
                 )
                 subbtn = gr.Button("Submit", variant="primary") 
-            clearopenai = gr.ClearButton([txt, openai_chat])
+            clearopenai = gr.ClearButton([txt, openai_chat], elem_id="clearopenai")
 
         with gr.Column(scale=0, elem_id="tools_col") as tools_col:
             with gr.Tab("Examples"):

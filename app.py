@@ -153,6 +153,7 @@ with gr.Blocks(
     #component-0 { height: 100vh!important; }
     #tools_col {height: 100vh!important;}
     #chat_col {height: 100vh!important;}
+    #chatbot { flex-grow: 1; }
     """,
     # .contain { display: flex; flex-direction: column; }
     # component-0 { height: 100%; }

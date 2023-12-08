@@ -146,7 +146,7 @@ with gr.Blocks(
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg,
     ),
-    css="footer {visibility: hidden}",
+    css="gradio-app > .gradio-container {width: 100%!important;}",
     analytics_enabled=False
     ) as app:
 
@@ -157,15 +157,14 @@ with gr.Blocks(
         return history, gr.update(value="", interactive=False)
 
     gr.Markdown("OpenProBono")
-    
-    with gr.Row(scale=2) as the_row:
-        with gr.Column() as chat_col:
+    with gr.Row() as the_row:
+        with gr.Column(scale=2) as chat_col:
             with gr.Row() as chat_row:
                 openai_chat = gr.Chatbot(
                     [],
                     elem_id="chat",
                     label="OpenProBono",
-                    show_label=True,
+                    show_label=False,
                 )
 
             with gr.Row() as input_row:

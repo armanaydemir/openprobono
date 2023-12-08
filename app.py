@@ -155,9 +155,10 @@ with gr.Blocks(
     def add_text(history, text):
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
+
+    gr.Markdown("OpenProBono")
     
-    with gr.Tab("Chat"):
-        gr.Markdown("OpenProBono")
+    with gr.Column() as chat_col:
         with gr.Row() as chat_row:
             openai_chat = gr.Chatbot(
                 [],
@@ -177,86 +178,87 @@ with gr.Blocks(
             subbtn = gr.Button("Submit", variant="primary") 
         clearopenai = gr.ClearButton([txt, openai_chat])
 
-    with gr.Tab("Examples"):
-        for prompt in example_prompts:
-            with gr.Accordion(prompt, open=False):
-                for example in example_prompts[prompt]:
-                    exbtn = gr.Button(example)
-                    exbtn.click(lambda x: x, exbtn, txt, queue=False)
+    with gr.Column() as tools_col:
+        with gr.Tab("Examples"):
+            for prompt in example_prompts:
+                with gr.Accordion(prompt, open=False):
+                    for example in example_prompts[prompt]:
+                        exbtn = gr.Button(example)
+                        exbtn.click(lambda x: x, exbtn, txt, queue=False)
 
-    with gr.Tab("Settings"):
-        admin_visible = "admin" in root_path
-        with gr.Column(visible=admin_visible) as tool_col:
-            with gr.Row() as tool_row:
-                t1name = gr.Textbox(
-                    value="government-search",
+        with gr.Tab("Settings"):
+            admin_visible = "admin" in root_path
+            with gr.Column(visible=admin_visible) as tool_col:
+                with gr.Row() as tool_row:
+                    t1name = gr.Textbox(
+                        value="government-search",
+                        scale=4,
+                        label="Enter name for tool",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t1txt = gr.Textbox(
+                        value="site:*.gov | site:*.edu | site:*scholar.google.com",
+                        scale=4,
+                        label="Enter list of whitelisted urls for search with google syntax",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t1prompt = gr.Textbox(
+                        value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+                        scale=4,
+                        label="Enter prompt for search",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                with gr.Row() as tool_row:
+                    t2name = gr.Textbox(
+                        value="case-search",
+                        scale=4,
+                        label="Enter name for tool",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t2txt = gr.Textbox(
+                        value="site:*case.law | site:*.gov | site:*.edu | site:*courtlistener.com | site:*scholar.google.com",
+                        scale=4,
+                        label="Enter list of whitelisted urls for search with google syntax",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t2prompt = gr.Textbox(
+                        value="Use for finding case law. Always cite your sources.",
+                        scale=4,
+                        label="Enter prompt for search",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                with gr.Row() as user_prompt_row:
+                    user_prompt = gr.Textbox(
+                        value="",
+                        scale=4,
+                        label="Enter additional system prompt",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+            gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
+            with gr.Row() as email_row:    
+                emailtxt = gr.Textbox(
                     scale=4,
-                    label="Enter name for tool",
-                    show_label=True,
-                    container=True,
-                    interactive=True,
+                    label="input",
+                    show_label=False,
+                    placeholder="Enter your email to sign up for updates",
+                    container=False,
+                    type="email",
                 )
-                t1txt = gr.Textbox(
-                    value="site:*.gov | site:*.edu | site:*scholar.google.com",
-                    scale=4,
-                    label="Enter list of whitelisted urls for search with google syntax",
-                    show_label=True,
-                    container=True,
-                    interactive=True,
-                )
-                t1prompt = gr.Textbox(
-                    value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-                    scale=4,
-                    label="Enter prompt for search",
-                    show_label=True,
-                    container=True,
-                    interactive=True,
-                )
-            with gr.Row() as tool_row:
-                t2name = gr.Textbox(
-                    value="case-search",
-                    scale=4,
-                    label="Enter name for tool",
-                    show_label=True,
-                    container=True,
-                    interactive=True,
-                )
-                t2txt = gr.Textbox(
-                    value="site:*case.law | site:*.gov | site:*.edu | site:*courtlistener.com | site:*scholar.google.com",
-                    scale=4,
-                    label="Enter list of whitelisted urls for search with google syntax",
-                    show_label=True,
-                    container=True,
-                    interactive=True,
-                )
-                t2prompt = gr.Textbox(
-                    value="Use for finding case law. Always cite your sources.",
-                    scale=4,
-                    label="Enter prompt for search",
-                    show_label=True,
-                    container=True,
-                    interactive=True,
-                )
-            with gr.Row() as user_prompt_row:
-                user_prompt = gr.Textbox(
-                    value="",
-                    scale=4,
-                    label="Enter additional system prompt",
-                    show_label=True,
-                    container=True,
-                    interactive=True,
-                )
-        gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
-        with gr.Row() as email_row:    
-            emailtxt = gr.Textbox(
-                scale=4,
-                label="input",
-                show_label=False,
-                placeholder="Enter your email to sign up for updates",
-                container=False,
-                type="email",
-            )
-            emailbtn = gr.Button("Submit")
+                emailbtn = gr.Button("Submit")
     
     ##----------------------- backend   (llm stuff)-----------------------##
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):

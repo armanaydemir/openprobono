@@ -150,6 +150,9 @@ with gr.Blocks(
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; max-height: 100%!important; height: 100%!important;}
     #therow {height: 100%!important;}
+    #component-0 { height: 100%!important; }
+    #tools_col {height: 100%!important;}
+    #chat_col {height: 100%!important;}
     """,
     # .contain { display: flex; flex-direction: column; }
     # component-0 { height: 100%; }
@@ -166,7 +169,7 @@ with gr.Blocks(
 
     gr.Markdown("OpenProBono")
     with gr.Row(elem_id="therow") as the_row:
-        with gr.Column(scale=2) as chat_col:
+        with gr.Column(scale=2, elem_id="chat_col") as chat_col:
             with gr.Row() as chat_row:
                 openai_chat = gr.Chatbot(
                     [],
@@ -186,7 +189,7 @@ with gr.Blocks(
                 subbtn = gr.Button("Submit", variant="primary") 
             clearopenai = gr.ClearButton([txt, openai_chat])
 
-        with gr.Column(scale=0) as tools_col:
+        with gr.Column(scale=0, elem_id="tools_col") as tools_col:
             with gr.Tab("Examples"):
                 for prompt in example_prompts:
                     with gr.Accordion(prompt, open=False):

@@ -151,12 +151,12 @@ with gr.Blocks(
     .gradio-container {max-width: 100%!important; width: 100%!important; max-height: 100vh!important; height: 100vh!important;}
     #therow {height: 100vh!important;}
     #component-0 { height: 100vh!important; }
-    #tools_col {height: 100vh!important;}
-    #chat_col {height: 100vh!important;}
+    #tools_col {height: 100%!important;}
+    #chat_col {height: 100%!important;}
     #chatbot {height: 100%!important;}
     #chatrow { flex-grow: 2; }
-    #inputrow { flex-grow: 0; }
-    #clearopenai {flex-grow: 0; }
+    #inputrow { flex-grow: 1; }
+    #clearopenai {flex-grow: 1; }
     """,
     # .contain { display: flex; flex-direction: column; }
     # component-0 { height: 100%; }

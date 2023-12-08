@@ -146,7 +146,7 @@ with gr.Blocks(
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg,
     ),
-    #css="footer {visibility: hidden}",
+    css="footer {visibility: hidden}",
     analytics_enabled=False
     ) as app:
 
@@ -175,18 +175,16 @@ with gr.Blocks(
                 container=False,
             )
             subbtn = gr.Button("Submit", variant="primary") 
-        with gr.Row() as email_row:    
-            emailtxt = gr.Textbox(
-                scale=4,
-                label="input",
-                show_label=False,
-                placeholder="Enter your email to sign up for updates",
-                container=False,
-                type="email",
-            )
-            emailbtn = gr.Button("Submit")
+        clearopenai = gr.ClearButton([txt, openai_chat])
 
-    with gr.Tab("Details"):
+    with gr.Tab("Examples"):
+        for prompt in example_prompts:
+            with gr.Accordion(prompt, open=False):
+                for example in example_prompts[prompt]:
+                    exbtn = gr.Button(example)
+                    exbtn.click(lambda x: x, exbtn, txt, queue=False)
+
+    with gr.Tab("Settings"):
         admin_visible = "admin" in root_path
         with gr.Column(visible=admin_visible) as tool_col:
             with gr.Row() as tool_row:
@@ -249,14 +247,16 @@ with gr.Blocks(
                     interactive=True,
                 )
         gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
-        clearopenai = gr.ClearButton([txt, openai_chat])
-
-    with gr.Tab("Examples"):
-        for prompt in example_prompts:
-            with gr.Accordion(prompt, open=False):
-                for example in example_prompts[prompt]:
-                    exbtn = gr.Button(example)
-                    exbtn.click(lambda x: x, exbtn, txt, queue=False)
+        with gr.Row() as email_row:    
+            emailtxt = gr.Textbox(
+                scale=4,
+                label="input",
+                show_label=False,
+                placeholder="Enter your email to sign up for updates",
+                container=False,
+                type="email",
+            )
+            emailbtn = gr.Button("Submit")
     
     ##----------------------- backend   (llm stuff)-----------------------##
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):

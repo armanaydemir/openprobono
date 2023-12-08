@@ -155,8 +155,8 @@ with gr.Blocks(
     #chat_col {height: 100vh!important;}
     #chatbot {height: 100%!important;}
     #chatrow { flex-grow: 2; }
-    #inputrow { flex-grow: 1; }
-    #clearopenai {flex-grow: 1; }
+    #inputrow { flex-grow: 0; }
+    #clearopenai {flex-grow: 0; }
     """,
     # .contain { display: flex; flex-direction: column; }
     # component-0 { height: 100%; }

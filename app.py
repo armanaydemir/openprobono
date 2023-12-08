@@ -148,7 +148,9 @@ with gr.Blocks(
     ),
     css="""
     footer {visibility: hidden}
-    #component-0 {max-width: 100%!important; width: 100%!important; min-width: 100%!important; min-height: 100%!important; max-height: 100%!important; height: 100%!important;}
+    .contain { display: flex; flex-direction: column; }
+    #component-0 { height: 100%; }
+    #chatbot { flex-grow: 1; overflow: auto;}
     .gradio-container {max-width: 100%!important; width: 100%!important; max-height: 100%!important; height: 100%!important;}
     """,
     analytics_enabled=False

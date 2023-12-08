@@ -147,11 +147,13 @@ with gr.Blocks(
         radius_size=gr.themes.sizes.radius_lg,
     ),
     css="""
-    footer {visibility: hidden} """,
+    footer {visibility: hidden}
+    .gradio-container {max-width: 100%!important; width: 100%!important; max-height: 100%!important; height: 100%!important;}
+    #therow {height: 100%!important;}
+    """,
     # .contain { display: flex; flex-direction: column; }
     # component-0 { height: 100%; }
     # chatbot { flex-grow: 1; overflow: auto;}
-    # .gradio-container {max-width: 100%!important; width: 100%!important; max-height: 100%!important; height: 100%!important;}
     # """,
     analytics_enabled=False
     ) as app:
@@ -163,7 +165,7 @@ with gr.Blocks(
         return history, gr.update(value="", interactive=False)
 
     gr.Markdown("OpenProBono")
-    with gr.Row(height="100%") as the_row:
+    with gr.Row(elem_id="therow") as the_row:
         with gr.Column(scale=2) as chat_col:
             with gr.Row() as chat_row:
                 openai_chat = gr.Chatbot(
@@ -171,7 +173,6 @@ with gr.Blocks(
                     elem_id="chatbot",
                     label="OpenProBono",
                     show_label=False,
-                    height="100%",
                 )
 
             with gr.Row() as input_row:

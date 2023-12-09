@@ -151,13 +151,13 @@ with gr.Blocks(
     .gradio-container {max-width: 100%!important; width: 100%!important; }
     #component-0 { height: 100%!important; min-height: 100%!important; max-height: 100%!important;}
     #chat_col {height: 90vh!important; min-height: 90vh!important; max-height: 90vh!important;}
-    #therow {height: 90vh!important; min-height: 90vh!important; max-height: 90vh!important; }
+    #tools_col {height: 90%!important; overflow: scroll!important;}
+    #therow {height: 90vh!important; min-height: 90vh!important; max-height: 90vh!important;}
     #chatbot {height: 100%!important; min-height: 100%!important; max-height: 100%!important; flex-grow: 5; overflow: scroll!important;}
     #chatrow { height: 70%!important; min-height: 70%!important; max-height: 70%!important; }
     #inputrow { height: 20%!important; min-height: 20%!important; max-height: 20%!important; }
     #clearopenai { height: 5%!important; min-height: 5%!important; max-height: 5%!important; }
     """,
-    #tools_col {height: 90%!important;}
     #chat_col {height: 90%!important; min-height: 90%!important; max-height: 90%!important;}
     # 
     # .contain { display: flex; flex-direction: column; }

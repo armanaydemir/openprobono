@@ -150,12 +150,12 @@ with gr.Blocks(
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }
     #component-0 { height: 100%!important; }
+    #therow {height: 100vh!important;}
     #chatbot { flex-grow: 1; overflow: auto!important;}
     #chatrow { flex-grow: 20; }
     #inputrow { flex-grow: 1; }
     #clearopenai {flex-grow: 1; }
     """,
-    #therow {height: 100vh!important;}
     #tools_col {height: 90%!important;}
     #chat_col {height: 90%!important; min-height: 90%!important; max-height: 90%!important;}
     # 

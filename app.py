@@ -154,7 +154,7 @@ with gr.Blocks(
     #tools_col {height: 90%!important;}
     #chat_col {height: 90%!important;}
     #chatbot {min-height: 100%!important; max-height: 100%!important; height: 100%!important;}
-    #chatrow { flex-grow: 10; }
+    #chatrow { flex-grow: 20; }
     #inputrow { flex-grow: 1; }
     #clearopenai {flex-grow: 1; }
     """,

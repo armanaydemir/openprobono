@@ -151,7 +151,7 @@ with gr.Blocks(
     .gradio-container {max-width: 100%!important; width: 100%!important; }
     #component-0 { height: 100%!important; }
     #therow {height: 90vh!important;}
-    #chatbot {flex-grow: 5; overflow: auto!important;}
+    #chatbot {height: 100%!important; flex-grow: 5; overflow: scroll!important;}
     #chatrow { flex-grow: 20; }
     #inputrow { flex-grow: 1; }
     #clearopenai {flex-grow: 1; }

@@ -203,68 +203,69 @@ with gr.Blocks(
                             exbtn = gr.Button(example)
                             exbtn.click(lambda x: x, exbtn, txt, queue=False)
 
+            admin_visible = "staging" in root_path
+            with gr.Tab("Advanced Settings", visible=admin_visible):
+                with gr.Row() as tool_row:
+                    t1name = gr.Textbox(
+                        value="government-search",
+                        scale=4,
+                        label="Enter name for tool",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t1txt = gr.Textbox(
+                        value="site:*.gov | site:*.edu | site:*scholar.google.com",
+                        scale=4,
+                        label="Enter list of whitelisted urls for search with google syntax",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t1prompt = gr.Textbox(
+                        value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+                        scale=4,
+                        label="Enter prompt for search",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                with gr.Row() as tool_row:
+                    t2name = gr.Textbox(
+                        value="case-search",
+                        scale=4,
+                        label="Enter name for tool",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t2txt = gr.Textbox(
+                        value="site:*case.law | site:*.gov | site:*.edu | site:*courtlistener.com | site:*scholar.google.com",
+                        scale=4,
+                        label="Enter list of whitelisted urls for search with google syntax",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t2prompt = gr.Textbox(
+                        value="Use for finding case law. Always cite your sources.",
+                        scale=4,
+                        label="Enter prompt for search",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                with gr.Row() as user_prompt_row:
+                    user_prompt = gr.Textbox(
+                        value="",
+                        scale=4,
+                        label="Enter additional system prompt",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+
             with gr.Tab("Settings"):
-                admin_visible = "staging" in root_path
-                with gr.Column(visible=admin_visible) as tool_col:
-                    with gr.Row() as tool_row:
-                        t1name = gr.Textbox(
-                            value="government-search",
-                            scale=4,
-                            label="Enter name for tool",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                        t1txt = gr.Textbox(
-                            value="site:*.gov | site:*.edu | site:*scholar.google.com",
-                            scale=4,
-                            label="Enter list of whitelisted urls for search with google syntax",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                        t1prompt = gr.Textbox(
-                            value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-                            scale=4,
-                            label="Enter prompt for search",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                    with gr.Row() as tool_row:
-                        t2name = gr.Textbox(
-                            value="case-search",
-                            scale=4,
-                            label="Enter name for tool",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                        t2txt = gr.Textbox(
-                            value="site:*case.law | site:*.gov | site:*.edu | site:*courtlistener.com | site:*scholar.google.com",
-                            scale=4,
-                            label="Enter list of whitelisted urls for search with google syntax",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                        t2prompt = gr.Textbox(
-                            value="Use for finding case law. Always cite your sources.",
-                            scale=4,
-                            label="Enter prompt for search",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                    with gr.Row() as user_prompt_row:
-                        user_prompt = gr.Textbox(
-                            value="",
-                            scale=4,
-                            label="Enter additional system prompt",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
                 gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
                 with gr.Row() as email_row:    
                     emailtxt = gr.Textbox(

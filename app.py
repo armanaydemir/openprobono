@@ -173,7 +173,7 @@ with gr.Blocks(
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
 
-    gr.Markdown("<a href=\"https://www.openprobono.com/\" target=\"_blank\" style=\"text-decoration:none!important;\">OpenProBono</a>")
+    gr.Markdown("<a href=\"https://www.openprobono.com/\" target=\"_blank\" style=\"text-decoration:none!important;  color: white\">OpenProBono</a>")
     with gr.Row(elem_id="therow") as the_row:
         with gr.Column(scale=2, elem_id="chat_col") as chat_col:
             with gr.Row(elem_id="chatrow") as chat_row:

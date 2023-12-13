@@ -195,7 +195,13 @@ with gr.Blocks(
                 subbtn = gr.Button("Submit", variant="primary") 
             clearopenai = gr.ClearButton([txt, openai_chat], elem_id="clearopenai")
 
-        with gr.Column(scale=0, elem_id="tools_col") as tools_col:
+        with gr.Column(scale=0, elem_id="tools_col", theme=gr.themes.Default(
+            primary_hue=gr.themes.colors.yellow, 
+            secondary_hue=gr.themes.colors.red,
+            font=gr.themes.GoogleFont("Open Sans"),
+            radius_size=gr.themes.sizes.radius_lg,
+            ),
+        ) as tools_col:
             with gr.Tab("Examples"):
                 for prompt in example_prompts:
                     with gr.Accordion(prompt, open=False):

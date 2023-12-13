@@ -173,7 +173,7 @@ with gr.Blocks(
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
 
-    gr.Markdown("OpenProBono")
+    gr.Markdown("<a href=\"https://www.openprobono.com/\" target=\"_blank\">OpenProBono</a>")
     with gr.Row(elem_id="therow") as the_row:
         with gr.Column(scale=2, elem_id="chat_col") as chat_col:
             with gr.Row(elem_id="chatrow") as chat_row:
@@ -195,13 +195,7 @@ with gr.Blocks(
                 subbtn = gr.Button("Submit", variant="primary") 
             clearopenai = gr.ClearButton([txt, openai_chat], elem_id="clearopenai")
 
-        with gr.Column(scale=0, elem_id="tools_col", theme=gr.themes.Default(
-            primary_hue=gr.themes.colors.yellow, 
-            secondary_hue=gr.themes.colors.red,
-            font=gr.themes.GoogleFont("Open Sans"),
-            radius_size=gr.themes.sizes.radius_lg,
-            ),
-        ) as tools_col:
+        with gr.Column(scale=0, elem_id="tools_col") as tools_col:
             with gr.Tab("Examples"):
                 for prompt in example_prompts:
                     with gr.Accordion(prompt, open=False):

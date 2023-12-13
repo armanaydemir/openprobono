@@ -157,7 +157,6 @@ with gr.Blocks(
     #chatrow { height: 70%!important; min-height: 70%!important; max-height: 70%!important; }
     #inputrow { height: 20%!important; min-height: 20%!important; max-height: 20%!important; }
     #clearopenai { height: 5%!important; min-height: 5%!important; max-height: 5%!important; }
-    a:hover, a:visited, a:link, a:active { text-decoration: none; }
     """,
     #chat_col {height: 90%!important; min-height: 90%!important; max-height: 90%!important;}
     # 
@@ -174,7 +173,7 @@ with gr.Blocks(
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
 
-    gr.Markdown("<a href=\"https://www.openprobono.com/\" target=\"_blank\">OpenProBono</a>")
+    gr.Markdown("<a href=\"https://www.openprobono.com/\" target=\"_blank\" style=\"text-decoration:none!important;\">OpenProBono</a>")
     with gr.Row(elem_id="therow") as the_row:
         with gr.Column(scale=2, elem_id="chat_col") as chat_col:
             with gr.Row(elem_id="chatrow") as chat_row:

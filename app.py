@@ -157,6 +157,7 @@ with gr.Blocks(
     #chatrow { height: 70%!important; min-height: 70%!important; max-height: 70%!important; }
     #inputrow { height: 20%!important; min-height: 20%!important; max-height: 20%!important; }
     #clearopenai { height: 5%!important; min-height: 5%!important; max-height: 5%!important; }
+    a:hover, a:visited, a:link, a:active { text-decoration: none; }
     """,
     #chat_col {height: 90%!important; min-height: 90%!important; max-height: 90%!important;}
     # 

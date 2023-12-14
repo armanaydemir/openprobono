@@ -170,7 +170,7 @@ with gr.Blocks(
     request = gr.Request()
     print(request)
     print("this is reqeust")
-    print(request['headers'])
+    print(request.client)
 
     session = gr.State(get_uuid_id)
 

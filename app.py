@@ -168,9 +168,8 @@ with gr.Blocks(
     ) as app:
 
     request = gr.Request()
-    user_agent = request.headers["user-agent"]
-    print(user_agent)
-    print("this is agent")
+    print(request)
+    print("this is reqeust")
 
     session = gr.State(get_uuid_id)
 

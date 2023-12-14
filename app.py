@@ -90,6 +90,14 @@ chat_ga_script = """
 }
 """
 
+
+#script for user-agent retreival
+user_agent_script = """
+() => {
+    return navigator.userAgent
+}
+"""
+
 example_prompts = {
     "Criminal Law": [
         "What are my rights if I'm arrested?",
@@ -167,11 +175,9 @@ with gr.Blocks(
     analytics_enabled=False
     ) as app:
 
-    request = gr.Request()
-    print(request)
-    print("this is reqeust")
-    print(request.request)
-    print(request.query_params)
+    #loading user agent
+    app.load(None, None, user_agent, _js=user_agent_script)
+    print(user_agent)
 
     session = gr.State(get_uuid_id)
 

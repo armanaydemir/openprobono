@@ -191,14 +191,14 @@ with gr.Blocks(
         #if examples are to be hidden
         else:
             button_text = "Example Prompts"
-        return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = state), state
+        return gr.update(value=button_text), gr.update(visible = not state),  gr.update(visible = not state), gr.update(visible = state), state
 
     def hide_examples(state):
         #if examples are currently shown, change state
         if(state):
             state = not state
         button_text = "Example Prompts"
-        return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = state), state
+        return gr.update(value=button_text), gr.update(visible = not state),  gr.update(visible = not state), gr.update(visible = state), state
 
 
     def add_text(history, text):
@@ -226,9 +226,13 @@ with gr.Blocks(
                 )
                 subbtn = gr.Button("Submit", variant="primary")
 
+        with gr.Row() as mobile_row:
             examples_shown = gr.State(False)
             example_prompts_button = gr.Button("Example Prompts")
+            with gr.Tab("Details") as details:
+                gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
         
+            
         # with gr.Group() as tools_desktop_group:
         with gr.Column(scale=0, elem_id="tools_col_css") as tools_col:
             with gr.Tab("Examples"):
@@ -311,7 +315,7 @@ with gr.Blocks(
                     exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
     
     #connecting frontend interactions to backend
-    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
+    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, chat_col, details, examples_box, examples_shown], queue=False)
     
     ##----------------------- backend   (llm stuff)-----------------------##
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
@@ -544,7 +548,7 @@ with gr.Blocks(
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False
     ).then(
-        hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False
+        hide_examples, [examples_shown], [example_prompts_button, chat_col, details, examples_box, examples_shown], queue=False
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
@@ -559,7 +563,7 @@ with gr.Blocks(
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit"
     ).then(
-        hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False
+        hide_examples, [examples_shown], [example_prompts_button, chat_col, details, examples_box, examples_shown], queue=False
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
@@ -580,7 +584,7 @@ with gr.Blocks(
 
     def isMobile_change(isMobile):
         return gr.update(visible=(not isMobile), render=(not isMobile), interactive=(not isMobile)), gr.update(visible=isMobile, render=isMobile, interactive=isMobile)
-    isMobile.change(isMobile_change, [isMobile], [tools_col, example_prompts_button], queue=False)
+    isMobile.change(isMobile_change, [isMobile], [tools_col, mobile_row], queue=False)
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

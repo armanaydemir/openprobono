@@ -94,6 +94,8 @@ chat_ga_script = """
 #script for user-agent retreival
 user_agent_script = """
 () => {
+    console.log(navigator.userAgent)
+    console.log('useragent')
     return navigator.userAgent
 }
 """

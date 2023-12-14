@@ -554,6 +554,7 @@ with gr.Blocks(
 
     def isMobile_change(isMobile):
         toShow = isMobile.value
+        print("isMobile: " + str(toShow))
         return gr.update(visible=toShow, interactive=toShow, render=toShow)
     isMobile.change(isMobile_change, isMobile, tools_col)
 

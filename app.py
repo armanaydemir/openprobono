@@ -207,6 +207,7 @@ with gr.Blocks(
                 )
                 subbtn = gr.Button("Submit", variant="primary") 
             clearopenai = gr.ClearButton([txt, openai_chat], elem_id="clearopenai")
+
         with gr.Group() as tools_tab_group:
             with gr.Column(scale=0, elem_id="tools_col_css") as tools_col:
                 with gr.Tab("Examples"):
@@ -553,7 +554,7 @@ with gr.Blocks(
     )
 
     def isMobile_change(isMobile):
-        return gr.update(visible=(not isMobile))
+        return gr.update(visible=(not isMobile), render=(not isMobile), interactive=(not isMobile))
     isMobile.change(isMobile_change, [isMobile], tools_tab_group, queue=False)
 
     #loading google analytics script

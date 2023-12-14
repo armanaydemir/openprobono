@@ -571,12 +571,12 @@ with gr.Blocks(
     )
 
     #hitting enter and clicking submit for email
-    email_txt = emailtxt.submit(lambda x: x, [emailtxt], [emailtxt], queue=False, _js=email_ga_script).then(
-        store_email, [emailtxt, session], None, queue=False
-    )
-    email_msg = emailbtn.click(store_email, [emailtxt, session], None, queue=False, _js=email_ga_script).then(
-        store_email, [emailtxt, session], None, queue=False
-    )
+    # email_txt = emailtxt.submit(lambda x: x, [emailtxt], [emailtxt], queue=False, _js=email_ga_script).then(
+    #     store_email, [emailtxt, session], None, queue=False
+    # )
+    # email_msg = emailbtn.click(store_email, [emailtxt, session], None, queue=False, _js=email_ga_script).then(
+    #     store_email, [emailtxt, session], None, queue=False
+    # )
 
     def isMobile_change(isMobile):
         return gr.update(visible=(not isMobile), render=(not isMobile), interactive=(not isMobile)), gr.update(visible=isMobile, render=isMobile, interactive=isMobile)

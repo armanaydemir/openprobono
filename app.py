@@ -308,7 +308,7 @@ with gr.Blocks(
             with gr.Accordion(prompt, open=False):
                 for example in example_prompts[prompt]:
                     exbtn = gr.Button(example)
-                    exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
+                    exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
     
     #connecting frontend interactions to backend
     example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
@@ -544,7 +544,7 @@ with gr.Blocks(
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False
     ).then(
-        hide_examples, [examples_shown], [example_prompts_button, chat_row, examples_box, examples_shown], queue=False
+        hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
@@ -559,7 +559,7 @@ with gr.Blocks(
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit"
     ).then(
-        hide_examples, [examples_shown], [example_prompts_button, chat_row, examples_box, examples_shown], queue=False
+        hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(

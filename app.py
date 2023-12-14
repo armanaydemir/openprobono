@@ -176,7 +176,7 @@ with gr.Blocks(
     # """,
     analytics_enabled=False
     ) as app:
-    user_agent = gr.State(False)
+    user_agent = gr.Checkbox(label="isMobile", default=False, visible=False, render=False)
     #loading user agent
     app.load(None, None, [user_agent], _js=user_agent_script)
 

@@ -207,7 +207,7 @@ with gr.Blocks(
                 )
                 subbtn = gr.Button("Submit", variant="primary")
 
-        with gr.Group(visible=False, render=False, interactive=False) as tools_mobile_group:
+        with gr.Group() as tools_mobile_group:
             with gr.Accordion("Examples", open=False):
                 for prompt in example_prompts:
                     with gr.Accordion(prompt, open=False):

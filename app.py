@@ -555,7 +555,7 @@ with gr.Blocks(
     def isMobile_change(isMobile, user_agent, tools_col):
         toShow = isMobile.value
         return gr.update(visible=toShow, interactive=toShow, render=toShow)
-    isMobile.change(isMobile_change, user_agent, tools_col)
+    isMobile.change(isMobile_change, isMobile, tools_col)
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

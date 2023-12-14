@@ -176,7 +176,7 @@ with gr.Blocks(
     # """,
     analytics_enabled=False
     ) as app:
-    user_agent = None
+    user_agent = gr.Textbox(visible=False, scale=0, label="user_agent", show_label=False, container=False, interactive=False, render=False)
     #loading user agent
     app.load(None, None, [user_agent], _js=user_agent_script)
     print(user_agent)

@@ -174,7 +174,7 @@ with gr.Blocks(
     # """,
     analytics_enabled=False
     ) as app:
-
+    user_agent = None
     #loading user agent
     app.load(None, None, user_agent, _js=user_agent_script)
     print(user_agent)

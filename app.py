@@ -226,79 +226,79 @@ with gr.Blocks(
                 )
                 subbtn = gr.Button("Submit", variant="primary")
         
-        with gr.Group() as tools_desktop_group:
-            with gr.Column(scale=0, elem_id="tools_col_css") as tools_col:
-                with gr.Tab("Examples"):
-                    for prompt in example_prompts:
-                        with gr.Accordion(prompt, open=False):
-                            for example in example_prompts[prompt]:
-                                exbtn = gr.Button(example)
-                                exbtn.click(lambda x: x, exbtn, txt, queue=False)
+        # with gr.Group() as tools_desktop_group:
+        with gr.Column(scale=0, elem_id="tools_col_css") as tools_col:
+            with gr.Tab("Examples"):
+                for prompt in example_prompts:
+                    with gr.Accordion(prompt, open=False):
+                        for example in example_prompts[prompt]:
+                            exbtn = gr.Button(example)
+                            exbtn.click(lambda x: x, exbtn, txt, queue=False)
 
-                admin_visible = "staging" in root_path
-                with gr.Tab("Tools", visible=admin_visible):
-                    with gr.Row() as tool_row:
-                        t1name = gr.Textbox(
-                            value="government-search",
-                            scale=4,
-                            label="Enter name for tool",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                        t1txt = gr.Textbox(
-                            value="site:*.gov | site:*.edu | site:*scholar.google.com",
-                            scale=4,
-                            label="Enter list of whitelisted urls for search with google syntax",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                        t1prompt = gr.Textbox(
-                            value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
-                            scale=4,
-                            label="Enter prompt for search",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                    with gr.Row() as tool_row:
-                        t2name = gr.Textbox(
-                            value="case-search",
-                            scale=4,
-                            label="Enter name for tool",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                        t2txt = gr.Textbox(
-                            value="site:*case.law | site:*.gov | site:*.edu | site:*courtlistener.com | site:*scholar.google.com",
-                            scale=4,
-                            label="Enter list of whitelisted urls for search with google syntax",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                        t2prompt = gr.Textbox(
-                            value="Use for finding case law. Always cite your sources.",
-                            scale=4,
-                            label="Enter prompt for search",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
-                    with gr.Row() as user_prompt_row:
-                        user_prompt = gr.Textbox(
-                            value="",
-                            scale=4,
-                            label="Enter additional system prompt",
-                            show_label=True,
-                            container=True,
-                            interactive=True,
-                        )
+            admin_visible = "staging" in root_path
+            with gr.Tab("Tools", visible=admin_visible):
+                with gr.Row() as tool_row:
+                    t1name = gr.Textbox(
+                        value="government-search",
+                        scale=4,
+                        label="Enter name for tool",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t1txt = gr.Textbox(
+                        value="site:*.gov | site:*.edu | site:*scholar.google.com",
+                        scale=4,
+                        label="Enter list of whitelisted urls for search with google syntax",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t1prompt = gr.Textbox(
+                        value="Useful for when you need to answer questions or find resources about government and laws. Always cite your sources.",
+                        scale=4,
+                        label="Enter prompt for search",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                with gr.Row() as tool_row:
+                    t2name = gr.Textbox(
+                        value="case-search",
+                        scale=4,
+                        label="Enter name for tool",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t2txt = gr.Textbox(
+                        value="site:*case.law | site:*.gov | site:*.edu | site:*courtlistener.com | site:*scholar.google.com",
+                        scale=4,
+                        label="Enter list of whitelisted urls for search with google syntax",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                    t2prompt = gr.Textbox(
+                        value="Use for finding case law. Always cite your sources.",
+                        scale=4,
+                        label="Enter prompt for search",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
+                with gr.Row() as user_prompt_row:
+                    user_prompt = gr.Textbox(
+                        value="",
+                        scale=4,
+                        label="Enter additional system prompt",
+                        show_label=True,
+                        container=True,
+                        interactive=True,
+                    )
 
-                with gr.Tab("Details"):
-                    gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
+            with gr.Tab("Details"):
+                gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
 
     with gr.Column(visible=False, interactive=False) as tools_mobile_group:
         examples_shown = gr.State(False)
@@ -581,7 +581,7 @@ with gr.Blocks(
 
     def isMobile_change(isMobile):
         return gr.update(visible=(not isMobile), render=(not isMobile), interactive=(not isMobile)), gr.update(visible=isMobile, render=isMobile, interactive=isMobile)
-    isMobile.change(isMobile_change, [isMobile], [tools_desktop_group, tools_mobile_group], queue=False)
+    isMobile.change(isMobile_change, [isMobile], [tools_col, tools_mobile_group], queue=False)
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

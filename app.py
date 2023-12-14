@@ -93,14 +93,10 @@ chat_ga_script = """
 
 #script for user-agent retreival
 user_agent_script = """
-async () => {
-    const script = document.createElement("script");
-    script.innerHTML = `
-        console.log(navigator.userAgent)
-        console.log('useragent')
-        return navigator.userAgent
-    `;
-    document.head.appendChild(script);
+() => {
+    console.log(navigator.userAgent)
+    console.log('useragent')
+    return navigator.userAgent
 }
 """
 
@@ -180,7 +176,7 @@ with gr.Blocks(
     # """,
     analytics_enabled=False
     ) as app:
-    user_agent = gr.Textbox(visible=False, scale=0, label="user_agent", show_label=False, container=False, interactive=False, render=False)
+    user_agent = gr.Textbox(visible=True, scale=0, label="user_agent", show_label=False, container=False, interactive=False, render=True)
     #loading user agent
     app.load(None, None, [user_agent], _js=user_agent_script)
     print(user_agent)

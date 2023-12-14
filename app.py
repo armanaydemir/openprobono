@@ -178,7 +178,7 @@ with gr.Blocks(
     ) as app:
     user_agent = None
     #loading user agent
-    app.load(None, None, user_agent, _js=user_agent_script)
+    app.load(None, None, [user_agent], _js=user_agent_script)
     print(user_agent)
 
     session = gr.State(get_uuid_id)
@@ -528,7 +528,9 @@ with gr.Blocks(
         openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat]
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
-    ).then(store_conversation, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], None, queue=False)
+    ).then(
+        store_conversation, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], None, queue=False
+    )
 
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(

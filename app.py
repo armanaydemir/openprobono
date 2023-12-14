@@ -167,6 +167,11 @@ with gr.Blocks(
     analytics_enabled=False
     ) as app:
 
+    request = gr.Request()
+    user_agent = request.headers["user-agent"]
+    print(user_agent)
+    print("this is agent")
+
     session = gr.State(get_uuid_id)
 
     def add_text(history, text):
@@ -266,7 +271,7 @@ with gr.Blocks(
                     )
 
             with gr.Tab("Settings"):
-                gr.Markdown("This demo is a beta meant for informational purposes, demonstrating the abilities of our current technology and to compare different variations of models, prompting methods, document upload, and other features as we continually improve. The data sent in the demo is not guaranteed to be kept private. We will keep iterating on this demo, so keep an eye out for frequent updates. This is not legal advice. Learn more at www.openprobono.com.")
+                gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
                 with gr.Row() as email_row:    
                     emailtxt = gr.Textbox(
                         scale=4,

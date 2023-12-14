@@ -552,10 +552,11 @@ with gr.Blocks(
         store_email, [emailtxt, session], None, queue=False
     )
 
-    def isMobile_change(isMobile):
-        print("check this out")
-        gr.update(visible = not isMobile)
-    isMobile.change(isMobile_change, isMobile, tools_col)
+    def isMobile_change(isMobile, tools_col):
+        tools_col.update(visible=(not isMobile))
+        return tools_col
+
+    isMobile.change(isMobile_change, [isMobile, tools_col], tools_col)
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

@@ -182,6 +182,24 @@ with gr.Blocks(
 
     session = gr.State(get_uuid_id)
 
+    def toggle_examples(state):
+        state = not state
+        #if examples are to be shown
+        if(state):
+            button_text = "Back"
+        #if examples are to be hidden
+        else:
+            button_text = "Example Prompts"
+        return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = state), state
+
+    def hide_examples(state):
+        #if examples are currently shown, change state
+        if(state):
+            state = not state
+        button_text = "Example Prompts"
+        return gr.update(value=button_text), gr.update(visible = not state), gr.update(visible = state), state
+
+
     def add_text(history, text):
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
@@ -281,38 +299,19 @@ with gr.Blocks(
                 with gr.Tab("Details"):
                     gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
 
-            with gr.Row() as email_row:    
-                emailtxt = gr.Textbox(
-                    scale=4,
-                    label="input",
-                    show_label=False,
-                    placeholder="Enter your email to sign up for updates",
-                    container=False,
-                    type="email",
-                )
-                emailbtn = gr.Button("Submit")
-
     with gr.Column(visible=False, interactive=False) as tools_mobile_group:
-        with gr.Accordion("Examples", open=False):
-            for prompt in example_prompts:
-                with gr.Accordion(prompt, open=False):
-                    for example in example_prompts[prompt]:
-                        exbtn = gr.Button(example)
-                        exbtn.click(lambda x: x, exbtn, txt, queue=False)
-            
-        with gr.Accordion("Details", open=False):
-            gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
+        examples_shown = gr.State(False)
+        example_prompts_button = gr.Button("Example Prompts")
 
-        with gr.Row() as email_row:    
-            emailtxt = gr.Textbox(
-                scale=4,
-                label="input",
-                show_label=False,
-                placeholder="Enter your email to sign up for updates",
-                container=False,
-                type="email",
-            )
-            emailbtn = gr.Button("Submit")
+    with gr.Column(visible=False) as examples_box:
+        for prompt in example_prompts:
+            with gr.Accordion(prompt, open=False):
+                for example in example_prompts[prompt]:
+                    exbtn = gr.Button(example)
+                    exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False)
+    
+    #connecting frontend interactions to backend
+    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
     
     ##----------------------- backend   (llm stuff)-----------------------##
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
@@ -545,6 +544,8 @@ with gr.Blocks(
     txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False
     ).then(
+        hide_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False
+    ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(
         openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat]
@@ -557,6 +558,8 @@ with gr.Blocks(
     #corresponds to clicking the submit button
     sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False).then(
         add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit"
+    ).then(
+        hide_examples, [examples_shown], [example_prompts_button, chat_row, details_accordion, email_row, examples_box, examples_shown], queue=False
     ).then(
         lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
     ).then(

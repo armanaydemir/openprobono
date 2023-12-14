@@ -207,29 +207,6 @@ with gr.Blocks(
                 )
                 subbtn = gr.Button("Submit", variant="primary")
 
-        with gr.Group() as tools_mobile_group:
-            with gr.Accordion("Examples", open=False):
-                for prompt in example_prompts:
-                    with gr.Accordion(prompt, open=False):
-                        for example in example_prompts[prompt]:
-                            exbtn = gr.Button(example)
-                            exbtn.click(lambda x: x, exbtn, txt, queue=False)
-
-                
-            with gr.Accordion("Details", open=False):
-                gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
-
-            with gr.Row() as email_row:    
-                emailtxt = gr.Textbox(
-                    scale=4,
-                    label="input",
-                    show_label=False,
-                    placeholder="Enter your email to sign up for updates",
-                    container=False,
-                    type="email",
-                )
-                emailbtn = gr.Button("Submit")
-
         with gr.Group() as tools_desktop_group:
             with gr.Column(scale=0, elem_id="tools_col_css") as tools_col:
                 with gr.Tab("Examples"):
@@ -303,6 +280,28 @@ with gr.Blocks(
 
                 with gr.Tab("Details"):
                     gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
+
+            with gr.Row() as email_row:    
+                emailtxt = gr.Textbox(
+                    scale=4,
+                    label="input",
+                    show_label=False,
+                    placeholder="Enter your email to sign up for updates",
+                    container=False,
+                    type="email",
+                )
+                emailbtn = gr.Button("Submit")
+
+        with gr.Group(visible=False, interactive=False) as tools_mobile_group:
+            with gr.Accordion("Examples", open=False):
+                for prompt in example_prompts:
+                    with gr.Accordion(prompt, open=False):
+                        for example in example_prompts[prompt]:
+                            exbtn = gr.Button(example)
+                            exbtn.click(lambda x: x, exbtn, txt, queue=False)
+                
+            with gr.Accordion("Details", open=False):
+                gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
 
             with gr.Row() as email_row:    
                 emailtxt = gr.Textbox(

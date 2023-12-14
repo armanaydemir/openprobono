@@ -217,7 +217,7 @@ with gr.Blocks(
                             exbtn.click(lambda x: x, exbtn, txt, queue=False)
 
             admin_visible = "staging" in root_path
-            with gr.Tab("Advanced Settings", visible=admin_visible):
+            with gr.Tab("Tools", visible=admin_visible):
                 with gr.Row() as tool_row:
                     t1name = gr.Textbox(
                         value="government-search",
@@ -278,7 +278,7 @@ with gr.Blocks(
                         interactive=True,
                     )
 
-            with gr.Tab("Settings"):
+            with gr.Tab(":gear:"):
                 gr.Markdown("OpenProBono AI is designed to assist users in finding relevant information and resources related to government and laws. While we strive to provide accurate and up-to-date information, it is important to note that the AI's results should be verified against official sources. The AI's findings should not be considered legal advice, and users should consult with legal professionals for specific legal matters. Additionally, the AI's recommendations and suggestions are based on algorithms and data analysis, and may not cover all possible scenarios or legal interpretations. The AI's developers and operators do not assume any liability for the accuracy, completeness, or reliability of the AI's results. Users are responsible for independently verifying the information and using their own judgment in making legal decisions. Learn more at www.openprobono.com.")
                 with gr.Row() as email_row:    
                     emailtxt = gr.Textbox(
@@ -555,7 +555,6 @@ with gr.Blocks(
     def isMobile_change(isMobile, tools_col):
         tools_col.update(visible=(not isMobile))
         return tools_col
-
     isMobile.change(isMobile_change, [isMobile, tools_col], tools_col)
 
     #loading google analytics script

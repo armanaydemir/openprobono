@@ -552,7 +552,7 @@ with gr.Blocks(
         store_email, [emailtxt, session], None, queue=False
     )
 
-    def isMobile_change(isMobile, user_agent, tools_col):
+    def isMobile_change(isMobile):
         toShow = isMobile.value
         return gr.update(visible=toShow, interactive=toShow, render=toShow)
     isMobile.change(isMobile_change, isMobile, tools_col)

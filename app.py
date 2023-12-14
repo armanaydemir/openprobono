@@ -292,7 +292,7 @@ with gr.Blocks(
                 )
                 emailbtn = gr.Button("Submit")
 
-        with gr.Group(visible=False, interactive=False) as tools_mobile_group:
+        with gr.Row(visible=False, interactive=False) as tools_mobile_group:
             with gr.Accordion("Examples", open=False):
                 for prompt in example_prompts:
                     with gr.Accordion(prompt, open=False):

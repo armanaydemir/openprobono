@@ -208,7 +208,7 @@ with gr.Blocks(
                 subbtn = gr.Button("Submit", variant="primary") 
             clearopenai = gr.ClearButton([txt, openai_chat], elem_id="clearopenai")
 
-        with gr.Column(scale=0, elem_id="tools_col", visible=(not user_agent.value)) as tools_col:
+        with gr.Column(scale=0, elem_id="tools_col") as tools_col:
             with gr.Tab("Examples"):
                 for prompt in example_prompts:
                     with gr.Accordion(prompt, open=False):

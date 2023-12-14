@@ -186,13 +186,13 @@ with gr.Blocks(
 
     def toggle_examples(state):
         state = not state
-        return gr.update(visible = state), gr.update(visible = not state), gr.update(visible = state), state
+        return gr.update(visible = not state), gr.update(visible = state), state
 
     def hide_examples(state):
         #if examples are currently shown, change state
         if(state):
             state = not state
-        return gr.update(visible = state), gr.update(visible = not state), gr.update(visible = state), state
+        return gr.update(visible = not state), gr.update(visible = state), state
 
 
     def add_text(history, text):
@@ -220,7 +220,7 @@ with gr.Blocks(
                 )
                 subbtn = gr.Button("Submit", variant="primary")
 
-            example_prompts_button = gr.Button("Example Prompts")
+            example_prompts_button = gr.Button("Example Prompts", visible=False)
         
         # with gr.Group() as tools_desktop_group:
         with gr.Column(scale=0, elem_id="tools_col_css") as tools_col:
@@ -305,8 +305,8 @@ with gr.Blocks(
                     exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
     
     #connecting frontend interactions to backend
-    example_prompts_button.click(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
-    back_button.click(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
+    example_prompts_button.click(toggle_examples, [examples_shown], [the_row, examples_box, examples_shown], queue=False)
+    back_button.click(toggle_examples, [examples_shown], [the_row, examples_box, examples_shown], queue=False)
     
     ##----------------------- backend   (llm stuff)-----------------------##
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):

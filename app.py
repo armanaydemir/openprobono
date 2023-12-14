@@ -171,6 +171,7 @@ with gr.Blocks(
     print(request)
     print("this is reqeust")
     print(request.request)
+    print(request.query_params)
 
     session = gr.State(get_uuid_id)
 

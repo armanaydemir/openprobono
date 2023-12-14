@@ -176,8 +176,9 @@ with gr.Blocks(
     # """,
     analytics_enabled=False
     ) as app:
-    isMobile = gr.Checkbox(label="isMobile", visible=False, render=False, interactive=False)
+    
     #loading user agent
+    isMobile = gr.Checkbox(label="isMobile", visible=False, render=False)
     app.load(None, None, [isMobile], _js=user_agent_script)
 
     session = gr.State(get_uuid_id)

@@ -176,9 +176,10 @@ with gr.Blocks(
     # """,
     analytics_enabled=False
     ) as app:
-    isMobile = gr.Checkbox(label="isMobile", visible=False, render=False)
+    isMobile = gr.State(False)
     #loading user agent
     app.load(None, None, [isMobile], _js=user_agent_script)
+    print(isMobile.value)
 
     session = gr.State(get_uuid_id)
 
@@ -552,11 +553,11 @@ with gr.Blocks(
         store_email, [emailtxt, session], None, queue=False
     )
 
-    def isMobile_change(isMobile):
-        toShow = isMobile.value
-        print("isMobile: " + str(toShow))
-        return gr.update(visible=toShow, interactive=toShow, render=toShow)
-    isMobile.change(isMobile_change, isMobile, tools_col)
+    # def isMobile_change(isMobile):
+    #     toShow = isMobile.value
+    #     print("isMobile: " + str(toShow))
+    #     return gr.update(visible=toShow, interactive=toShow, render=toShow)
+    # isMobile.change(isMobile_change, isMobile, tools_col)
 
     #loading google analytics script
     app.load(None, None, None, _js=ga_script)

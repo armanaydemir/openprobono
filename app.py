@@ -217,7 +217,7 @@ with gr.Blocks(
                     placeholder="Enter query",
                     container=False,
                 )
-                subbtn = gr.Button("Submit", variant="primary", scale=1)
+                subbtn = gr.Button("Submit", variant="primary", scale=1, min_width=1)
 
             example_prompts_button = gr.Button("Example Prompts", visible=False)
         

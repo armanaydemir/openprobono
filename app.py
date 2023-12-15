@@ -165,7 +165,7 @@ with gr.Blocks(
     #therow {height: 95vh!important; min-height: 95vh!important; max-height: 95vh!important;}
     #chatbot {height: 100%!important; min-height: 100%!important; max-height: 100%!important; flex-grow: 5; overflow: scroll!important;}
     #chatrow { height: 70%!important; min-height: 70%!important; max-height: 70%!important; }
-    #inputrow { height: 10%!important; min-height: 20%!important; max-height: 20%!important; }
+    #inputrow { height: 10%!important; min-height: 10%!important; max-height: 10%!important; }
     #clearopenai { height: 5%!important; min-height: 5%!important; max-height: 5%!important; }
     """,
     #chat_col {height: 90%!important; min-height: 90%!important; max-height: 90%!important;}

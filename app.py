@@ -160,9 +160,9 @@ with gr.Blocks(
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }
     #component-0 { height: 100%!important; min-height: 100%!important; max-height: 100%!important; overflow: scroll!important;}
-    #chat_col {height: 90vh!important; min-height: 90vh!important; max-height: 90vh!important; overflow: scroll!important;}
+    #chat_col {height: 95vh!important; min-height: 95vh!important; max-height: 95vh!important;}
     #tools_col_css {height: 90vh!important; overflow: scroll!important;}
-    #therow {height: 90vh!important; min-height: 90vh!important; max-height: 90vh!important;}
+    #therow {height: 95vh!important; min-height: 95vh!important; max-height: 95vh!important;}
     #chatbot {height: 100%!important; min-height: 100%!important; max-height: 100%!important; flex-grow: 5; overflow: scroll!important;}
     #chatrow { height: 70%!important; min-height: 70%!important; max-height: 70%!important; }
     #inputrow { height: 20%!important; min-height: 20%!important; max-height: 20%!important; }
@@ -220,7 +220,7 @@ with gr.Blocks(
                 )
                 subbtn = gr.Button("Submit", variant="primary")
 
-            example_prompts_button = gr.Button("Example Prompts", visible=False, render=True)
+            example_prompts_button = gr.Button("Example Prompts", visible=False)
         
         # with gr.Group() as tools_desktop_group:
         with gr.Column(scale=0, elem_id="tools_col_css") as tools_col:

@@ -211,13 +211,13 @@ with gr.Blocks(
 
             with gr.Row(elem_id="inputrow") as input_row:
                 txt = gr.Textbox(
-                    scale=10,
+                    scale=5,
                     label="input",
                     show_label=False,
                     placeholder="Enter query",
                     container=False,
                 )
-                subbtn = gr.Button("Submit", variant="primary")
+                subbtn = gr.Button("Submit", variant="primary", scale=1)
 
             example_prompts_button = gr.Button("Example Prompts", visible=False)
         

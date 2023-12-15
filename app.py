@@ -194,7 +194,6 @@ with gr.Blocks(
             state = not state
         return gr.update(visible = not state), gr.update(visible = state), state
 
-
     def add_text(history, text):
         history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
@@ -212,7 +211,7 @@ with gr.Blocks(
 
             with gr.Row(elem_id="inputrow") as input_row:
                 txt = gr.Textbox(
-                    scale=6,
+                    scale=10,
                     label="input",
                     show_label=False,
                     placeholder="Enter query",

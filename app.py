@@ -302,7 +302,7 @@ with gr.Blocks(
             with gr.Accordion(prompt, open=False):
                 for example in example_prompts[prompt]:
                     exbtn = gr.Button(example)
-                    exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False)
+                    exbtn.click(lambda x: x, exbtn, txt, queue=False).then(toggle_examples, [examples_shown], [the_row, examples_box, examples_shown], queue=False)
     
     #connecting frontend interactions to backend
     example_prompts_button.click(toggle_examples, [examples_shown], [the_row, examples_box, examples_shown], queue=False)

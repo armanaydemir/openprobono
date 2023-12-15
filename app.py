@@ -209,7 +209,7 @@ with gr.Blocks(
                     show_label=False,
                 )
 
-            with gr.Row(elem_id="inputrow") as input_row:
+            with gr.Row(elem_id="inputrow", equal_height=False) as input_row:
                 txt = gr.Textbox(
                     scale=10,
                     label="input",

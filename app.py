@@ -220,7 +220,7 @@ with gr.Blocks(
                 )
                 subbtn = gr.Button("Submit", variant="primary")
 
-            example_prompts_button = gr.Button("Example Prompts", visible=False)
+            example_prompts_button = gr.Button("Example Prompts", visible=False, render=True)
         
         # with gr.Group() as tools_desktop_group:
         with gr.Column(scale=0, elem_id="tools_col_css") as tools_col:

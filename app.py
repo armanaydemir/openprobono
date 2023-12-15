@@ -160,7 +160,7 @@ with gr.Blocks(
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }
     #component-0 { height: 100%!important; min-height: 100%!important; max-height: 100%!important; overflow: scroll!important;}
-    #chat_col {height: 90vh!important; min-height: 90vh!important; max-height: 90vh!important;}
+    #chat_col {height: 90vh!important; min-height: 90vh!important; max-height: 90vh!important; overflow: scroll!important;}
     #tools_col_css {height: 90vh!important; overflow: scroll!important;}
     #therow {height: 90vh!important; min-height: 90vh!important; max-height: 90vh!important;}
     #chatbot {height: 100%!important; min-height: 100%!important; max-height: 100%!important; flex-grow: 5; overflow: scroll!important;}

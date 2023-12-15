@@ -164,8 +164,8 @@ with gr.Blocks(
     #tools_col_css {height: 90vh!important; overflow: scroll!important;}
     #therow {height: 95vh!important; min-height: 95vh!important; max-height: 95vh!important;}
     #chatbot {height: 100%!important; min-height: 100%!important; max-height: 100%!important; flex-grow: 5; overflow: scroll!important;}
-    #chatrow { height: 60%!important; min-height: 60%!important; max-height: 60%!important; }
-    #inputrow { height: 30%!important; min-height: 30%!important; max-height: 30%!important; }
+    #chatrow { height: 70%!important; min-height: 70%!important; max-height: 70%!important; }
+    #inputrow { height: 20%!important; min-height: 20%!important; max-height: 20%!important; }
     """,
     #chat_col {height: 90%!important; min-height: 90%!important; max-height: 90%!important;}
     # 
@@ -210,13 +210,14 @@ with gr.Blocks(
 
             with gr.Row(elem_id="inputrow", equal_height=False) as input_row:
                 txt = gr.Textbox(
+                    lines=2,
                     scale=10,
                     label="input",
                     show_label=False,
                     placeholder="Enter query",
                     container=False,
                 )
-                subbtn = gr.Button("Submit", variant="primary", scale=1, min_width=1, lines=2)
+                subbtn = gr.Button("Submit", variant="primary", scale=1, min_width=1)
 
             example_prompts_button = gr.Button("Example Prompts", visible=False)
         

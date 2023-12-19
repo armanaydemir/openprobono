@@ -200,7 +200,7 @@ with gr.Blocks(
         return gr.update(visible = not state), gr.update(visible = state), state
 
     def add_text(history, text):
-        history = history + [(text, None)]
+        history = history[-1][0] = text
         return history, gr.update(value="", interactive=False)
 
     gr.Markdown("<a href=\"https://www.openprobono.com/\" target=\"_blank\" style=\"text-decoration:none!important;  color: white\">OpenProBono</a>")

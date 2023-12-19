@@ -166,7 +166,7 @@ with gr.Blocks(
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }
     #component-0 { height: 100%!important; min-height: 100%!important; max-height: 100%!important; overflow: scroll!important;}
-    #component-66 { outline-color: #111726; outline-style: solid; }
+    #component-66 { background: #404040; }
     #chat_col {height: 95vh!important; min-height: 95vh!important; max-height: 95vh!important;}
     #tools_col_css {height: 90vh!important; overflow: scroll!important;}
     #therow {height: 95vh!important; min-height: 95vh!important; max-height: 95vh!important;}

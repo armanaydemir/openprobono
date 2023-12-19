@@ -149,19 +149,20 @@ def get_uuid_id():
     return str(uuid.uuid4())
 
 
-theme = gr.Theme.load("./new_theme.json").set(
+theme = gr.Theme.load("./new_theme.json")
+
+default = gr.themes.Default(
+        primary_hue=gr.themes.colors.indigo, 
+        secondary_hue=gr.themes.colors.blue,
+        font=gr.themes.GoogleFont("Open Sans"),
+    ).set(
             body_background_fill="linear-gradient(to right, *primary_700, *primary_500)",
             body_background_fill_dark="linear-gradient(to right, *primary_700, *primary_500)",
 )
-# .set(
-#         primary_hue=gr.themes.colors.indigo, 
-#         secondary_hue=gr.themes.colors.blue,
-#         font=gr.themes.GoogleFont("Open Sans"),
-#     )
 
 with gr.Blocks(
     title="OpenProBono",
-    theme=theme,
+    theme=default,
     css="""
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }

@@ -157,7 +157,7 @@ theme = gr.Theme.from_hub("Taithrah/Minimal").set(
 
 with gr.Blocks(
     title="OpenProBono",
-    theme=,
+    theme=theme,
     css="""
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }

@@ -149,8 +149,7 @@ def get_uuid_id():
     return str(uuid.uuid4())
 
 
-theme = gr.Theme.from_hub("Taithrah/Minimal")
-theme.dump("theme.json")
+theme = gr.Theme.load("./new_theme.json")
 # .set(
 #         primary_hue=gr.themes.colors.indigo, 
 #         secondary_hue=gr.themes.colors.blue,

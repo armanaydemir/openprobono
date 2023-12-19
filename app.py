@@ -155,6 +155,7 @@ with gr.Blocks(
         secondary_hue=gr.themes.colors.blue,
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg,
+        background_fill_primary="*primary_50",
     ),
     css="""
     footer {visibility: hidden}

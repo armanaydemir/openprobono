@@ -149,11 +149,13 @@ def get_uuid_id():
     return str(uuid.uuid4())
 
 
-theme = gr.Theme.from_hub("Taithrah/Minimal").set(
-        primary_hue=gr.themes.colors.indigo, 
-        secondary_hue=gr.themes.colors.blue,
-        font=gr.themes.GoogleFont("Open Sans"),
-    )
+theme = gr.Theme.from_hub("Taithrah/Minimal")
+theme.dump("theme.json")
+# .set(
+#         primary_hue=gr.themes.colors.indigo, 
+#         secondary_hue=gr.themes.colors.blue,
+#         font=gr.themes.GoogleFont("Open Sans"),
+#     )
 
 with gr.Blocks(
     title="OpenProBono",

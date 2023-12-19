@@ -200,7 +200,7 @@ with gr.Blocks(
         return gr.update(visible = not state), gr.update(visible = state), state
 
     def add_text(history, text):
-        history = history[-1][0] = text
+        history = history + [(text, None)]
         return history, gr.update(value="", interactive=False)
 
     gr.Markdown("<a href=\"https://www.openprobono.com/\" target=\"_blank\" style=\"text-decoration:none!important;  color: white\">OpenProBono</a>")
@@ -322,7 +322,7 @@ with gr.Blocks(
             job_done = object()
 
             history_langchain_format = ChatMessageHistory()
-            for i in range(0, len(history)-1):
+            for i in range(1, len(history)-1):
                 (human, ai) = history[i]
                 history_langchain_format.add_user_message(human)
                 history_langchain_format.add_ai_message(ai)

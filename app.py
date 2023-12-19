@@ -155,18 +155,18 @@ default = gr.themes.Default(
         primary_hue=gr.themes.colors.indigo, 
         secondary_hue=gr.themes.colors.blue,
         font=gr.themes.GoogleFont("Open Sans"),
-    ).set(
-            body_background_fill="linear-gradient(to right, #1e244d, #183e1b)",
-            body_background_fill_dark="linear-gradient(to right, #1e244d, #183e1b)",
-)
+    )
 
 with gr.Blocks(
     title="OpenProBono",
-    theme=default,
+    theme=theme.set(
+            body_background_fill="linear-gradient(to right, #1e244d, #183e1b)",
+            body_background_fill_dark="linear-gradient(to right, #1e244d, #183e1b)"),
     css="""
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }
     #component-0 { height: 100%!important; min-height: 100%!important; max-height: 100%!important; overflow: scroll!important;}
+    #component-66 { background: #111726; }
     #chat_col {height: 95vh!important; min-height: 95vh!important; max-height: 95vh!important;}
     #tools_col_css {height: 90vh!important; overflow: scroll!important;}
     #therow {height: 95vh!important; min-height: 95vh!important; max-height: 95vh!important;}

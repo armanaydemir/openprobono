@@ -149,7 +149,10 @@ def get_uuid_id():
     return str(uuid.uuid4())
 
 
-theme = gr.Theme.load("./new_theme.json")
+theme = gr.Theme.load("./new_theme.json").set(
+            body_background_fill="linear-gradient(to right, *primary_700, *primary_500)",
+            body_background_fill_dark="linear-gradient(to right, *primary_700, *primary_500)",
+)
 # .set(
 #         primary_hue=gr.themes.colors.indigo, 
 #         secondary_hue=gr.themes.colors.blue,

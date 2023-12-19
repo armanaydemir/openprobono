@@ -152,12 +152,12 @@ def get_uuid_id():
 theme = gr.Theme.load("./new_theme.json")
 
 default = gr.themes.Default(
-        primary_hue=gr.themes.colors.indigo, 
-        secondary_hue=gr.themes.colors.blue,
+        primary_hue=gr.themes.colors.blue, 
+        secondary_hue=gr.themes.colors.green,
         font=gr.themes.GoogleFont("Open Sans"),
     ).set(
-            body_background_fill="linear-gradient(to right, *primary_700, *primary_500)",
-            body_background_fill_dark="linear-gradient(to right, *primary_700, *primary_500)",
+            body_background_fill="linear-gradient(to right, *primary_700, *secondary_500)",
+            body_background_fill_dark="linear-gradient(to right, *primary_700, *secondary_500)",
 )
 
 with gr.Blocks(

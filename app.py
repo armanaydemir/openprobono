@@ -148,15 +148,19 @@ example_prompts = {
 def get_uuid_id():
     return str(uuid.uuid4())
 
-with gr.Blocks(
-    title="OpenProBono",
-    theme=gr.themes.Default(
+
+theme = gr.themes.Default(
         primary_hue=gr.themes.colors.indigo, 
         secondary_hue=gr.themes.colors.blue,
         font=gr.themes.GoogleFont("Open Sans"),
         radius_size=gr.themes.sizes.radius_lg,
-        background_fill_primary="*primary_50",
-    ),
+    ).set(
+        background_fill_primary="*primary_50"
+    )
+
+with gr.Blocks(
+    title="OpenProBono",
+    theme=theme,
     css="""
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }

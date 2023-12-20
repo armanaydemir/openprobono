@@ -313,6 +313,12 @@ with gr.Blocks(
     back_button.click(toggle_examples, [examples_shown], [the_row, examples_box, examples_shown], queue=False)
     
     ##----------------------- backend   (llm stuff)-----------------------##
+    class MyCallbackHandler(BaseCallbackHandler):
+        def __init__(self, q):
+            self.q = q
+        def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+            self.q.put(token)
+
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
         print(history)
         print(history[-1])

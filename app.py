@@ -317,106 +317,102 @@ with gr.Blocks(
         print(history)
         print(history[-1])
         print("^^this is history^^")
-        if(history[-1][0].strip() == ""):
-            history[-1][1] = "Hi, how can I assist you today?"
-            yield history 
-        else:
-            q = Queue()
-            job_done = object()
+        q = Queue()
+        job_done = object()
 
-            history_langchain_format = ChatMessageHistory()
-            for i in range(1, len(history)-1):
-                (human, ai) = history[i]
-                history_langchain_format.add_user_message(human)
-                history_langchain_format.add_ai_message(ai)
-            memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+        history_langchain_format = ChatMessageHistory()
+        for i in range(1, len(history)-1):
+            (human, ai) = history[i]
+            history_langchain_format.add_user_message(human)
+            history_langchain_format.add_ai_message(ai)
+        memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
 
-            ##----------------------- tools -----------------------##
+        ##----------------------- tools -----------------------##
 
-            def gov_search(q):
-                data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
-                db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
-                return filtered_search(GoogleSearch({
-                    'q': t1txt + " " + q,
-                    'num': 5
-                    }).get_dict())
+        def gov_search(q):
+            data = {"search": t1txt + " " + q, 'prompt':t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
+            db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
+            return filtered_search(GoogleSearch({
+                'q': t1txt + " " + q,
+                'num': 5
+                }).get_dict())
 
-            def case_search(q):
-                data = {"search": t2txt + " " + q, 'prompt': t2prompt, 'timestamp': firestore.SERVER_TIMESTAMP}
-                db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
-                return filtered_search(GoogleSearch({
-                    'q': t2txt + " " + q,
-                    'num': 5
-                    }).get_dict())
+        def case_search(q):
+            data = {"search": t2txt + " " + q, 'prompt': t2prompt, 'timestamp': firestore.SERVER_TIMESTAMP}
+            db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)
+            return filtered_search(GoogleSearch({
+                'q': t2txt + " " + q,
+                'num': 5
+                }).get_dict())
 
-            async def async_gov_search(q):
-                return gov_search(q)
+        async def async_gov_search(q):
+            return gov_search(q)
 
-            async def async_case_search(q):
-                return case_search(q)
+        async def async_case_search(q):
+            return case_search(q)
 
-            #Filter search results retured by serpapi to only include relavant results
-            def filtered_search(results):
-                new_dict = {}
-                if('sports_results' in results):
-                    new_dict['sports_results'] = results['sports_results']
-                if('organic_results' in results):
-                    new_dict['organic_results'] = results['organic_results']
-                return new_dict
+        #Filter search results retured by serpapi to only include relavant results
+        def filtered_search(results):
+            new_dict = {}
+            if('sports_results' in results):
+                new_dict['sports_results'] = results['sports_results']
+            if('organic_results' in results):
+                new_dict['organic_results'] = results['organic_results']
+            return new_dict
 
-            #Definition and descriptions of tools aviailable to the bot
-            tools = [
-                Tool(
-                    name=t1name,
-                    func=gov_search,
-                    coroutine=async_gov_search,
-                    description=t1prompt,
-                ),
-                Tool(
-                    name=t1name,
-                    func=case_search,
-                    coroutine=async_case_search,
-                    description=t2prompt,
-                )
-            ]
-            ##----------------------- end of tools -----------------------##
+        #Definition and descriptions of tools aviailable to the bot
+        tools = [
+            Tool(
+                name=t1name,
+                func=gov_search,
+                coroutine=async_gov_search,
+                description=t1prompt,
+            ),
+            Tool(
+                name=t1name,
+                func=case_search,
+                coroutine=async_case_search,
+                description=t2prompt,
+            )
+        ]
+        ##----------------------- end of tools -----------------------##
 
-            system_message = 'You are a helpful AI assistant. ALWAYS use tools to answer questions.'
-            system_message += user_prompt
-            system_message += '. If you used a tool, ALWAYS return a "SOURCES" part in your answer.'
-            agent_kwargs = {
-                "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
-            }
-            async def task(prompt):
-                #definition of llm used for bot
-                bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
-                
-                agent = initialize_agent(
-                    tools=tools,
-                    llm=bot_llm,
-                    agent=AgentType.OPENAI_FUNCTIONS,
-                    verbose=False,
-                    agent_kwargs=agent_kwargs,
-                    memory=memory,
-                    #return_intermediate_steps=True
-                )
-                agent.agent.prompt.messages[0].content = system_message
-                ret = await agent.arun(prompt)
-                q.put(job_done)
-                return ret
+        system_message = 'You are a helpful AI assistant. ALWAYS use tools to answer questions.'
+        system_message += user_prompt
+        system_message += '. If you used a tool, ALWAYS return a "SOURCES" part in your answer.'
+        agent_kwargs = {
+            "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+        }
+        async def task(prompt):
+            #definition of llm used for bot
+            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
+            
+            agent = initialize_agent(
+                tools=tools,
+                llm=bot_llm,
+                agent=AgentType.OPENAI_FUNCTIONS,
+                verbose=False,
+                agent_kwargs=agent_kwargs,
+                memory=memory,
+                #return_intermediate_steps=True
+            )
+            agent.agent.prompt.messages[0].content = system_message
+            ret = await agent.arun(prompt)
+            q.put(job_done)
+            return ret
 
-            with start_blocking_portal() as portal:
-                portal.start_task_soon(task, history[-1][0])
+        with start_blocking_portal() as portal:
+            portal.start_task_soon(task, history[-1][0])
 
-                content = ""
-                while True:
-                    next_token = q.get(True)
-                    if next_token is job_done:
-                        break
-                    content += next_token
-                    history[-1][1] = content
+            content = ""
+            while True:
+                next_token = q.get(True)
+                if next_token is job_done:
+                    break
+                content += next_token
+                history[-1][1] = content
 
-                    yield history
+                yield history
         
 
     ##----------------------- end of backend  (llm stuff)-----------------------##

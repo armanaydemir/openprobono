@@ -326,7 +326,7 @@ with gr.Blocks(
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
-
+        print("after memory")
         ##----------------------- tools -----------------------##
 
         def gov_search(q):
@@ -384,6 +384,8 @@ with gr.Blocks(
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
         async def task(prompt):
+            print("task started")
+            print(prompt)
             #definition of llm used for bot
             bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
             
@@ -402,6 +404,7 @@ with gr.Blocks(
             return ret
 
         with start_blocking_portal() as portal:
+            print("inside portal")
             portal.start_task_soon(task, history[-1][0])
 
             content = ""

@@ -438,7 +438,7 @@ with gr.Blocks(
     ).then(
         hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False
     ).then(
-        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
+        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script, queue=False
     ).then(
         openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat]
     ).then(
@@ -453,7 +453,7 @@ with gr.Blocks(
     ).then(
         hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False
     ).then(
-        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script
+        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script, queue=False
     ).then(
         openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat]
     ).then(

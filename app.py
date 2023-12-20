@@ -398,6 +398,7 @@ with gr.Blocks(
                 memory=memory,
                 #return_intermediate_steps=True
             )
+            print("init agent")
             agent.agent.prompt.messages[0].content = system_message
             ret = await agent.arun(prompt)
             print("task finished")

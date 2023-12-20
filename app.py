@@ -91,7 +91,7 @@ chat_ga_script = """
 """
 
 
-#script for user-agent retreival
+#script for user-agent retreival (returns true if mobile)
 user_agent_script = """
 () => {
     let check = false;

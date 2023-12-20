@@ -388,7 +388,7 @@ with gr.Blocks(
             print(prompt)
             #definition of llm used for bot
             bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
-            
+            print("bot_llm defined")
             agent = initialize_agent(
                 tools=tools,
                 llm=bot_llm,

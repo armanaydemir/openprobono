@@ -429,14 +429,14 @@ with gr.Blocks(
         print("^^ this is the email ^^")
 
     #corresponds to enter in the text box
-    txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False, preprocess=False).then(
-        add_text, [openai_chat, txt], [openai_chat, txt], queue=False, preprocess=False
+    txt_msg = txt.submit(lambda: gr.update(interactive=False), None, [txt], queue=False, preprocess=False, postprocess=False).then(
+        add_text, [openai_chat, txt], [openai_chat, txt], queue=False, preprocess=False, postprocess=False
     ).then(
-        hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False, preprocess=False
+        hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False, preprocess=False, postprocess=False
     ).then(
-        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script, queue=False, preprocess=False
+        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script, queue=False, preprocess=False, postprocess=False
     ).then(
-        openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat], preprocess=False
+        openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat], preprocess=False, postprocess=False
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(
@@ -444,14 +444,14 @@ with gr.Blocks(
     )
 
     #corresponds to clicking the submit button
-    sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False, preprocess=False).then(
-        add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit", preprocess=False
+    sub_msg = subbtn.click(lambda: gr.update(interactive=False), None, [txt], queue=False, preprocess=False, postprocess=False).then(
+        add_text, [openai_chat, txt], [openai_chat, txt], queue=False, api_name="submit", preprocess=False, postprocess=False
     ).then(
-        hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False, preprocess=False
+        hide_examples, [examples_shown], [example_prompts_button, the_row, examples_box, examples_shown], queue=False, preprocess=False, postprocess=False
     ).then(
-        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script, queue=False, preprocess=False
+        lambda x: x, [openai_chat], openai_chat, _js=chat_ga_script, queue=False, preprocess=False, postprocess=False
     ).then(
-        openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat], preprocess=False
+        openai_bot, [openai_chat, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session], [openai_chat], preprocess=False, postprocess=False
     ).then(
         lambda: gr.update(interactive=True), None, [txt], queue=False
     ).then(

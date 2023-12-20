@@ -158,7 +158,9 @@ default = gr.themes.Default(
 
 with gr.Blocks(
     title="OpenProBono",
-    theme=default,
+    theme=default.set(
+            body_background_fill="linear-gradient(to right, #1e244d, #183e1b)",
+            body_background_fill_dark="linear-gradient(to right, #1e244d, #183e1b)"),
     css="""
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }

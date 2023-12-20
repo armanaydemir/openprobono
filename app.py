@@ -179,9 +179,12 @@ with gr.Blocks(
     # chatbot { flex-grow: 1; overflow: auto;}
     # """,
     analytics_enabled=False,
-    _js="""const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set('__theme', 'dark');
-    window.location.search = urlParams;"""
+    _js="""window.addEventListener('load', function () {
+  gradioURL = window.location.href
+  if (!gradioURL.endsWith('?__theme=dark')) {
+    window.location.replace(gradioURL + '?__theme=dark');
+  }
+});"""
     ) as app:
     
     #loading user agent

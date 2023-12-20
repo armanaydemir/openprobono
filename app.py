@@ -400,13 +400,14 @@ with gr.Blocks(
             )
             agent.agent.prompt.messages[0].content = system_message
             ret = await agent.arun(prompt)
+            print("task finished")
             q.put(job_done)
             return ret
 
         with start_blocking_portal() as portal:
             print("inside portal")
             portal.start_task_soon(task, history[-1][0])
-
+            print("after start task soon")
             content = ""
             while True:
                 next_token = q.get(True)

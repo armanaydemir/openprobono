@@ -320,9 +320,6 @@ with gr.Blocks(
             self.q.put(token)
 
     def openai_bot(history, t1name, t1txt, t1prompt, t2name, t2txt, t2prompt, user_prompt, session):
-        print(history)
-        print(history[-1])
-        print("^^this is history^^")
         q = Queue()
         job_done = object()
 
@@ -332,7 +329,6 @@ with gr.Blocks(
             history_langchain_format.add_user_message(human)
             history_langchain_format.add_ai_message(ai)
         memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
-        print("after memory")
         ##----------------------- tools -----------------------##
 
         def gov_search(q):
@@ -390,11 +386,8 @@ with gr.Blocks(
             "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
         }
         async def task(prompt):
-            print("task started")
-            print(prompt)
             #definition of llm used for bot
             bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
-            print("bot_llm defined")
             agent = initialize_agent(
                 tools=tools,
                 llm=bot_llm,
@@ -404,17 +397,13 @@ with gr.Blocks(
                 memory=memory,
                 #return_intermediate_steps=True
             )
-            print("init agent")
             agent.agent.prompt.messages[0].content = system_message
             ret = await agent.arun(prompt)
-            print("task finished")
             q.put(job_done)
             return ret
 
         with start_blocking_portal() as portal:
-            print("inside portal")
             portal.start_task_soon(task, history[-1][0])
-            print("after start task soon")
             content = ""
             while True:
                 next_token = q.get(True)
@@ -422,8 +411,6 @@ with gr.Blocks(
                     break
                 content += next_token
                 history[-1][1] = content
-                print("content: " + content)
-                print("yield histoyr")
                 yield history
         
 

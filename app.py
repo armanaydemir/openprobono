@@ -235,7 +235,7 @@ with gr.Blocks(
                             exbtn = gr.Button(example)
                             exbtn.click(lambda x: x, exbtn, txt, queue=False)
 
-            admin_visible = "staging" in root_path
+            admin_visible = "admin" in root_path or "staging" in root_path
             with gr.Tab("Tools", visible=admin_visible):
                 with gr.Row() as tool_row:
                     t1name = gr.Textbox(

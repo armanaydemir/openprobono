@@ -208,7 +208,7 @@ with gr.Blocks(
         with gr.Column(scale=2, elem_id="chat_col") as chat_col:
             with gr.Row(elem_id="chatrow") as chat_row:
                 openai_chat = gr.Chatbot(
-                    [(None, "Hi! Ask me any legal questions you have!\n \nIf you don\'t know where to start, try looking at the example prompts!")],
+                    [],
                     elem_id="chatbot",
                     label="OpenProBono",
                     show_label=False,

@@ -414,7 +414,8 @@ with gr.Blocks(
                     break
                 content += next_token
                 history[-1][1] = content
-
+                print("content: " + content)
+                print("yield histoyr")
                 yield history
         
 

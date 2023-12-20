@@ -158,9 +158,7 @@ default = gr.themes.Default(
 
 with gr.Blocks(
     title="OpenProBono",
-    theme=theme.set(
-            body_background_fill="linear-gradient(to right, #1e244d, #183e1b)",
-            body_background_fill_dark="linear-gradient(to right, #1e244d, #183e1b)"),
+    theme=default,
     css="""
     footer {visibility: hidden}
     .gradio-container {max-width: 100%!important; width: 100%!important; }
@@ -179,12 +177,6 @@ with gr.Blocks(
     # chatbot { flex-grow: 1; overflow: auto;}
     # """,
     analytics_enabled=False,
-    _js="""window.addEventListener('load', function () {
-  gradioURL = window.location.href
-  if (!gradioURL.endsWith('?__theme=dark')) {
-    window.location.replace(gradioURL + '?__theme=dark');
-  }
-});"""
     ) as app:
     
     #loading user agent

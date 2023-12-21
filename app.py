@@ -19,6 +19,7 @@ from multiprocessing import Pool
 import os
 from queue import Queue
 import re
+import requests
 from serpapi import GoogleSearch
 import sys
 from typing import Any, Dict, List, Optional, Union
@@ -33,6 +34,9 @@ langchain.debug = True
 
 #manually set the api key for now
 GoogleSearch.SERP_API_KEY = "5567e356a3e19133465bc68755a124268543a7dd0b2809d75b038797b43626ab"
+
+#setting up courtlistener api
+courtlistener_header = {"Authorization": "Token " + os.getenv('COURTLISTENER_TOKEN')}
 
 #setting up firebase
 cred = credentials.Certificate("../../creds.json")
@@ -89,7 +93,6 @@ chat_ga_script = """
     return chat
 }
 """
-
 
 #script for user-agent retreival (returns true if mobile)
 #also makes it dark mode
@@ -155,10 +158,10 @@ def get_uuid_id():
 theme = gr.Theme.load("./new_theme.json")
 
 default = gr.themes.Default(
-        primary_hue=gr.themes.colors.indigo, 
-        secondary_hue=gr.themes.colors.blue,
-        font=gr.themes.GoogleFont("Open Sans"),
-    )
+    primary_hue=gr.themes.colors.indigo, 
+    secondary_hue=gr.themes.colors.blue,
+    font=gr.themes.GoogleFont("Open Sans"),
+)
 
 with gr.Blocks(
     title="OpenProBono",
@@ -331,6 +334,10 @@ with gr.Blocks(
                 history_langchain_format.add_ai_message(ai)
             memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
             ##----------------------- tools -----------------------##
+            def courtlistener_search(query):
+                response = requests.get("https://www.courtlistener.com/api/rest/v3/search/?q=" + query, headers=courtlistener_header)
+                return response.json()
+
             def gov_search(q):
                 data = {"search": t1txt + " " + q, 'prompt': t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
                 db.collection(root_path + "search").document(session).collection('searches').document("search" + get_uuid_id()).set(data)

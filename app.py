@@ -4,7 +4,6 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import gradio as gr
 import langchain
-from langchain import PromptTemplate
 from langchain.agents import AgentExecutor, AgentOutputParser, AgentType, LLMSingleActionAgent, initialize_agent, Tool, ZeroShotAgent
 from langchain.chains import LLMChain
 from langchain.callbacks.base import BaseCallbackHandler
@@ -13,7 +12,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
-from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder
+from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from multiprocessing import Pool
 import os
@@ -590,8 +589,21 @@ with gr.Blocks(
     
 app.queue()
 
-#using command line arguments to set port and root path
-if(len(sys.argv) < 3):
-    app.launch(share=True, favicon_path="./missing.ico")
-else:
-    app.launch(root_path=sys.argv[1], server_port=int(sys.argv[2]), favicon_path="./missing.ico")
+
+"""
+How to launch Gradio app within another FastAPI app. 
+
+Run this from the terminal as you would normally start a FastAPI app: `uvicorn app:api`
+and navigate to http://localhost:8000/gradio in your browser to see the Gradio app.
+"""
+from fastapi import FastAPI
+
+CUSTOM_PATH = "/gradio"
+
+api = FastAPI()
+
+@api.get("/")
+def read_main():
+    return {"message": "This is your main app"}
+
+gr.mount_gradio_app(api, app, path=CUSTOM_PATH)

@@ -336,7 +336,7 @@ with gr.Blocks(
             ##----------------------- tools -----------------------##
             def courtlistener_search(query):
                 response = requests.get("https://www.courtlistener.com/api/rest/v3/search/?q=" + query, headers=courtlistener_header)
-                return response.json()
+                return str(response.json())
 
             def gov_search(q):
                 data = {"search": t1txt + " " + q, 'prompt': t1prompt,'timestamp': firestore.SERVER_TIMESTAMP}
@@ -353,6 +353,9 @@ with gr.Blocks(
                     'q': t2txt + " " + q,
                     'num': 5
                     }).get_dict())
+
+            async def async_courtlistener_search(query):
+                return courtlistener_search(query)
 
             async def async_gov_search(q):
                 return gov_search(q)
@@ -391,6 +394,12 @@ with gr.Blocks(
 
             #Definition and descriptions of tools aviailable to the bot
             tools = [
+                Tools(
+                    name="Courtlistener Search", 
+                    func=courtlistener_search,
+                    coroutine=async_courtlistener_search,
+                    description="Searches courtlistener for relevant cases"
+                ),
                 Tool(
                     name=t1name,
                     func=gov_search,

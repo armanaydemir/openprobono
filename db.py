@@ -10,6 +10,7 @@ db = firestore.client()
 
 #getting conversations and showing most recent ones
 past = datetime.datetime.now() - datetime.timedelta(days=4)
+past.replace(tzinfo=pytz.UTC)
 
 docs = db.collection('conversationsClone').limit(10).get()
 for doc in docs:

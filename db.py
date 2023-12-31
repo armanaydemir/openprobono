@@ -12,4 +12,8 @@ db = firestore.client()
 docs = db.collection('conversationsClone').limit(10).get()
 for doc in docs:
     print(f'{doc.id} => {doc.to_dict()}')
-    print(db.collection('conversationsClone').document(doc.id).collection('conversations').get())
+    subdocs = db.collection('conversationsClone').document(doc.id).collection('conversations').get()
+    print(subdocs)
+    for msg in subdocs:
+        print(f'{msg.id} => {msg.to_dict()}')
+    print("------------------")

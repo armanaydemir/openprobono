@@ -10,5 +10,5 @@ db = firestore.client()
 #getting conversations and showing most recent ones
 
 docs = db.collection('conversationsClone').limit(10).get()
-docs = [doc.get("conversation") for doc in docs]
-print(docs)
+for doc in docs:
+    print(f'{doc.id} => {doc.to_dict()}')

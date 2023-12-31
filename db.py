@@ -10,9 +10,9 @@ db = firestore.client()
 
 
 #getting conversations and showing most recent ones
-past = datetime.datetime.now() - datetime.timedelta(days=4)
+past = datetime.datetime.now() - datetime.timedelta(days=19)
 past = past.replace(tzinfo=pytz.UTC)
-
+print(past)
 docs = db.collection('conversationsClone').limit(10).get()
 for doc in docs:
     # print(f'{doc.id} => {doc.to_dict()}')
@@ -20,7 +20,9 @@ for doc in docs:
     # print(subdocs)
     for msg in subdocs:
         # print(f'{msg.id} => {msg.to_dict()}')
-        if(msg.to_dict()['timestamp'] > past):
+        time = msg.to_dict()['timestamp']
+        print(time)
+        if(time > past):
             print(f'{msg.id} => {msg.to_dict()}')
             
     print("------------------")

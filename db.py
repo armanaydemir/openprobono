@@ -9,4 +9,4 @@ db = firestore.client()
 
 #getting conversations and showing most recent ones
 
-print(db.collection('conversations').order_by('timestamp', direction=firestore.Query.DESCENDING).limit(10).stream())
+print(db.collection('conversations').order_by('timestamp', direction=firestore.Query.DESCENDING).limit(10).get())

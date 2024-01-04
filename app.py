@@ -12,7 +12,7 @@ from langchain.callbacks.streaming_stdout_final_only import FinalStreamingStdOut
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
-from langchain.memory import ConversationTokenBufferMemory, ChatMessageHistory
+from langchain.memory import ConversationSummaryBufferMemory, ChatMessageHistory
 from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from multiprocessing import Pool
@@ -337,7 +337,7 @@ with gr.Blocks(
                 (human, ai) = history[i]
                 history_langchain_format.add_user_message(human)
                 history_langchain_format.add_ai_message(ai)
-            memory = ConversationTokenBufferMemory(llm=memory_llm, max_token_limit=3000, return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+            memory = ConversationSummaryBufferMemory(llm=memory_llm, max_token_limit=2000, chat_memory=history_langchain_format, memory_key="memory")
             ##----------------------- tools -----------------------##
 
             def gov_search(q):

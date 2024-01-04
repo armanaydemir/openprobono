@@ -12,7 +12,7 @@ from langchain.callbacks.streaming_stdout_final_only import FinalStreamingStdOut
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader, UnstructuredURLLoader
 from langchain.llms import OpenAI
-from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain.memory import ConversationTokenBufferMemory, ChatMessageHistory
 from langchain.prompts import BaseChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import AgentAction, AgentFinish, AIMessage, HumanMessage
 from multiprocessing import Pool

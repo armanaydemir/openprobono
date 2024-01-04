@@ -337,7 +337,7 @@ with gr.Blocks(
                 (human, ai) = history[i]
                 history_langchain_format.add_user_message(human)
                 history_langchain_format.add_ai_message(ai)
-            memory = ConversationTokenBufferMemory(llm=memory_llm, max_token_limit=4000, return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+            memory = ConversationTokenBufferMemory(llm=memory_llm, max_token_limit=3000, return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
             ##----------------------- tools -----------------------##
 
             def gov_search(q):

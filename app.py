@@ -20,7 +20,7 @@ from queue import Queue
 import re
 from serpapi import GoogleSearch
 import sys
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 import uuid
 
 # two main components: chat, bot
@@ -182,11 +182,11 @@ with gr.Blocks(
     # chatbot { flex-grow: 1; overflow: auto;}
     # """,
     analytics_enabled=False
-    ) as app:
+    ) as gr_app:
     
     #loading user agent
     isMobile = gr.Checkbox(label="isMobile", visible=False)
-    app.load(None, None, [isMobile], _js=user_agent_script)
+    gr_app.load(None, None, [isMobile], _js=user_agent_script)
 
     session = gr.State(get_uuid_id)
     examples_shown = gr.State(False)
@@ -326,8 +326,10 @@ with gr.Blocks(
             history_langchain_format = ChatMessageHistory()
             for i in range(1, len(history)-1):
                 (human, ai) = history[i]
-                history_langchain_format.add_user_message(human)
-                history_langchain_format.add_ai_message(ai)
+                if human:
+                    history_langchain_format.add_user_message(human)
+                if ai:
+                    history_langchain_format.add_ai_message(ai)
             memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
             ##----------------------- tools -----------------------##
             def gov_search(q):
@@ -523,7 +525,7 @@ with gr.Blocks(
                     if next_token is job_done:
                         break
                     content += next_token
-                    history[-1][1] = content
+                    history[-1] = (history[-1][0], content)
 
                     yield history
         
@@ -584,26 +586,35 @@ with gr.Blocks(
     isMobile.change(isMobile_change, [isMobile], [tools_col, example_prompts_button], queue=False)
 
     #loading google analytics script
-    app.load(None, None, None, _js=ga_script)
+    gr_app.load(None, None, None, _js=ga_script)
 ##----------------------- frontend -----------------------##
     
-app.queue()
+gr_app.queue()
 
 
 """
 How to launch Gradio app within another FastAPI app. 
 
-Run this from the terminal as you would normally start a FastAPI app: `uvicorn app:api`
+Run this from the terminal as you would normally start a FastAPI app: `uvicorn app:fast_app`
 and navigate to http://localhost:8000/gradio in your browser to see the Gradio app.
 """
 from fastapi import FastAPI
+from pydantic import BaseModel
 
-CUSTOM_PATH = "/gradio"
+fast_app = FastAPI()
 
-api = FastAPI()
+class InputPrompt(BaseModel):
+    prompt: str
 
-@api.get("/")
-def read_main():
-    return {"message": "This is your main app"}
+class InputChat(BaseModel):
+    chat: List[Tuple[Union[str, None], Union[str, None]]]
 
-gr.mount_gradio_app(api, app, path=CUSTOM_PATH)
+@fast_app.post("/handle-prompt/")
+def read_item(data: InputPrompt):
+    return list(openai_bot([(data.prompt, None)], t1name.value, t1txt.value, t1prompt.value, t2name.value, t2txt.value, t2prompt.value, user_prompt.value, None))[-1][0][1]
+
+@fast_app.post("/handle-chat/")
+def read_item(data: InputChat):
+    return openai_bot(data.chat, t1name.value, t1txt.value, t1prompt.value, t2name.value, t2txt.value, t2prompt.value, user_prompt.value, None)
+
+gr.mount_gradio_app(fast_app, gr_app, path="/")

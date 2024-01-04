@@ -329,12 +329,15 @@ with gr.Blocks(
             q = Queue()
             job_done = object()
 
+            bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
+            memory_llm = OpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
+
             history_langchain_format = ChatMessageHistory()
             for i in range(1, len(history)-1):
                 (human, ai) = history[i]
                 history_langchain_format.add_user_message(human)
                 history_langchain_format.add_ai_message(ai)
-            memory = ConversationBufferMemory(return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
+            memory = ConversationTokenBufferMemory(llm=memory_llm, max_token_limit=4000, return_messages=True, chat_memory=history_langchain_format, memory_key="memory")
             ##----------------------- tools -----------------------##
 
             def gov_search(q):
@@ -394,7 +397,6 @@ with gr.Blocks(
             async def task(prompt):
                 #definition of llm used for bot
                 prompt = "Using the tools at your disposal, answer the following question: " + prompt
-                bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
                 agent = initialize_agent(
                     tools=tools,
                     llm=bot_llm,

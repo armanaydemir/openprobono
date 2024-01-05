@@ -330,7 +330,7 @@ with gr.Blocks(
             job_done = object()
 
             bot_llm = ChatOpenAI(temperature=0.0, model='gpt-3.5-turbo-0613', request_timeout=60*5, streaming=True, callbacks=[MyCallbackHandler(q)])
-            memory_llm = OpenAI(temperature=0.0, model='gpt-3.5-turbo-0613')
+            memory_llm = OpenAI(temperature=0.0, model='gpt-3.5')
 
             memory = ConversationSummaryBufferMemory(llm=memory_llm, max_token_limit=2000, memory_key="memory", return_messages=True)
             for i in range(1, len(history)-1):

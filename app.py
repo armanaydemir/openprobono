@@ -334,7 +334,7 @@ with gr.Blocks(
 
             memory = ConversationSummaryBufferMemory(llm=memory_llm, max_token_limit=2000, memory_key="memory")
             for i in range(1, len(history)-1):
-                memory.save_context({'input': history[i][0], 'output': history[i][1]})
+                memory.save_context({'input': history[i][0]}, {'output': history[i][1]})
             
             # history_langchain_format = ChatMessageHistory()
             # for i in range(1, len(history)-1):

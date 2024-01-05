@@ -32,7 +32,7 @@ import uuid
 langchain.debug = True
 
 #manually set the api key for now
-GoogleSearch.SERP_API_KEY = "5567e356a3e19133465bc68755a124268543a7dd0b2809d75b038797b43626ab"
+GoogleSearch.SERP_API_KEY = "e6e9a37144cdd3e3e40634f60ef69c1ea6e330dfa0d0cde58991aa2552fff980"
 
 #setting up firebase
 cred = credentials.Certificate("../../creds.json")

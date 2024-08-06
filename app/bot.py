@@ -8,8 +8,9 @@ from langfuse.decorators import langfuse_context, observe
 from openai import OpenAI
 from openai.types.chat import ChatCompletion, ChatCompletionMessageToolCall
 
-from app import chat_models
+from app.chat_models import chat, chat_history
 from app.models import BotRequest, ChatRequest
+from app.moderation import moderate
 from app.prompts import (
     MAX_NUM_TOOLS,
     MULTIPLE_TOOLS_PROMPT,
@@ -87,7 +88,7 @@ def openai_bot_stream(r: ChatRequest, bot: BotRequest):
     """
     if r.history[-1]["content"].strip() == "":
         return "Hi, how can I assist you today?"
-    if chat_models.moderate(r.history[-1]["content"].strip()):
+    if moderate(r.history[-1]["content"].strip()):
         return (
             "I'm sorry, I can't help you with that. "
             "Please modify your message and try again."
@@ -106,7 +107,7 @@ def openai_bot_stream(r: ChatRequest, bot: BotRequest):
     }
 
     # response is a ChatCompletion object
-    response: ChatCompletion = chat_models.chat(messages, bot.chat_model, **kwargs)
+    response: ChatCompletion = chat(messages, bot.chat_model, **kwargs)
     tool_calls, current_dict = yield from stream_openai_response(response)
     # Step 2: check if the model wanted to call a function
     if tool_calls:
@@ -179,7 +180,7 @@ def openai_tools_stream(
             tools_used += 1
         # get a new response from the model where it can see the function response
         yield "\nAnalyzing tool results\n"
-        response = chat_models.chat(messages, bot.chat_model, **kwargs)
+        response = chat(messages, bot.chat_model, **kwargs)
         tool_calls, current_dict = yield from stream_openai_response(response)
         messages.append(current_dict)
 
@@ -203,7 +204,7 @@ def openai_bot(r: ChatRequest, bot: BotRequest) -> str:
     """
     if r.history[-1]["content"].strip() == "":
         return "Hi, how can I assist you today?"
-    if chat_models.moderate(r.history[-1]["content"].strip()):
+    if moderate(r.history[-1]["content"].strip()):
         return (
             "I'm sorry, I can't help you with that. "
             "Please modify your message and try again."
@@ -229,7 +230,7 @@ def openai_bot(r: ChatRequest, bot: BotRequest) -> str:
     )
 
     # response is a ChatCompletion object
-    response: ChatCompletion = chat_models.chat(messages, bot.chat_model, **kwargs)
+    response: ChatCompletion = chat(messages, bot.chat_model, **kwargs)
     response_message = response.choices[0].message
     tool_calls = response_message.tool_calls
     # Step 2: check if the model wanted to call a function
@@ -297,7 +298,7 @@ def openai_tools(
             )  # extend conversation with function response
             tools_used += 1
         # get a new response from the model where it can see the function response
-        response = chat_models.chat(messages, bot.chat_model, **kwargs)
+        response = chat(messages, bot.chat_model, **kwargs)
         response_message = response.choices[0].message
         messages.append(response_message)
         tool_calls = response_message.tool_calls
@@ -307,12 +308,12 @@ def openai_tools(
 def anthropic_bot(r: ChatRequest, bot: BotRequest):
     if r.history[-1][0].strip() == "":
         return "Hi, how can I assist you today?"
-    if chat_models.moderate(r.history[-1][0].strip(), bot.chat_model):
+    if moderate(r.history[-1][0].strip(), bot.chat_model):
         return (
             "I'm sorry, I can't help you with that. "
             "Please modify your message and try again."
         )
-    messages = chat_models.messages(r.history, bot.chat_model.engine)
+    messages = chat_history(r.history, bot.chat_model.engine)
     toolset = search_toolset_creator(bot) + vdb_toolset_creator(bot)
     client = Anthropic()
     # Step 1: send the conversation and available functions to the model
@@ -335,7 +336,7 @@ def anthropic_bot(r: ChatRequest, bot: BotRequest):
         metadata={"bot_id": r.bot_id},
     )
 
-    response = chat_models.chat(messages, bot.chat_model, **kwargs)
+    response = chat(messages, bot.chat_model, **kwargs)
     messages.append({"role": response.role, "content": response.content})
     # Step 2: check if the model wanted to call a function
     tool_calls: list[ToolsBetaContentBlock] = [
@@ -384,7 +385,7 @@ def anthropic_tools(
             tools_used += 1
         # Step 4: send info for each function call and function response to the model
         # get a new response from the model where it can see the function response
-        response = chat_models.chat(messages, bot.chat_model, **kwargs)
+        response = chat(messages, bot.chat_model, **kwargs)
         messages.append({"role": response.role, "content": response.content})
         tool_calls = [msg for msg in response.content if msg.type == "tool_use"]
     content: list[ToolsBetaContentBlock] = messages[-1]["content"]

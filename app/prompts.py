@@ -224,3 +224,25 @@ After you have written out your analysis, determine which of the two answers you
 
 The output format should look as follows: \"Feedback: {{Write out your analysis and reasoning}} [RESULT] {{A or B or Tie}}\"
 Please do not generate any other opening, closing, and explanations. Be sure to include [RESULT] in your output."""
+
+
+OPINION_SUMMARY_BASE_PROMPT = """Write your summary as a list of bullet points with the following titles:
+
+Parties
+Introduction
+Background
+Procedural History
+Issues Presented
+Analysis
+Holding
+
+Provide exactly one bullet point per title. Each bullet point should be no longer than 3 sentences. Only use the titles given above, and do not change the titles."""
+
+OPINION_SUMMARY_MAP_PROMPT = \
+    "Your task is to summarize a judicial opinion. " +\
+    OPINION_SUMMARY_BASE_PROMPT +\
+    """ If there is not any information related to a title, write "I could not find any information." for that bullet point."""
+
+OPINION_SUMMARY_REDUCE_PROMPT = \
+    """Your task is to combine partial summaries of a judicial opinion into a single, comprehensive summary.""" +\
+    OPINION_SUMMARY_BASE_PROMPT

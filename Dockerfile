@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 poppler-utils tesse
 
 COPY requirements.txt /api/requirements.txt
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache-dir
 
 RUN python -c 'import nltk; nltk.download("punkt"); nltk.download("averaged_perceptron_tagger");'
 

@@ -6,6 +6,7 @@ import pymilvus
 from app import milvusdb
 
 collection_name = "DevTest"
+test_expr = "metadata['key']=='ocsmqjosfa'"
 
 def test_connection() -> None:
     conns = pymilvus.connections.list_connections()
@@ -61,3 +62,9 @@ def test_upload_site(url: str) -> None:
     assert result["message"] == "Success"
     assert "insert_count" in result
     assert result["insert_count"] > 0
+
+def test_get_expr() -> None:
+    result = milvusdb.get_expr(collection_name, test_expr)
+    assert result["message"] == "Success"
+    assert "result" in result
+    assert len(result["result"]) > 0

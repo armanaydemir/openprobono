@@ -11,7 +11,7 @@ from unstructured.documents.elements import Element, ElementMetadata, Text
 from unstructured.partition.auto import partition
 
 from app.encoders import embed_strs
-from app.milvusdb import get_expr, load_vdb_param, upload_data_json
+from app.milvusdb import get_expr, load_vdb_param, upload_data
 
 
 class KnowledgeBase(Protocol):
@@ -76,7 +76,12 @@ class KnowledgeBase(Protocol):
                 texts.append(chunks[i].text)
                 metadatas.append(chunks[i].metadata.to_dict())
             vectors = embed_strs(texts, encoder)
-            result = upload_data_json(collection_name, vectors, texts, metadatas)
+            data = [{
+                "vector": vectors[i],
+                "metadata": metadatas[i],
+                "text": texts[i],
+            } for i in range(len(texts))]
+            result = upload_data(collection_name, data)
             if result["message"] != "Success":
                 return False
         return True

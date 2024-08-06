@@ -1,6 +1,7 @@
 """Written by Arman Aydemir. This file contains the main API code for the backend."""
 from __future__ import annotations
 
+import logging
 import re
 from typing import Annotated
 
@@ -37,8 +38,17 @@ from app.models import (
     OpinionSearchRequest,
     get_uuid_id,
 )
-from app.opinion_search import count_opinions, opinion_search, summarize_opinion
+from app.opinion_search import add_opinion_summary, count_opinions, opinion_search
 from app.prompts import FILTERED_CASELAW_PROMPT  # noqa: TCH001
+
+# init logs
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    filename="/var/log/opb.log",
+)
+
+logger = logging.getLogger(__name__)
 
 # this is to ensure tracing with langfuse
 # @asynccontextmanager
@@ -217,7 +227,7 @@ def init_session_stream(
         session_id=session_id,
         api_key=request.api_key,
     )
-    print("streaming response here")
+    logger.info("streaming response here")
     return StreamingResponse(process_chat_stream(cr), media_type="text/event-stream")
 
 
@@ -390,7 +400,7 @@ def upload_file(file: UploadFile, session_id: str, summary: str | None = None,
         Success or failure message.
 
     """
-    print(f"api_key {api_key} uploading file")
+    logger.info("api_key %s uploading file", api_key)
     try:
         return file_upload(file, session_id, summary)
     except Exception as error:
@@ -418,7 +428,7 @@ def upload_files(files: list[UploadFile],
         Success or failure message.
 
     """
-    print(f"api_key {api_key} uploading files")
+    logger.info("api_key %s uploading files", api_key)
     if not summaries:
         summaries = [None] * len(files)
     elif len(files) != len(summaries):
@@ -446,7 +456,7 @@ def vectordb_upload_ocr(file: UploadFile,
         session_id: str, summary: str | None = None,
         api_key: str = Security(api_key_auth)) -> dict:
     """Upload a file by user and use OCR to extract info."""
-    print(f"api_key {api_key} uploading file with OCR")
+    logger.info("api_key %s uploading file with OCR", api_key)
     return session_upload_ocr(file, session_id, summary if summary else None)
 
 
@@ -462,7 +472,7 @@ def delete_file(filename: str, session_id: str, api_key: str = Security(api_key_
         session to delete the file from.
 
     """
-    print(f"api_key {api_key} deleting file {filename}")
+    logger.info("api_key %s deleting file %s", api_key, filename)
     return delete_expr(
         SESSION_DATA,
         f"metadata['source']=='{filename}' and session_id=='{session_id}'",
@@ -486,7 +496,7 @@ def delete_files(filenames: list[str], session_id: str, api_key: str = Security(
         Success message with number of files deleted.
 
     """
-    print(f"api_key {api_key} deleting files")
+    logger.info("api_key %s deleting files", api_key)
     for filename in filenames:
         delete_file(filename, session_id)
     return {"message": f"Success: deleted {len(filenames)} files"}
@@ -507,7 +517,7 @@ def get_session_files(session_id: str, api_key: str = Security(api_key_auth)) ->
         Success message with list of filenames.
 
     """
-    print(f"api_key {api_key} getting session files for session {session_id}")
+    logger.info("api_key %s getting session files for session %s", api_key, session_id)
     source_summaries = session_source_summaries(session_id)
     files = list(source_summaries.keys())
     return {"message": f"Success: found {len(files)} files", "result": files}
@@ -527,7 +537,7 @@ def delete_session_files(session_id: str, api_key: str = Security(api_key_auth))
     _type_
         _description_
     """
-    print(f"api_key {api_key} deleting session files for session {session_id}")
+    logger.info("api_key %s deleting session files for session %s", api_key, session_id)
     return delete_expr(SESSION_DATA, f"session_id=='{session_id}'")
 
 
@@ -547,14 +557,7 @@ def search_opinions(
     if not api_key_check(api_key):
         return {"message": "Failure: API key invalid"}
     try:
-        results = opinion_search(
-            req.query,
-            req.k,
-            req.jurisdictions,
-            req.keyword_query,
-            req.after_date,
-            req.before_date,
-        )
+        results = opinion_search(req)
     except Exception as error:
         return {"message": "Failure: Internal Error: " + str(error)}
     else:
@@ -569,7 +572,7 @@ def get_opinion_summary(
     if not api_key_check(api_key):
         return {"message": "Failure: API key invalid"}
     try:
-        summary = summarize_opinion(opinion_id)
+        summary = add_opinion_summary(opinion_id)
     except Exception as error:
         return {"message": "Failure: Internal Error: " + str(error)}
     else:

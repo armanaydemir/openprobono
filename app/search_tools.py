@@ -10,7 +10,13 @@ from serpapi.google_search import GoogleSearch
 
 from app.courtlistener import courtlistener_search, courtlistener_tool_args
 from app.milvusdb import query, source_exists, upload_site
-from app.models import BotRequest, EngineEnum, SearchMethodEnum, SearchTool
+from app.models import (
+    BotRequest,
+    EngineEnum,
+    OpinionSearchRequest,
+    SearchMethodEnum,
+    SearchTool,
+)
 from app.prompts import FILTERED_CASELAW_PROMPT
 
 GoogleSearch.SERP_API_KEY = os.environ["SERPAPI_KEY"]
@@ -504,14 +510,15 @@ def run_search_tool(tool: SearchTool, function_args: dict) -> str:
                 tool_after_date = function_args["after-date"]
             if "before-date" in function_args:
                 tool_before_date = function_args["before-date"]
-            function_response = courtlistener_search(
-                qr,
-                3,
-                tool_jurisdiction,
-                tool_kw_query,
-                tool_after_date,
-                tool_before_date,
+            request = OpinionSearchRequest(
+                query=qr,
+                k=3,
+                jurisdictions=tool_jurisdiction,
+                keyword_query=tool_kw_query,
+                after_date=tool_after_date,
+                before_date=tool_before_date,
             )
+            function_response = courtlistener_search(request)
         case SearchMethodEnum.courtroom5:
             function_response = courtroom5_search_tool(qr, prf)
         case SearchMethodEnum.dynamic_courtroom5:

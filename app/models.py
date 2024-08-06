@@ -250,7 +250,27 @@ class BotRequest(BaseModel):
 
 
 class OpinionSearchRequest(BaseModel):
-    """Model class representing an opinion search request."""
+    """Model class representing an opinion search request.
+
+    Attributes
+    ----------
+    query : str
+        The query
+    k : int, optional
+        The number of results to return, by default 3
+    jurisdictions : list[str] | None, optional
+        The two-letter abbreviations of a state or territory, e.g. 'NJ' or 'TX',
+        to filter query results by state. Use 'us-app' for federal appellate,
+        'us-dis' for federal district, 'us-sup' for supreme court, 'us-misc'
+        for federal special. By default None.
+    keyword_query: str | None, optional
+        The users keyword query, by default None
+    after_date : str | None, optional
+        The after date for the query date range in YYYY-MM-DD format, by default None
+    before_date : str | None, optional
+        The before date for the query date range in YYYY-MM-DD format, by default None
+
+    """
 
     query: str
     k: int = 4

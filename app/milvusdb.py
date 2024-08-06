@@ -5,7 +5,6 @@ import logging
 import os
 import time
 from json import loads
-from logging.handlers import RotatingFileHandler
 from typing import TYPE_CHECKING
 
 from langfuse.decorators import langfuse_context, observe
@@ -18,7 +17,6 @@ from pymilvus import (
     utility,
 )
 
-from app.chat_models import summarize_langchain
 from app.db import load_vdb, store_vdb
 from app.encoders import embed_strs
 from app.loaders import (
@@ -30,6 +28,7 @@ from app.loaders import (
 )
 from app.models import EncoderParams, MilvusMetadataEnum, OpenAIModelEnum
 from app.splitters import chunk_elements_by_title, chunk_str
+from app.summarization import summarize_langchain
 
 if TYPE_CHECKING:
     from fastapi import UploadFile
@@ -39,20 +38,6 @@ if TYPE_CHECKING:
 connection_args = loads(os.environ["Milvus"])
 # test connection to db, also needed to use utility functions
 connections.connect(uri=connection_args["uri"], token=connection_args["token"])
-
-
-# init logs
-log_formatter = logging.Formatter(
-    "%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s",
-)
-my_handler = RotatingFileHandler("vdb.log", maxBytes=5*1024*1024, backupCount=2)
-my_handler.setFormatter(log_formatter)
-my_handler.setLevel(logging.ERROR)
-
-vdb_log = logging.getLogger("vdb")
-vdb_log.setLevel(logging.ERROR)
-
-vdb_log.addHandler(my_handler)
 
 
 # used to cache collection params from firebase
@@ -257,7 +242,6 @@ def query(
 
     """
     coll = Collection(collection_name)
-    coll.load()
     encoder = load_vdb_param(collection_name, "encoder")
     data = embed_strs([query], encoder)
     search_params = {
@@ -354,25 +338,20 @@ def source_exists(collection_name: str, url: str) -> bool:
     return len(q) > 0
 
 @observe(capture_input=False)
-def upload_data_json(
+def upload_data(
     collection_name: str,
-    vectors: list[list[float]],
-    texts: list[str],
-    metadatas: list[dict],
+    data: list[dict],
     batch_size: int = 1000,
 ) -> dict[str, str]:
     """Upload data to a collection with json format.
 
     Parameters
     ----------
-    texts : list[str]
-        The text to be uploaded.
-    vectors : list[list[float]]
-        The vectors to be uploaded.
-    metadatas : list[dict]
-        The metadata to be uploaded.
     collection_name : str
         The name of the Milvus collection.
+    data : list[dict]
+        The data to upload. Format should match collection schema.
+        Example: `[{'vector': [], 'text': '', 'metadata': {}}]`
     batch_size : int, optional
         The number of records to be uploaded at a time, by default 1000.
 
@@ -382,18 +361,13 @@ def upload_data_json(
         With a `message`, `insert_count` on success
 
     """
-    data = [vectors, texts, metadatas]
     collection = Collection(collection_name)
     pks = []
     insert_count = 0
-    for i in range(0, len(texts), batch_size):
-        batch_vector = data[0][i: i + batch_size]
-        batch_text = data[1][i: i + batch_size]
-        batch_metadata = data[2][i: i + batch_size]
-        batch = [batch_vector, batch_text, batch_metadata]
-        current_batch_size = len(batch[0])
+    for i in range(0, len(data), batch_size):
+        batch = data[i: i + batch_size]
+        current_batch_size = len(batch)
         res = collection.insert(batch)
-        print(res)
         pks += res.primary_keys
         insert_count += res.insert_count
         if res.insert_count != current_batch_size:
@@ -444,7 +418,6 @@ def get_expr(collection_name: str, expr: str, batch_size: int = 1000) -> dict:
 
     """
     coll = Collection(collection_name)
-    coll.load()
     collection_format = load_vdb_param(collection_name, "metadata_format")
     output_fields = ["text", "vector"]
     match collection_format:
@@ -487,7 +460,6 @@ def delete_expr(collection_name: str, expr: str) -> dict[str, str]:
 
     """
     coll = Collection(collection_name)
-    coll.load()
     ids = coll.delete(expr=expr)
     return {"message": "Success", "delete_count": ids.delete_count}
 
@@ -518,10 +490,9 @@ def upsert_expr_json(
     delete_result = delete_expr(collection_name, expr)
     if delete_result["message"] != "Success":
         return delete_result
-    vectors = [d["vector"] for d in upsert_data]
-    texts = [d["text"] for d in upsert_data]
-    metadatas = [d["metadata"] for d in upsert_data]
-    return upload_data_json(collection_name, vectors, texts, metadatas)
+    delete_count = delete_result["delete_count"]
+    insert_result = upload_data(collection_name, upsert_data)
+    return {"delete_count": delete_count, **insert_result}
 
 
 def fields_to_json(fields_entry: dict) -> dict:
@@ -641,24 +612,32 @@ def upload_courtlistener(
     # cited opinions take up a lot of tokens and are included in the text
     if "opinions_cited" in opinion:
         del opinion["opinions_cited"]
-
-    metadatas = [opinion] * len(texts)
     # upload
     vectors = embed_strs(texts, load_vdb_param(collection_name, "encoder"))
-    return upload_data_json(collection_name, vectors, texts, metadatas)
+    data = [{
+        "vector": vectors[i],
+        "metadata": opinion,
+        "text": texts[i],
+    } for i in range(len(texts))]
+    return upload_data(collection_name, data)
 
 
 def crawl_upload_site(collection_name: str, description: str, url: str) -> list[str]:
     create_collection(collection_name, description=description)
     urls = [url]
     new_urls, prev_elements = scrape_with_links(url, urls)
-    strs, metadatas = chunk_elements_by_title(prev_elements, 3000, 1000, 300)
-    ai_summary = summarize_langchain(strs, OpenAIModelEnum.gpt_4o)
+    texts, metadatas = chunk_elements_by_title(prev_elements, 3000, 1000, 300)
+    ai_summary = summarize_langchain(texts, OpenAIModelEnum.gpt_4o)
     for metadata in metadatas:
         metadata["ai_summary"] = ai_summary
     encoder = load_vdb_param(collection_name, "encoder")
-    vectors = embed_strs(strs, encoder)
-    upload_data_json(collection_name, vectors, strs, metadatas)
+    vectors = embed_strs(texts, encoder)
+    data = [{
+        "vector": vectors[i],
+        "metadata": metadatas[i],
+        "text": texts[i],
+    } for i in range(len(texts))]
+    upload_data(collection_name, data)
     print("new_urls: ", new_urls)
     while len(new_urls) > 0:
         cur_url = new_urls.pop()
@@ -673,7 +652,12 @@ def crawl_upload_site(collection_name: str, description: str, url: str) -> list[
             for metadata in metadatas:
                 metadata["ai_summary"] = ai_summary
             vectors = embed_strs(strs, encoder)
-            upload_data_json(collection_name, vectors, strs, metadatas)
+            data = [{
+                "vector": vectors[i],
+                "metadata": metadatas[i],
+                "text": texts[i],
+            } for i in range(len(texts))]
+            upload_data(collection_name, data)
             prev_elements = cur_elements
     print(urls)
     return urls
@@ -698,14 +682,19 @@ def upload_site(collection_name: str, url: str, max_chars=10000, new_after_n_cha
     elements = scrape(url)
     if len(elements) == 0:
         return {"message": f"Failure: no elements found at {url}"}
-    strs, metadatas = chunk_elements_by_title(elements, max_chars, new_after_n_chars, overlap)
-    vectors = embed_strs(strs, load_vdb_param(collection_name, "encoder"))
-    ai_summary = summarize_langchain(strs, OpenAIModelEnum.gpt_4o)
+    texts, metadatas = chunk_elements_by_title(elements, max_chars, new_after_n_chars, overlap)
+    vectors = embed_strs(texts, load_vdb_param(collection_name, "encoder"))
+    ai_summary = summarize_langchain(texts, OpenAIModelEnum.gpt_4o)
     for metadata in metadatas:
         metadata["timestamp"] = str(time.time())
         metadata["url"] = url
         metadata["ai_summary"] = ai_summary
-    return upload_data_json(collection_name, vectors, strs, metadatas)
+    data = [{
+        "vector": vectors[i],
+        "metadata": metadatas[i],
+        "text": texts[i],
+    } for i in range(len(texts))]
+    return upload_data(collection_name, data)
 
 
 def session_upload_ocr(
@@ -737,9 +726,9 @@ def session_upload_ocr(
 
     """
     reader = quickstart_ocr(file)
-    strs = chunk_str(reader, max_chunk_size, chunk_overlap)
-    vectors = embed_strs(strs, load_vdb_param(SESSION_DATA, "encoder"))
-    ai_summary = summarize_langchain(strs, OpenAIModelEnum.gpt_4o)
+    texts = chunk_str(reader, max_chunk_size, chunk_overlap)
+    vectors = embed_strs(texts, load_vdb_param(SESSION_DATA, "encoder"))
+    ai_summary = summarize_langchain(texts, OpenAIModelEnum.gpt_4o)
     metadata = {
         "session_id": session_id,
         "source": file.filename,
@@ -748,7 +737,12 @@ def session_upload_ocr(
     if summary is not None:
         metadata["user_summary"] = summary
     # upload
-    return upload_data_json(SESSION_DATA, vectors, strs, [metadata] * len(strs))
+    data = [{
+        "vector": vectors[i],
+        "metadata": metadata,
+        "text": texts[i],
+    } for i in range(len(texts))]
+    return upload_data(SESSION_DATA, data)
 
 
 def file_upload(
@@ -785,7 +779,12 @@ def file_upload(
     for i in range(len(metadatas)):
         metadatas[i]["session_id"] = session_id
     # upload
-    return upload_data_json(SESSION_DATA, vectors, texts, metadatas)
+    data = [{
+        "vector": vectors[i],
+        "metadata": metadatas[i],
+        "text": texts[i],
+    } for i in range(len(texts))]
+    return upload_data(SESSION_DATA, data)
 
 
 def session_source_summaries(
@@ -809,7 +808,6 @@ def session_source_summaries(
 
     """
     coll = Collection(SESSION_DATA)
-    coll.load()
     q_iter = coll.query_iterator(
         expr=f"session_id=='{session_id}'",
         output_fields=["metadata"],

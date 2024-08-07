@@ -27,6 +27,8 @@ from app.models import (
 VERSION = "_vj1"
 BOT_COLLECTION = "bots"
 MILVUS_COLLECTION = "milvus"
+MILVUS_SOURCES = "sources"
+MILVUS_CHUNKS = "chunks"
 CONVERSATION_COLLECTION = "conversations"
 
 firebase_config = loads(os.environ["Firebase"])
@@ -272,4 +274,117 @@ def store_vdb(
     if fields is not None:
         data["fields"] = fields
     db.collection(MILVUS_COLLECTION).document(collection_name).set(data)
+    return True
+
+def load_vdb_source(collection_name: str, source_id: int) -> dict:
+    """Load source data for entities in a Milvus collection from Firebase.
+
+    Parameters
+    ----------
+    collection_name : str
+        The name of the Milvus collection containing the source.
+    source_id : int
+        The id of the source.
+
+    Returns
+    -------
+    dict
+        The source data.
+
+    """
+    milvus = db.collection(MILVUS_COLLECTION)
+    milvus_coll = milvus.document(collection_name)
+    coll_sources = milvus_coll.collection(MILVUS_SOURCES)
+    source = coll_sources.document(str(source_id))
+    if source.exists():
+        return source.to_dict()
+    return {}
+
+def store_vdb_source(
+    collection_name: str,
+    source_id: int,
+    source_data: dict,
+) -> bool:
+    """Store source data for entities in a Milvus collection in Firebase.
+
+    Parameters
+    ----------
+    collection_name : str
+        The name of the Milvus collection containing the source.
+    source_id : int
+        The id of the source.
+    source_data : dict
+        The source data to store.
+
+    Returns
+    -------
+    bool
+        Indicating success or failure
+
+    """
+    milvus = db.collection(MILVUS_COLLECTION)
+    milvus_coll = milvus.document(collection_name)
+    coll_sources = milvus_coll.collection(MILVUS_SOURCES)
+    coll_sources.document(str(source_id)).set(source_data)
+    return True
+
+def load_vdb_chunk(collection_name: str, source_id: int, chunk_id: int) -> dict:
+    """Load chunk data for an entity in a Milvus collection from Firebase.
+
+    Parameters
+    ----------
+    collection_name : str
+        The name of the Milvus collection containing the chunk.
+    source_id : int
+        The id of the source from which the chunk originated.
+    chunk_id : int
+        The id of the chunk.
+
+    Returns
+    -------
+    dict
+        The chunk data.
+
+    """
+    milvus = db.collection(MILVUS_COLLECTION)
+    milvus_coll = milvus.document(collection_name)
+    coll_sources = milvus_coll.collection(MILVUS_SOURCES)
+    source = coll_sources.document(str(source_id))
+    source_chunks = source.collection(MILVUS_CHUNKS)
+    chunk = source_chunks.document(str(chunk_id)).get()
+    if chunk.exists:
+        return chunk.to_dict()
+    return {}
+
+def store_vdb_chunk(
+    collection_name: str,
+    source_id: int,
+    chunk_id: int,
+    chunk_data: dict,
+) -> bool:
+    """Store chunk data for an entity in a Milvus collection in Firebase.
+
+    Parameters
+    ----------
+    collection_name : str
+        The name of the Milvus collection containing the chunk.
+    source_id : int
+        The id of the source from which the chunk originated.
+    chunk_id : int
+        The id of the chunk.
+    chunk_data : dict
+        The chunk data to store.
+
+    Returns
+    -------
+    bool
+        Indicating success or failure
+
+    """
+    milvus = db.collection(MILVUS_COLLECTION)
+    milvus_coll = milvus.document(collection_name)
+    coll_sources = milvus_coll.collection(MILVUS_SOURCES)
+    source = coll_sources.document(str(source_id))
+    source_chunks = source.collection(MILVUS_CHUNKS)
+    source_chunks.document(str(chunk_id)).set(chunk_data)
     return True

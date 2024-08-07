@@ -127,21 +127,17 @@ class KnowledgeBase(Protocol):
 class KnowledgeBaseNC(KnowledgeBase):
     """Evaluation data for the NC General Statutes."""
 
-    # for loading eval data by statute
-    root_dir = "data/chapter_urls/"
-    chapter_names = sorted(os.listdir(root_dir))
-    # for loading by chapter
-    evalset_urls = "data/NC-court/court-urls"
-    chapter_pdf_urls = ""
-    if Path(evalset_urls).exists():
-        with Path(evalset_urls).open() as f:
-            chapter_pdf_urls = [line.strip() for line in f.readlines()]
+    def __init__(self, source_list_file: str) -> None:
+        """Load a list of sources."""
+        if Path(source_list_file).exists():
+            with Path(source_list_file).open() as f:
+                self.sources = [line.strip() for line in f]
 
 
     def generate_elements(
         self: KnowledgeBaseNC,
     ) -> Generator[tuple[str, list[Element]]]:
-        """Generate chapter elements from their source URLs.
+        """Generate a list of elements from their source URLs.
 
         Parameters
         ----------
@@ -154,7 +150,7 @@ class KnowledgeBaseNC(KnowledgeBase):
             The elements generated from a chapter.
 
         """
-        for chapter_pdf_url in self.chapter_pdf_urls:
+        for chapter_pdf_url in self.sources:
             elements = partition(url=chapter_pdf_url, content_type="application/pdf")
             yield chapter_pdf_url, elements
 
@@ -172,11 +168,11 @@ class KnowledgeBaseNC(KnowledgeBase):
             overlap,
         )
 
-    def load_chapter_elements(
+    def load_elements(
         self: KnowledgeBaseNC,
         collection_name: str,
     ) -> Generator[list[Element]]:
-        """Load chapter elements from the milvus Collection.
+        """Load elements from the milvus Collection.
 
         Parameters
         ----------
@@ -191,125 +187,5 @@ class KnowledgeBaseNC(KnowledgeBase):
             The elements loaded from the milvus Collection.
 
         """
-        for chapter_pdf_url in self.chapter_pdf_urls:
+        for chapter_pdf_url in self.sources:
             yield self.generate_vdb_elements(collection_name, chapter_pdf_url)
-
-
-    def load_statute_urls(self: KnowledgeBaseNC, chapter_name: str) -> list[str]:
-        """Load statute urls for a given chapter.
-
-        Parameters
-        ----------
-        self : KnowledgeBaseNC
-            The current instance of KnowledgeBaseNC.
-        chapter_name : str
-            The name of the chapter.
-
-        Returns
-        -------
-        list[str]
-            The list of statute urls for the given chapter.
-
-        """
-        with Path(self.root_dir + chapter_name).open() as f:
-            return [line.strip() for line in f.readlines()]
-
-
-    def generate_statute_elements(
-        self: KnowledgeBaseNC,
-    ) -> Generator[tuple[str, list[Element]]]:
-        """Generate statute elements from the configured sources.
-
-        Parameters
-        ----------
-        self : KnowledgeBaseNC
-            The current instance of KnowledgeBaseNC.
-
-        Yields
-        ------
-        Generator[tuple[str, list[Element]]]
-            The elements generated from a statute.
-
-        """
-        for chapter in self.chapter_names:
-            statute_urls = self.load_statute_urls(chapter)
-            for statute_url in statute_urls:
-                elements = partition(statute_url)
-                yield statute_url, elements
-
-
-    def resume_statute_elements(
-        self: KnowledgeBaseNC,
-        chapter_name: str,
-        statute_url: str,
-    ) -> Generator[tuple[str, list[Element]]]:
-        """Resume generating elements for a given statute.
-
-        Parameters
-        ----------
-        self : KnowledgeBaseNC
-            The current instance of KnowledgeBaseNC.
-        chapter_name : str
-            The name of the chapter to resume from.
-        statute_url : str
-            The url of the statute within the chapter to resume from.
-
-        Yields
-        ------
-        Generator[tuple[str, list[Element]]]
-            The elements generated from a statute.
-
-        """
-        resume_chapter = next(
-            iter(
-                [chapter for chapter in self.chapter_names if chapter == chapter_name],
-            ),
-            None,
-        )
-        if resume_chapter:
-            resume_chapter_idx = self.chapter_names.index(resume_chapter)
-        else:
-            resume_chapter_idx = 0
-        for i in range(resume_chapter_idx, len(self.chapter_names)):
-            statute_urls = self.load_statute_urls(self.chapter_names[i])
-            resume_statute = next(
-                iter(
-                    [statute for statute in statute_urls if statute == statute_url],
-                ),
-                None,
-            )
-            if resume_statute:
-                resume_statute_idx = statute_urls.index(resume_statute)
-            else:
-                resume_statute = 0
-            for j in range(resume_statute_idx, len(statute_urls)):
-                elements = partition(
-                    url=statute_urls[j],
-                    content_type="application/pdf",
-                )
-                yield statute_url, elements
-
-
-    def load_statute_elements(
-        self: KnowledgeBaseNC,
-        collection_name: str,
-    ) -> Generator[list[Element]]:
-        """Load statute elements from the milvus Collection.
-
-        Parameters
-        ----------
-        self : KnowledgeBaseNC
-            The current instance of KnowledgeBaseNC.
-        collection_name : str
-            The name of the milvus Collection to gather documents from.
-
-        Yields
-        ------
-        Generator[list[Element]]
-            The elements loaded from the milvus Collection.
-
-        """
-        for chapter in self.chapter_names:
-            statute_urls = self.load_statute_urls(chapter)
-            for statute_url in statute_urls:
-                yield self.generate_vdb_elements(collection_name, statute_url)

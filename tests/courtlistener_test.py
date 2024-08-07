@@ -7,21 +7,23 @@ def test_batchupload(capsys) -> None:
         batch_metadata_files()
 
 def test_batchupdate():
-    from app.courtlistener import update_chunks
-    from app.milvusdb import DataType, FieldSchema, create_collection
+    from app.loaders import update_chunks
+    from app.milvusdb import DataType, FieldSchema, create_collection, Collection
     from app.models import EncoderParams, MilvusMetadataEnum
 
-    opinion_id_field = FieldSchema("opinion_id", DataType.INT32, "The opinion ID")
-    chunk_index_field = FieldSchema("chunk_index", DataType.INT32, "The chunk's index in the opinion")
-    metadata_field = FieldSchema("metadata", DataType.JSON, "The chunk's metadata")
+    #source_id_field = FieldSchema("source_id", DataType.INT32, "The source ID")
+    #court_id_field = FieldSchema("court_id", DataType.VARCHAR, "The court ID", max_length=15)
+    #date_filed_field = FieldSchema("date_filed", DataType.VARCHAR, "The file date", max_length=10)
+    #chunk_index_field = FieldSchema("chunk_index", DataType.INT32, "The chunk's index in the opinion")
+    #metadata_field = FieldSchema("metadata", DataType.JSON, "The chunk's metadata")
 
-    create_collection("test_firebase", EncoderParams(dim=1536),
-                      "Chunked opinions from CourtListener bulk data",
-                      [opinion_id_field, chunk_index_field, metadata_field],
-                        MilvusMetadataEnum.field,
-                      )
+    #create_collection("test_firebase", EncoderParams(dim=1536),
+    #                  "Chunked opinions from CourtListener bulk data",
+    #                  [source_id_field, court_id_field, date_filed_field],
+    #                    MilvusMetadataEnum.field,
+    #                  )
 
-    #update_chunks()
+    update_chunks()
 
 def test_batchretry():
     import pathlib
